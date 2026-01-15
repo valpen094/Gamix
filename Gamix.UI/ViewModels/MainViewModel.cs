@@ -101,5 +101,18 @@ namespace Gamix.UI.ViewModels
             
             LoadSessions();
         }
+
+        /// <summary>
+        /// 指定したプリセットを削除します。
+        /// </summary>
+        /// <param name="preset">削除するプリセット。</param>
+        [RelayCommand]
+        private async Task DeletePreset(Gamix.Core.Models.Preset preset)
+        {
+            if (preset == null) return;
+            
+            await _presetService.DeletePresetAsync(preset.Name);
+            LoadPresets();
+        }
     }
 }
