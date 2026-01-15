@@ -33,17 +33,26 @@
             <!-- Header with Title -->
             <Grid Grid.Row="0" Margin="20,15,20,10">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                    <ColumnDefinition Width="Auto"/> <!-- Title -->
+                    <ColumnDefinition Width="*"/>    <!-- Spacer -->
+                    <ColumnDefinition Width="Auto"/> <!-- Preset Input -->
+                    <ColumnDefinition Width="Auto"/> <!-- Minimize -->
                 </Grid.ColumnDefinitions>
                 
-                <TextBlock Text="Gamix!" 
+                <!-- App Icon -->
+                <TextBlock Grid.Column="0" Text="🎵" FontSize="24" VerticalAlignment="Center" Margin="0,0,8,0"
+                           Foreground="{DynamicResource Brush_AccentPrimary}"/>
+                
+                <!-- Title -->
+                <TextBlock Grid.Column="1" Text="Gamix!" 
                            FontSize="28" FontWeight="Bold"
                            Foreground="{DynamicResource Brush_AccentPrimary}"
                            VerticalAlignment="Center"/>
                 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBox Width="120" Height="28" Margin="0,0,8,0" 
+                <!-- Preset Input -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                    <TextBox Width="100" Height="28" Margin="0,0,8,0" 
                              Text="{Binding NewPresetName, UpdateSourceTrigger=PropertyChanged}" 
                              VerticalContentAlignment="Center" Padding="8,0"
                              BorderThickness="1" BorderBrush="{DynamicResource Brush_AccentSecondary}">
@@ -56,7 +65,7 @@
                     <Button Content="💾" Command="{Binding SavePresetCommand}"
                             Width="28" Height="28"
                             Background="{DynamicResource Brush_AccentTertiary}" 
-                            Foreground="White" BorderThickness="0" FontSize="14">
+                            Foreground="{DynamicResource Brush_Foreground}" BorderThickness="0" FontSize="14">
                         <Button.Resources>
                             <Style TargetType="Border">
                                 <Setter Property="CornerRadius" Value="14"/>
@@ -64,7 +73,20 @@
                         </Button.Resources>
                     </Button>
                 </StackPanel>
+                
+                <!-- Minimize Button (Right) -->
+                <Button Grid.Column="4" Content="−" Click="MinimizeButton_Click"
+                        Width="28" Height="28"
+                        Background="{DynamicResource Brush_AccentSecondary}" 
+                        Foreground="{DynamicResource Brush_Foreground}" BorderThickness="0" FontSize="18" FontWeight="Bold">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="14"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
             </Grid>
+
             
             <!-- Preset Buttons -->
             <ItemsControl Grid.Row="1" ItemsSource="{Binding Presets}" Margin="20,0,20,10">
@@ -80,7 +102,7 @@
                                 CommandParameter="{Binding}"
                                 Margin="0,0,8,8" Padding="12,6"
                                 Background="{DynamicResource Brush_AccentSecondary}" 
-                                Foreground="{DynamicResource Brush_CardBackground}" 
+                                Foreground="{DynamicResource Brush_Foreground}" 
                                 BorderThickness="0" FontSize="12">
                              <Button.Resources>
                                 <Style TargetType="Border">
@@ -101,11 +123,20 @@
                                     CornerRadius="15" Margin="0,0,0,10" Padding="15">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                                        <ColumnDefinition Width="*"/>    <!-- Content -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Mute -->
                                     </Grid.ColumnDefinitions>
                                     
-                                    <StackPanel Grid.Column="0">
+                                    <!-- App Icon -->
+                                    <Border Grid.Column="0" Width="36" Height="36" Margin="0,0,12,0" 
+                                            CornerRadius="8" Background="{DynamicResource Brush_Background}"
+                                            VerticalAlignment="Center">
+                                        <Image Source="{Binding Icon}" Width="24" Height="24" 
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                    
+                                    <StackPanel Grid.Column="1">
                                         <TextBlock Text="{Binding ProcessName}" 
                                                    FontSize="14" FontWeight="SemiBold"
                                                    Foreground="{DynamicResource Brush_Foreground}"
@@ -131,7 +162,7 @@
                                         </Grid>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Column="1" Text="🔇" 
+                                    <TextBlock Grid.Column="2" Text="🔇" 
                                                FontSize="18" VerticalAlignment="Center" Margin="10,0,0,0"
                                                Visibility="{Binding IsMuted, Converter={StaticResource BoolToVis}}"/>
                                 </Grid>

@@ -29,5 +29,13 @@ namespace Gamix.UI
                 DragMove();
             }
         }
+
+        /// <summary>
+        /// ウィンドウを最小化します。
+        /// </summary>
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
     }
 }
