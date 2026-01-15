@@ -22,6 +22,9 @@
                     <CubicEase EasingMode="EaseOut"/>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="DimOverlay"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0.5" Duration="0:0:0.3"/>
         </Storyboard>
         <Storyboard x:Key="HideSidebar">
             <DoubleAnimation Storyboard.TargetName="PresetSidebar" 
@@ -31,6 +34,9 @@
                     <CubicEase EasingMode="EaseOut"/>
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="DimOverlay"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0" Duration="0:0:0.3"/>
         </Storyboard>
 
         <!-- Custom ScrollBar Style -->
@@ -211,6 +217,9 @@
                 </ScrollViewer>
             </Grid>
             
+            <!-- Dimming Overlay -->
+            <Border x:Name="DimOverlay" Background="Black" Opacity="0" IsHitTestVisible="False" Panel.ZIndex="15" CornerRadius="20"/>
+
             <!-- Sidebar Trigger Area (Hitbox) -->
             <Border x:Name="SidebarTrigger" Width="20" HorizontalAlignment="Left" Background="Transparent" Panel.ZIndex="10"/>
 
