@@ -49,7 +49,7 @@ namespace Gamix.UI.ViewModels
         /// <summary>
         /// アプリケーションアイコン。
         /// </summary>
-        public ImageSource? Icon => IconHelper.GetIconFromPath(_model.IconPath);
+        public ImageSource? Icon => IconHelper.GetIconFromPath(_model.IconPath, _model.IsMaster, _model.ProcessName);
 
         /// <summary>
         /// マスター音量かどうか。
