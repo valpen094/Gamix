@@ -1,24 +1,35 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Gaming Theme Palette -->
-    <Color x:Key="Color_Background">#120024</Color> <!-- Deep Violet -->
+    <!-- Gaming Theme Palette (Neon Cyber v2) -->
+    <Color x:Key="Color_Background">#0A0A0A</Color> <!-- Jet Black -->
     <Color x:Key="Color_Foreground">#FFFFFF</Color> <!-- White -->
-    <Color x:Key="Color_CardBackground">#2A003D</Color> <!-- Darker Violet -->
+    <Color x:Key="Color_CardBackground">#18181B</Color> <!-- Dark Gray -->
     <Color x:Key="Color_ButtonForeground">#FFFFFF</Color> <!-- White -->
     
-    <Color x:Key="Color_AccentPrimary">#FF007F</Color> <!-- Neon Pink -->
-    <Color x:Key="Color_AccentSecondary">#00FFFF</Color> <!-- Neon Cyan -->
-    <Color x:Key="Color_AccentTertiary">#9D00FF</Color> <!-- Bright Purple -->
+    <Color x:Key="Color_AccentPrimaryStart">#00D1FF</Color> <!-- Neon Cyan -->
+    <Color x:Key="Color_AccentPrimaryEnd">#FF00C7</Color> <!-- Neon Magenta -->
+    <Color x:Key="Color_AccentSecondary">#FF00C7</Color> <!-- Neon Magenta -->
+    <Color x:Key="Color_AccentTertiary">#7000FF</Color> <!-- Electric Purple -->
 
     <SolidColorBrush x:Key="Brush_Background" Color="{StaticResource Color_Background}"/>
     <SolidColorBrush x:Key="Brush_Foreground" Color="{StaticResource Color_Foreground}"/>
     <SolidColorBrush x:Key="Brush_CardBackground" Color="{StaticResource Color_CardBackground}"/>
     <SolidColorBrush x:Key="Brush_ButtonForeground" Color="{StaticResource Color_ButtonForeground}"/>
+    <SolidColorBrush x:Key="Brush_SliderTrackBg" Color="#2D2D30"/>
     
-    <SolidColorBrush x:Key="Brush_AccentPrimary" Color="{StaticResource Color_AccentPrimary}"/>
+    <LinearGradientBrush x:Key="Brush_AccentPrimary" StartPoint="0,0.5" EndPoint="1,0.5">
+        <GradientStop Color="{StaticResource Color_AccentPrimaryStart}" Offset="0.0"/>
+        <GradientStop Color="{StaticResource Color_AccentPrimaryEnd}" Offset="1.0"/>
+    </LinearGradientBrush>
+
     <SolidColorBrush x:Key="Brush_AccentSecondary" Color="{StaticResource Color_AccentSecondary}"/>
     <SolidColorBrush x:Key="Brush_AccentTertiary" Color="{StaticResource Color_AccentTertiary}"/>
+
+    <!-- Gaming Effects -->
+    <DropShadowEffect x:Key="Effect_Glow" BlurRadius="15" ShadowDepth="0" Color="{StaticResource Color_AccentPrimaryStart}" Opacity="0.9"/>
+    <DropShadowEffect x:Key="Effect_GlowMagenta" BlurRadius="15" ShadowDepth="0" Color="{StaticResource Color_AccentSecondary}" Opacity="0.9"/>
+    <DropShadowEffect x:Key="Effect_SidebarGlow" Color="{StaticResource Color_AccentPrimaryStart}" BlurRadius="30" ShadowDepth="0" Opacity="0.6"/>
 
     <!-- Global Styles for this theme -->
     <Style TargetType="Window">

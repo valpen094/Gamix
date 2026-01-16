@@ -20,6 +20,10 @@
     <SolidColorBrush x:Key="Brush_AccentSecondary" Color="{StaticResource Color_AccentSecondary}"/>
     <SolidColorBrush x:Key="Brush_AccentTertiary" Color="{StaticResource Color_AccentTertiary}"/>
 
+    <SolidColorBrush x:Key="Brush_SliderTrackBg" Color="#F0F0F0"/>
+    <DropShadowEffect x:Key="Effect_Glow" BlurRadius="0" ShadowDepth="0" Opacity="0"/>
+    <DropShadowEffect x:Key="Effect_SidebarGlow" Color="#FFD1DC" BlurRadius="15" ShadowDepth="0" Opacity="0.3"/>
+
     <!-- Global Styles for this theme -->
     <Style TargetType="Window">
         <Setter Property="Background" Value="{StaticResource Brush_Background}"/>

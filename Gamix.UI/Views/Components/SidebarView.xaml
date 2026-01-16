@@ -51,7 +51,7 @@
                 <TranslateTransform X="-300"/>
             </Border.RenderTransform>
             <Border.Effect>
-                <DropShadowEffect Color="#FFD1DC" BlurRadius="20" ShadowDepth="4" Opacity="0.4"/>
+                <DynamicResource ResourceKey="Effect_SidebarGlow"/>
             </Border.Effect>
 
             <Grid Margin="15,20">
@@ -61,7 +61,8 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Text="Presets" FontSize="28" FontWeight="Bold" 
-                           Foreground="{DynamicResource Brush_AccentPrimary}" Margin="0,0,0,15"/>
+                           Foreground="{DynamicResource Brush_AccentPrimary}" Margin="0,0,0,15"
+                           Effect="{DynamicResource Effect_Glow}"/>
                 
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Presets}">
@@ -81,7 +82,7 @@
                                                VerticalAlignment="Center" Margin="0,0,5,0"
                                                Visibility="{Binding IsFavorite, Converter={StaticResource BoolToVis}}">
                                          <TextBlock.Effect>
-                                            <DropShadowEffect Color="#FFD1DC" BlurRadius="5" ShadowDepth="2" Opacity="0.5"/>
+                                            <DynamicResource ResourceKey="Effect_Glow"/>
                                          </TextBlock.Effect>
                                     </TextBlock>
                                     

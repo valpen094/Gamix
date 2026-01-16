@@ -18,7 +18,7 @@
                             </Grid.RowDefinitions>
                             <TickBar x:Name="TopTick" Fill="{TemplateBinding Foreground}" Height="4" Margin="0,0,0,2" Placement="Top" Grid.Row="0" Visibility="Collapsed"/>
                             <TickBar x:Name="BottomTick" Fill="{TemplateBinding Foreground}" Height="4" Margin="0,2,0,0" Placement="Bottom" Grid.Row="2" Visibility="Collapsed"/>
-                            <Border x:Name="TrackBackground" Background="#E0E0E0" BorderThickness="0" CornerRadius="10" Height="20" Grid.Row="1" VerticalAlignment="center">
+                            <Border x:Name="TrackBackground" Background="{DynamicResource Brush_SliderTrackBg}" BorderThickness="0" CornerRadius="10" Height="20" Grid.Row="1" VerticalAlignment="center">
                                 <Canvas Margin="-6,-1">
                                     <Rectangle x:Name="PART_SelectionRange" Fill="{TemplateBinding Foreground}" Height="20" RadiusX="10" RadiusY="10" Visibility="Hidden"/>
                                 </Canvas>
@@ -28,7 +28,11 @@
                                     <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{x:Null}">
                                         <RepeatButton.Template>
                                             <ControlTemplate TargetType="{x:Type RepeatButton}">
-                                                <Border Background="{DynamicResource Brush_AccentSecondary}" CornerRadius="10,0,0,10" Height="20"/>
+                                                <Border Background="{DynamicResource Brush_AccentPrimary}" CornerRadius="10,0,0,10" Height="20">
+                                                    <Border.Effect>
+                                                        <DynamicResource ResourceKey="Effect_Glow"/>
+                                                    </Border.Effect>
+                                                </Border>
                                             </ControlTemplate>
                                         </RepeatButton.Template>
                                     </RepeatButton>
@@ -37,7 +41,7 @@
                                     <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{x:Null}">
                                         <RepeatButton.Template>
                                             <ControlTemplate TargetType="{x:Type RepeatButton}">
-                                                <Border Background="#F0F0F0" CornerRadius="0,10,10,0" Height="20"/>
+                                                <Border Background="{DynamicResource Brush_SliderTrackBg}" CornerRadius="0,10,10,0" Height="20"/>
                                             </ControlTemplate>
                                         </RepeatButton.Template>
                                     </RepeatButton>
@@ -47,10 +51,8 @@
                                         <Thumb.Template>
                                             <ControlTemplate TargetType="{x:Type Thumb}">
                                                 <Grid>
-                                                    <Ellipse Fill="{DynamicResource Brush_AccentPrimary}" Stroke="White" StrokeThickness="3">
-                                                        <Ellipse.Effect>
-                                                            <DropShadowEffect Color="#FFD1DC" BlurRadius="5" ShadowDepth="2" Opacity="0.5"/>
-                                                        </Ellipse.Effect>
+                                                    <Ellipse Fill="{DynamicResource Brush_AccentPrimary}" Stroke="White" StrokeThickness="3"
+                                                             Effect="{DynamicResource Effect_Glow}">
                                                     </Ellipse>
                                                 </Grid>
                                             </ControlTemplate>
@@ -130,10 +132,8 @@
                                         BorderThickness="1" 
                                         BorderBrush="{DynamicResource Brush_AccentSecondary}" 
                                         CornerRadius="10" 
-                                        Margin="0,5,0,0">
-                                    <Border.Effect>
-                                        <DropShadowEffect Color="#DDDDDD" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
-                                    </Border.Effect>
+                                        Margin="0,5,0,0"
+                                        Effect="{DynamicResource Effect_Glow}">
                                     <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                     </ScrollViewer>

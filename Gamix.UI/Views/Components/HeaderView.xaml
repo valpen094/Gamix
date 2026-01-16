@@ -51,7 +51,8 @@
                         
                         <!-- Icon Content -->
                         <ContentPresenter x:Name="IconPresenter" Content="🎵" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-1,-2,0,0"
-                                          RenderTransformOrigin="0.5,0.5">
+                                          RenderTransformOrigin="0.5,0.5"
+                                          Effect="{DynamicResource Effect_Glow}">
                             <ContentPresenter.RenderTransform>
                                 <ScaleTransform x:Name="IconTransform" ScaleX="1" ScaleY="1"/>
                             </ContentPresenter.RenderTransform>
@@ -116,7 +117,8 @@
         <TextBlock Grid.Column="1" Text="Gamix!" 
                    FontSize="28" FontWeight="Bold"
                    Foreground="{DynamicResource Brush_AccentPrimary}"
-                   VerticalAlignment="Center"/>
+                   VerticalAlignment="Center"
+                   Effect="{DynamicResource Effect_Glow}"/>
         
         <!-- Preset Input -->
         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
@@ -169,15 +171,27 @@
                 Click="PaletteButton_Click"
                 Padding="0,0,0,2">
             <Button.Resources>
-                <ContextMenu x:Key="ThemeMenu" ItemsSource="{Binding AvailableThemes}" Placement="Bottom">
-                    <ContextMenu.ItemContainerStyle>
-                        <Style TargetType="MenuItem">
-                            <Setter Property="Header" Value="{Binding}"/>
-                            <Setter Property="Command" Value="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                            <Setter Property="CommandParameter" Value="{Binding}"/>
-                        </Style>
-                    </ContextMenu.ItemContainerStyle>
-                </ContextMenu>
+            <ContextMenu x:Key="ThemeMenu" ItemsSource="{Binding AvailableThemes}" Placement="Bottom">
+                <ContextMenu.Resources>
+                    <local_conv:EqualityConverter x:Key="EqualityConverter" xmlns:local_conv="clr-namespace:Gamix.UI.Converters"/>
+                </ContextMenu.Resources>
+                <ContextMenu.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Header" Value="{Binding}"/>
+                        <Setter Property="Command" Value="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                        <Setter Property="CommandParameter" Value="{Binding}"/>
+                        <Setter Property="IsCheckable" Value="True"/>
+                        <Setter Property="IsChecked">
+                            <Setter.Value>
+                                <MultiBinding Converter="{StaticResource EqualityConverter}" Mode="OneWay">
+                                    <Binding Path="."/>
+                                    <Binding Path="DataContext.CurrentTheme" RelativeSource="{RelativeSource AncestorType=ContextMenu}"/>
+                                </MultiBinding>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ContextMenu.ItemContainerStyle>
+            </ContextMenu>
             </Button.Resources>
             <Button.Style>
                 <Style TargetType="Button">

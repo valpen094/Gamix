@@ -46,6 +46,11 @@ namespace Gamix.UI.ViewModels
         public ObservableCollection<AudioDevice> InputDevices { get; } = [];
 
         /// <summary>
+        /// 現在選択されているテーマ名。
+        /// </summary>
+        public string CurrentTheme => _themeService.CurrentTheme;
+
+        /// <summary>
         /// 新規プリセット名の入力値。
         /// </summary>
         [ObservableProperty]
@@ -406,6 +411,7 @@ namespace Gamix.UI.ViewModels
             if (!string.IsNullOrEmpty(themeName))
             {
                 _themeService.SetTheme(themeName);
+                OnPropertyChanged(nameof(CurrentTheme));
             }
         }
     }
