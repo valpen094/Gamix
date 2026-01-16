@@ -95,6 +95,7 @@ namespace Gamix.UI.ViewModels
         private async void InitializeAsync()
         {
             await LoadDevicesAsync();
+            await LoadMasterVolumeAsync();
             await LoadSessionsAsync();
             LoadPresets();
         }
@@ -202,6 +203,8 @@ namespace Gamix.UI.ViewModels
             Sessions.Clear();
             foreach (var s in sessions)
             {
+                // マスターボリュームは上部に専用UIがあるため、セッションリストからは除外
+                if (s.IsMaster) continue;
                 Sessions.Add(new AudioSessionViewModel(s, _audioService));
             }
         }

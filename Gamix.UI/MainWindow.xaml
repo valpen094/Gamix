@@ -160,62 +160,121 @@
                 </Grid>
 
                 <!-- Volume & Device Selection Section -->
-                <Border Grid.Row="1" Background="{DynamicResource Brush_CardBackground}" 
-                        CornerRadius="12" Margin="15,0,15,10" Padding="15,12">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <!-- Master Volume -->
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="ボリューム" 
-                                   FontSize="14" FontWeight="SemiBold"
-                                   VerticalAlignment="Center" Margin="0,0,15,12"
-                                   Foreground="{DynamicResource Brush_Foreground}"/>
-                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12">
-                            <TextBlock Text="🔊" FontSize="14" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <TextBlock Text="{Binding MasterVolume, StringFormat={}{0:F0}}" 
-                                       FontSize="14" VerticalAlignment="Center" Width="30" Margin="0,0,8,0"
-                                       Foreground="{DynamicResource Brush_Foreground}"/>
-                            <Slider Minimum="0" Maximum="100" Width="200"
-                                    Value="{Binding MasterVolume}" 
-                                    Style="{StaticResource PastelSlider}"
-                                    VerticalAlignment="Center"/>
-                        </StackPanel>
-                        
-                        <!-- Output Device (Speaker) -->
-                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,0,15,8">
-                            <TextBlock Text="🔊" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="出力デバイス" FontSize="13" VerticalAlignment="Center"
-                                       Foreground="{DynamicResource Brush_Foreground}"/>
-                        </StackPanel>
-                        <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
-                                  ItemsSource="{Binding OutputDevices}" 
-                                  SelectedItem="{Binding SelectedOutputDevice}"
-                                  DisplayMemberPath="Name"
-                                  Margin="0,0,0,8"
-                                  FontSize="12"/>
-                        
-                        <!-- Input Device (Microphone) -->
-                        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,0,15,0">
-                            <TextBlock Text="🎤" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="入力デバイス" FontSize="13" VerticalAlignment="Center"
-                                       Foreground="{DynamicResource Brush_Foreground}"/>
-                        </StackPanel>
-                        <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-                                  ItemsSource="{Binding InputDevices}" 
-                                  SelectedItem="{Binding SelectedInputDevice}"
-                                  DisplayMemberPath="Name"
-                                  FontSize="12"/>
-                    </Grid>
-                </Border>
+                <StackPanel Grid.Row="1" Margin="15,0,15,10">
+                    
+                    <!-- Master Volume Row -->
+                    <Border Background="{DynamicResource Brush_CardBackground}" 
+                            CornerRadius="15" Margin="0,0,0,8" Padding="15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                                <ColumnDefinition Width="*"/>    <!-- Content -->
+                                <ColumnDefinition Width="Auto"/> <!-- Percentage -->
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Gradient Circle Icon - Volume (Pink to Purple) -->
+                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" 
+                                    VerticalAlignment="Center" Margin="0,0,12,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#FFB6C1" Offset="0"/>
+                                        <GradientStop Color="#DDA0DD" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M3,9 L7,9 L12,5 L12,19 L7,15 L3,15 Z M14,8 C15.5,9.5 15.5,14.5 14,16 M16.5,5.5 C19.5,8.5 19.5,15.5 16.5,18.5" 
+                                      Stroke="White" StrokeThickness="1.5" Fill="Transparent"
+                                      Width="20" Height="20" Stretch="Uniform"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Volume" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush_Foreground}" Margin="0,0,0,5"/>
+                                <Slider Minimum="0" Maximum="100" 
+                                        Value="{Binding MasterVolume}" 
+                                        Style="{StaticResource PastelSlider}"/>
+                            </StackPanel>
+                            
+                            <TextBlock Grid.Column="2" 
+                                       Text="{Binding MasterVolume, StringFormat={}{0:F0}%}" 
+                                       FontSize="14" FontWeight="Bold"
+                                       Foreground="{DynamicResource Brush_AccentPrimary}"
+                                       VerticalAlignment="Center" Margin="10,0,0,0"
+                                       HorizontalAlignment="Right" Width="50" TextAlignment="Right"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Output Device Row -->
+                    <Border Background="{DynamicResource Brush_CardBackground}" 
+                            CornerRadius="15" Margin="0,0,0,8" Padding="15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                                <ColumnDefinition Width="*"/>    <!-- Content -->
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Gradient Circle Icon - Output (Blue to Teal) -->
+                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" 
+                                    VerticalAlignment="Center" Margin="0,0,12,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#87CEEB" Offset="0"/>
+                                        <GradientStop Color="#48D1CC" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M4,6 C4,4 6,2 9,2 L15,2 C18,2 20,4 20,6 L20,8 C20,10 18,12 15,12 L9,12 C6,12 4,10 4,8 Z M6,12 L6,20 M18,12 L18,20 M9,8 A1,1 0 1,0 9,6 A1,1 0 1,0 9,8 M15,8 A1,1 0 1,0 15,6 A1,1 0 1,0 15,8" 
+                                      Stroke="White" StrokeThickness="1.5" Fill="Transparent"
+                                      Width="20" Height="20" Stretch="Uniform"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Output Device" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush_Foreground}" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding OutputDevices}" 
+                                          SelectedItem="{Binding SelectedOutputDevice}"
+                                          DisplayMemberPath="Name" FontSize="12"
+                                          Style="{StaticResource PopComboBox}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Input Device Row -->
+                    <Border Background="{DynamicResource Brush_CardBackground}" 
+                            CornerRadius="15" Padding="15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                                <ColumnDefinition Width="*"/>    <!-- Content -->
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Gradient Circle Icon - Input (Mint to Green) -->
+                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" 
+                                    VerticalAlignment="Center" Margin="0,0,12,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#98FB98" Offset="0"/>
+                                        <GradientStop Color="#3CB371" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Path Data="M12,2 C14,2 16,4 16,7 L16,12 C16,15 14,17 12,17 C10,17 8,15 8,12 L8,7 C8,4 10,2 12,2 Z M5,11 L5,12 C5,16 8,19 12,19 C16,19 19,16 19,12 L19,11 M12,19 L12,22" 
+                                      Stroke="White" StrokeThickness="1.5" Fill="Transparent"
+                                      Width="18" Height="20" Stretch="Uniform"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Input Device" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush_Foreground}" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding InputDevices}" 
+                                          SelectedItem="{Binding SelectedInputDevice}"
+                                          DisplayMemberPath="Name" FontSize="12"
+                                          Style="{StaticResource PopComboBox}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    
+                </StackPanel>
     
                 <!-- Sessions List -->
                 <ScrollViewer Grid.Row="2" Margin="15,0,15,15" VerticalScrollBarVisibility="Auto">
