@@ -62,6 +62,25 @@ namespace Gamix.UI
                 }
             }
         }
+
+
+        /// <summary>
+        /// サイドバーを表示します。
+        /// </summary>
+        private void ShowSidebar_Click(object sender, RoutedEventArgs e)
+        {
+            (FindResource("ShowSidebar") as System.Windows.Media.Animation.Storyboard)?.Begin();
+            DimOverlay.IsHitTestVisible = true;
+        }
+
+        /// <summary>
+        /// サイドバーを非表示にします。
+        /// </summary>
+        private void HideSidebar_Click(object sender, RoutedEventArgs e)
+        {
+            (FindResource("HideSidebar") as System.Windows.Media.Animation.Storyboard)?.Begin();
+            DimOverlay.IsHitTestVisible = false;
+        }
     }
 
     /// <summary>

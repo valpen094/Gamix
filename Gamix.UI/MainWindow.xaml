@@ -83,11 +83,7 @@
         </Style>
     </Window.Resources>
     
-    <Window.Triggers>
-        <EventTrigger RoutedEvent="MouseEnter" SourceName="SidebarTrigger">
-            <BeginStoryboard Storyboard="{StaticResource ShowSidebar}"/>
-        </EventTrigger>
-    </Window.Triggers>
+    <!-- Window.Triggers for Sidebar Removed (Now Click Based) -->
 
     <!-- Outer Border for rounded corners and shadow -->
     <Border Background="{DynamicResource Brush_Background}" 
@@ -115,8 +111,19 @@
                     </Grid.ColumnDefinitions>
                     
                     <!-- App Icon -->
-                    <TextBlock Grid.Column="0" Text="🎵" FontSize="24" VerticalAlignment="Center" Margin="0,0,8,0"
-                               Foreground="{DynamicResource Brush_AccentPrimary}"/>
+                    <!-- App Icon (Sidebar Toggle Button) -->
+                    <Button Grid.Column="0" Content="🎵" FontSize="24" 
+                            VerticalAlignment="Center" Margin="0,0,8,0"
+                            Foreground="{DynamicResource Brush_AccentPrimary}"
+                            Background="Transparent" BorderThickness="0"
+                            Cursor="Hand" ToolTip="メニューを開く"
+                            Click="ShowSidebar_Click">
+                         <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <ContentPresenter/>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                     
                     <!-- Title -->
                     <TextBlock Grid.Column="1" Text="Gamix!" 
@@ -337,11 +344,11 @@
                 </ScrollViewer>
             </Grid>
             
-            <!-- Dimming Overlay -->
-            <Border x:Name="DimOverlay" Background="Black" Opacity="0" IsHitTestVisible="False" Panel.ZIndex="15" CornerRadius="20"/>
+            <!-- Dimming Overlay (Click to Close Sidebar) -->
+            <Border x:Name="DimOverlay" Background="Black" Opacity="0" IsHitTestVisible="False" Panel.ZIndex="15" CornerRadius="20"
+                    MouseLeftButtonDown="HideSidebar_Click"/>
 
-            <!-- Sidebar Trigger Area (Hitbox) -->
-            <Border x:Name="SidebarTrigger" Width="20" HorizontalAlignment="Left" Background="Transparent" Panel.ZIndex="10"/>
+            <!-- Sidebar Trigger Area REMOVED -->
 
             <!-- Sidebar Panel -->
             <Border x:Name="PresetSidebar" HorizontalAlignment="Left" Width="280" 
@@ -356,11 +363,7 @@
                     <DropShadowEffect Color="#FFD1DC" BlurRadius="20" ShadowDepth="4" Opacity="0.4"/>
                 </Border.Effect>
 
-                <Border.Triggers>
-                    <EventTrigger RoutedEvent="MouseLeave">
-                        <BeginStoryboard Storyboard="{StaticResource HideSidebar}"/>
-                    </EventTrigger>
-                </Border.Triggers>
+                <!-- MouseLeave Trigger Removed to prevent auto-closing -->
 
                 <Grid Margin="15,20">
                     <Grid.RowDefinitions>
