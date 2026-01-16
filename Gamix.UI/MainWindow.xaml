@@ -12,6 +12,7 @@
         ResizeMode="NoResize">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <local:BoolToHeartConverter x:Key="BoolToHeartConverter"/>
         
         <!-- Sidebar Animation -->
         <Storyboard x:Key="ShowSidebar">
@@ -29,7 +30,7 @@
         <Storyboard x:Key="HideSidebar">
             <DoubleAnimation Storyboard.TargetName="PresetSidebar" 
                              Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
-                             To="-250" Duration="0:0:0.3">
+                             To="-300" Duration="0:0:0.3">
                 <DoubleAnimation.EasingFunction>
                     <CubicEase EasingMode="EaseOut"/>
                 </DoubleAnimation.EasingFunction>
@@ -342,13 +343,13 @@
             <Border x:Name="SidebarTrigger" Width="20" HorizontalAlignment="Left" Background="Transparent" Panel.ZIndex="10"/>
 
             <!-- Sidebar Panel -->
-            <Border x:Name="PresetSidebar" HorizontalAlignment="Left" Width="220" 
+            <Border x:Name="PresetSidebar" HorizontalAlignment="Left" Width="280" 
                     Background="{DynamicResource Brush_Background}" 
                     BorderBrush="{DynamicResource Brush_AccentPrimary}" BorderThickness="0,0,2,0"
                     CornerRadius="20,0,0,20" Panel.ZIndex="20"
                     RenderTransformOrigin="0,0" Margin="0">
                 <Border.RenderTransform>
-                    <TranslateTransform X="-250"/>
+                    <TranslateTransform X="-300"/>
                 </Border.RenderTransform>
                 <Border.Effect>
                     <DropShadowEffect Color="#FFD1DC" BlurRadius="20" ShadowDepth="4" Opacity="0.4"/>
@@ -375,12 +376,21 @@
                                 <DataTemplate>
                                     <Grid Margin="0,0,0,10">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/> <!-- Favorite Icon -->
+                                            <ColumnDefinition Width="*"/>    <!-- Name -->
+                                            <ColumnDefinition Width="Auto"/> <!-- Favorite Button -->
+                                            <ColumnDefinition Width="Auto"/> <!-- Rename Button -->
+                                            <ColumnDefinition Width="Auto"/> <!-- Delete Button -->
                                         </Grid.ColumnDefinitions>
                                         
-                                        <!-- Apply Button -->
-                                        <Button Grid.Column="0" Content="{Binding Name}" 
+                                        <!-- Favorite Icon (visible when IsFavorite) -->
+                                        <TextBlock Grid.Column="0" Text="💖" FontSize="16" 
+                                                   VerticalAlignment="Center" Margin="0,0,5,0"
+                                                   Visibility="{Binding IsFavorite, Converter={StaticResource BoolToVis}}"
+                                                   Effect="{DynamicResource DropShadowEffect}"/>
+                                        
+                                        <!-- Apply Button (Name) -->
+                                        <Button Grid.Column="1" Content="{Binding Name}" 
                                                 Command="{Binding DataContext.ApplyPresetCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                 CommandParameter="{Binding}"
                                                 HorizontalContentAlignment="Left"
@@ -395,15 +405,50 @@
                                             </Button.Resources>
                                         </Button>
                                         
+                                        <!-- Favorite Toggle Button -->
+                                        <Button Grid.Column="2" 
+                                                Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                CommandParameter="{Binding}"
+                                                Width="32" Height="32" Margin="0,0,3,0"
+                                                Background="{DynamicResource Brush_AccentSecondary}"
+                                                Foreground="White"
+                                                BorderThickness="0" FontSize="14"
+                                                ToolTip="お気に入り">
+                                            <Button.Content>
+                                                <TextBlock Text="{Binding IsFavorite, Converter={StaticResource BoolToHeartConverter}}"/>
+                                            </Button.Content>
+                                             <Button.Resources>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="CornerRadius" Value="8"/>
+                                                </Style>
+                                            </Button.Resources>
+                                        </Button>
+                                        
+                                        <!-- Rename Button -->
+                                        <Button Grid.Column="3" Content="✏️" 
+                                                Click="RenamePreset_Click"
+                                                Tag="{Binding}"
+                                                Width="32" Height="32" Margin="0,0,3,0"
+                                                Background="{DynamicResource Brush_AccentTertiary}"
+                                                Foreground="White"
+                                                BorderThickness="0" FontSize="14"
+                                                ToolTip="名前変更">
+                                             <Button.Resources>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="CornerRadius" Value="8"/>
+                                                </Style>
+                                            </Button.Resources>
+                                        </Button>
+                                        
                                         <!-- Delete Button -->
-                                        <Button Grid.Column="1" Content="🗑️" 
+                                        <Button Grid.Column="4" Content="🗑️" 
                                                 Command="{Binding DataContext.DeletePresetCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                 CommandParameter="{Binding}"
                                                 Width="32" Height="32"
                                                 Background="IndianRed"
                                                 Foreground="White"
                                                 BorderThickness="0" FontSize="14"
-                                                ToolTip="削除 (即実行)">
+                                                ToolTip="削除">
                                              <Button.Resources>
                                                 <Style TargetType="Border">
                                                     <Setter Property="CornerRadius" Value="8"/>

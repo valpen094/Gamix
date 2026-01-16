@@ -99,11 +99,53 @@ namespace Gamix.Core.Services
         }
 
         /// <inheritdoc/>
-        public async Task DeletePresetAsync(string name)
+        public async Task DeletePresetAsync(string name, string deviceId)
         {
             var presets = await LoadPresetsAsync();
-            presets.RemoveAll(p => p.Name == name);
+            presets.RemoveAll(p => p.Name == name && p.DeviceId == deviceId);
             await SaveToFileAsync(presets);
+        }
+
+        /// <inheritdoc/>
+        public async Task RenamePresetAsync(string oldName, string deviceId, string newName)
+        {
+            var presets = await LoadPresetsAsync();
+            var target = presets.FirstOrDefault(p => p.Name == oldName && p.DeviceId == deviceId);
+            if (target != null)
+            {
+                target.Name = newName;
+                await SaveToFileAsync(presets);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task SetFavoriteAsync(string name, string deviceId, bool isFavorite)
+        {
+            var presets = await LoadPresetsAsync();
+            
+            // 同じデバイスの他のプリセットのお気に入りを解除
+            if (isFavorite)
+            {
+                foreach (var p in presets.Where(p => p.DeviceId == deviceId))
+                {
+                    p.IsFavorite = false;
+                }
+            }
+            
+            // 対象プリセットのお気に入り状態を設定
+            var target = presets.FirstOrDefault(p => p.Name == name && p.DeviceId == deviceId);
+            if (target != null)
+            {
+                target.IsFavorite = isFavorite;
+                await SaveToFileAsync(presets);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Preset?> GetFavoritePresetAsync(string deviceId)
+        {
+            var presets = await LoadPresetsAsync();
+            return presets.FirstOrDefault(p => p.DeviceId == deviceId && p.IsFavorite);
         }
 
         /// <summary>

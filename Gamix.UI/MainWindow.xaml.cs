@@ -1,6 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using System.Globalization;
 using Gamix.UI.ViewModels;
+using Gamix.Core.Models;
 
 namespace Gamix.UI
 {
@@ -37,7 +39,44 @@ namespace Gamix.UI
         {
             WindowState = WindowState.Minimized;
         }
+
+        /// <summary>
+        /// プリセットの名前変更ダイアログを表示します。
+        /// </summary>
+        private async void RenamePreset_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.Tag is Preset preset)
+            {
+                var newName = Microsoft.VisualBasic.Interaction.InputBox(
+                    "新しいプリセット名を入力してください:",
+                    "名前変更",
+                    preset.Name);
+                
+                if (!string.IsNullOrWhiteSpace(newName) && newName != preset.Name)
+                {
+                    var vm = DataContext as MainViewModel;
+                    if (vm?.RenamePresetCommand.CanExecute((preset, newName)) == true)
+                    {
+                        await vm.RenamePresetCommand.ExecuteAsync((preset, newName));
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// bool を ❤️ / 🤍 に変換するコンバーター。
+    /// </summary>
+    public class BoolToHeartConverter : System.Windows.Data.IValueConverter
+    {
+        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
+        {
+            return (value is bool b && b) ? "❤️" : "🤍";
+        }
+
+        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
-
-

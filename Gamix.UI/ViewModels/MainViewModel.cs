@@ -98,6 +98,23 @@ namespace Gamix.UI.ViewModels
             await LoadMasterVolumeAsync();
             await LoadSessionsAsync();
             LoadPresets();
+            
+            // 起動時に Favorite プリセットを自動適用
+            await ApplyFavoritePresetAsync();
+        }
+
+        /// <summary>
+        /// Favorite プリセットを自動適用します。
+        /// </summary>
+        private async Task ApplyFavoritePresetAsync()
+        {
+            if (SelectedOutputDevice == null) return;
+            
+            var favorite = await _presetService.GetFavoritePresetAsync(SelectedOutputDevice.Id);
+            if (favorite != null)
+            {
+                await ApplyPreset(favorite);
+            }
         }
 
         /// <summary>
@@ -149,6 +166,9 @@ namespace Gamix.UI.ViewModels
         {
             if (value != null)
             {
+                // Windows のデフォルト入力デバイスも切り替え
+                Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
+
                 _ = _settingsService.SetSelectedInputDeviceIdAsync(value.Id);
                 _ = LoadInputMasterVolumeAsync();
             }
@@ -286,9 +306,35 @@ namespace Gamix.UI.ViewModels
         [RelayCommand]
         private async Task DeletePreset(Preset preset)
         {
-            if (preset == null) return;
+            if (preset == null || string.IsNullOrEmpty(preset.DeviceId)) return;
             
-            await _presetService.DeletePresetAsync(preset.Name);
+            await _presetService.DeletePresetAsync(preset.Name, preset.DeviceId);
+            LoadPresets();
+        }
+
+        /// <summary>
+        /// プリセットの名前を変更します。
+        /// </summary>
+        /// <param name="args">タプル (Preset, NewName)。</param>
+        [RelayCommand]
+        private async Task RenamePreset((Preset Preset, string NewName) args)
+        {
+            if (args.Preset == null || string.IsNullOrEmpty(args.NewName) || string.IsNullOrEmpty(args.Preset.DeviceId)) return;
+            
+            await _presetService.RenamePresetAsync(args.Preset.Name, args.Preset.DeviceId, args.NewName);
+            LoadPresets();
+        }
+
+        /// <summary>
+        /// プリセットのお気に入り状態をトグルします。
+        /// </summary>
+        /// <param name="preset">対象プリセット。</param>
+        [RelayCommand]
+        private async Task ToggleFavorite(Preset preset)
+        {
+            if (preset == null || string.IsNullOrEmpty(preset.DeviceId)) return;
+            
+            await _presetService.SetFavoriteAsync(preset.Name, preset.DeviceId, !preset.IsFavorite);
             LoadPresets();
         }
     }

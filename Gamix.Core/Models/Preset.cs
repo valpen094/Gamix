@@ -28,6 +28,11 @@ namespace Gamix.Core.Models
         public bool? IsMasterMuted { get; set; }
 
         /// <summary>
+        /// お気に入りプリセットかどうか。起動時に自動適用される。
+        /// </summary>
+        public bool IsFavorite { get; set; }
+
+        /// <summary>
         /// 各プロセスの音量設定リスト。
         /// </summary>
         public List<ProcessVolumeSetting> Settings { get; set; } = new();

@@ -36,6 +36,31 @@ namespace Gamix.Core.Services
         /// 指定した名前のプリセットを削除します。
         /// </summary>
         /// <param name="name">削除するプリセット名。</param>
-        Task DeletePresetAsync(string name);
+        /// <param name="deviceId">対象デバイスID。</param>
+        Task DeletePresetAsync(string name, string deviceId);
+
+        /// <summary>
+        /// プリセットの名前を変更します。
+        /// </summary>
+        /// <param name="oldName">現在の名前。</param>
+        /// <param name="deviceId">対象デバイスID。</param>
+        /// <param name="newName">新しい名前。</param>
+        Task RenamePresetAsync(string oldName, string deviceId, string newName);
+
+        /// <summary>
+        /// プリセットのお気に入り状態を設定します。
+        /// 同じデバイスでは1つのプリセットのみお気に入りに設定できます。
+        /// </summary>
+        /// <param name="name">プリセット名。</param>
+        /// <param name="deviceId">対象デバイスID。</param>
+        /// <param name="isFavorite">お気に入り状態。</param>
+        Task SetFavoriteAsync(string name, string deviceId, bool isFavorite);
+
+        /// <summary>
+        /// 指定したデバイスのお気に入りプリセットを取得します。
+        /// </summary>
+        /// <param name="deviceId">対象デバイスID。</param>
+        /// <returns>お気に入りプリセット。存在しない場合は null。</returns>
+        Task<Preset?> GetFavoritePresetAsync(string deviceId);
     }
 }
