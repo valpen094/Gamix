@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Gamix.UI"
         xmlns:components="clr-namespace:Gamix.UI.Views.Components"
         mc:Ignorable="d"
-        Title="Gamix!" Height="650" Width="420"
+        Title="Gamix!" Height="650" Width="500"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"

@@ -52,6 +52,19 @@ namespace Gamix.Core.Services
             await SaveSettingsAsync();
         }
 
+        /// <inheritdoc/>
+        public Task<string?> GetThemeAsync()
+        {
+            return Task.FromResult(_settings.Theme);
+        }
+
+        /// <inheritdoc/>
+        public async Task SetThemeAsync(string themeName)
+        {
+            _settings.Theme = themeName;
+            await SaveSettingsAsync();
+        }
+
         /// <summary>
         /// 設定をファイルから読み込みます。
         /// </summary>
@@ -89,6 +102,7 @@ namespace Gamix.Core.Services
         {
             public string? SelectedOutputDeviceId { get; set; }
             public string? SelectedInputDeviceId { get; set; }
+            public string? Theme { get; set; } = "Pastel";
         }
     }
 }

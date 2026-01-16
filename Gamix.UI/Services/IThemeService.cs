@@ -6,5 +6,6 @@ namespace Gamix.UI.Services
     {
         void SetTheme(string themeName);
         string CurrentTheme { get; }
+        System.Collections.Generic.IEnumerable<string> GetAvailableThemes();
     }
 }

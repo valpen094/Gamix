@@ -18,6 +18,7 @@ namespace Gamix.UI.ViewModels
         private readonly Gamix.Core.Audio.IAudioService _audioService;
         private readonly Gamix.Core.Services.IPresetService _presetService;
         private readonly ISettingsService _settingsService;
+        private readonly IThemeService _themeService;
         
         /// <summary>
         /// アクティブなオーディオセッションのコレクション。
@@ -28,6 +29,11 @@ namespace Gamix.UI.ViewModels
         /// 保存されたプリセットのコレクション。
         /// </summary>
         public ObservableCollection<Preset> Presets { get; } = new();
+
+        /// <summary>
+        /// 利用可能なテーマ名のコレクション。
+        /// </summary>
+        public ObservableCollection<string> AvailableThemes { get; } = new();
 
         /// <summary>
         /// 利用可能な出力デバイス（スピーカー）のコレクション。
@@ -87,11 +93,15 @@ namespace Gamix.UI.ViewModels
         /// <param name="audioService">オーディオセッション取得用のサービス。</param>
         /// <param name="presetService">プリセット管理用のサービス。</param>
         /// <param name="settingsService">設定保存用のサービス。</param>
-        public MainViewModel(Gamix.Core.Audio.IAudioService audioService, Gamix.Core.Services.IPresetService presetService, ISettingsService settingsService)
+        /// <param name="presetService">プリセット管理用のサービス。</param>
+        /// <param name="settingsService">設定保存用のサービス。</param>
+        /// <param name="themeService">テーマ管理用のサービス。</param>
+        public MainViewModel(Gamix.Core.Audio.IAudioService audioService, Gamix.Core.Services.IPresetService presetService, ISettingsService settingsService, IThemeService themeService)
         {
             _audioService = audioService;
             _presetService = presetService;
             _settingsService = settingsService;
+            _themeService = themeService;
             InitializeAsync();
         }
 
@@ -107,6 +117,17 @@ namespace Gamix.UI.ViewModels
             
             // 起動時に Favorite プリセットを自動適用
             await ApplyFavoritePresetAsync();
+
+            LoadThemes();
+        }
+
+        private void LoadThemes()
+        {
+            AvailableThemes.Clear();
+            foreach (var theme in _themeService.GetAvailableThemes())
+            {
+                AvailableThemes.Add(theme);
+            }
         }
 
         /// <summary>
@@ -372,6 +393,19 @@ namespace Gamix.UI.ViewModels
             {
                 IsInputMuted = !IsInputMuted;
                 _audioService.SetDeviceMasterMute(SelectedInputDevice.Id, IsInputMuted);
+            }
+        }
+
+        /// <summary>
+        /// テーマを変更します。
+        /// </summary>
+        /// <param name="themeName">変更するテーマ名。</param>
+        [RelayCommand]
+        private void ChangeTheme(string themeName)
+        {
+            if (!string.IsNullOrEmpty(themeName))
+            {
+                _themeService.SetTheme(themeName);
             }
         }
     }

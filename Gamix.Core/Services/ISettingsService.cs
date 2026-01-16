@@ -30,5 +30,17 @@ namespace Gamix.Core.Services
         /// </summary>
         /// <param name="deviceId">デバイスID。</param>
         Task SetSelectedInputDeviceIdAsync(string deviceId);
+
+        /// <summary>
+        /// 現在のテーマ名を取得します。
+        /// </summary>
+        /// <returns>テーマ名（例: "Pastel"）。未設定の場合は null。</returns>
+        Task<string?> GetThemeAsync();
+
+        /// <summary>
+        /// 現在のテーマ名を保存します。
+        /// </summary>
+        /// <param name="themeName">テーマ名。</param>
+        Task SetThemeAsync(string themeName);
     }
 }

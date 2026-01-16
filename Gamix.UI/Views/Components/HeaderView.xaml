@@ -18,6 +18,7 @@
             <ColumnDefinition Width="Auto"/> <!-- Title -->
             <ColumnDefinition Width="*"/>    <!-- Spacer -->
             <ColumnDefinition Width="Auto"/> <!-- Preset Input -->
+            <ColumnDefinition Width="Auto"/> <!-- Theme Palette -->
             <ColumnDefinition Width="Auto"/> <!-- Minimize -->
             <ColumnDefinition Width="Auto"/> <!-- Close -->
         </Grid.ColumnDefinitions>
@@ -131,18 +132,76 @@
             </TextBox>
             <Button Content="💾" Command="{Binding SavePresetCommand}"
                     Width="28" Height="28"
-                    Background="{DynamicResource Brush_AccentTertiary}" 
-                    Foreground="White" BorderThickness="0" FontSize="14">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="14"/>
+                    BorderThickness="0" FontSize="14"
+                    Padding="0,0,0,2"
+                    ToolTip="プリセットを保存">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="{DynamicResource Brush_AccentTertiary}"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="14">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="0.8"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.5"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
                     </Style>
-                </Button.Resources>
+                </Button.Style>
             </Button>
         </StackPanel>
         
-        <!-- Minimize Button (Right) -->
-        <Button Grid.Column="4" Content="−" Click="MinimizeButton_Click"
+        <!-- Palette Button -->
+        <Button Grid.Column="4" Content="🎨"
+                Width="28" Height="28" Margin="0,0,8,0"
+                BorderThickness="0" FontSize="16"
+                ToolTip="テーマを変更"
+                Click="PaletteButton_Click"
+                Padding="0,0,0,2">
+            <Button.Resources>
+                <ContextMenu x:Key="ThemeMenu" ItemsSource="{Binding AvailableThemes}" Placement="Bottom">
+                    <ContextMenu.ItemContainerStyle>
+                        <Style TargetType="MenuItem">
+                            <Setter Property="Header" Value="{Binding}"/>
+                            <Setter Property="Command" Value="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                            <Setter Property="CommandParameter" Value="{Binding}"/>
+                        </Style>
+                    </ContextMenu.ItemContainerStyle>
+                </ContextMenu>
+            </Button.Resources>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="{DynamicResource Brush_AccentPrimary}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="14">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.8"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <Button Grid.Column="5" Content="−" Click="MinimizeButton_Click"
                 Width="28" Height="28" Margin="0,0,8,0"
                 BorderThickness="0" FontSize="18" FontWeight="Bold">
             <Button.Style>
@@ -168,7 +227,7 @@
         </Button>
 
         <!-- Close Button (Right) -->
-        <Button Grid.Column="5" Content="✕" Click="CloseButton_Click"
+        <Button Grid.Column="6" Content="✕" Click="CloseButton_Click"
                 Width="28" Height="28" Padding="0,0,0,2"
                 BorderThickness="0" FontSize="16" FontWeight="Bold">
              <Button.Style>

@@ -30,5 +30,16 @@ namespace Gamix.UI.Views.Components
         {
             SidebarRequested?.Invoke(this, e);
         }
+
+        private void PaletteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Resources["ThemeMenu"] is ContextMenu menu)
+            {
+                // Ensure DataContext is passed down since it's not in the visual tree
+                menu.DataContext = button.DataContext;
+                menu.PlacementTarget = button;
+                menu.IsOpen = true;
+            }
+        }
     }
 }

@@ -40,7 +40,7 @@ namespace Gamix.UI
             base.OnStartup(e);
 
             var themeService = Services.GetRequiredService<IThemeService>();
-            themeService.SetTheme("Pastel");
+            // Theme is initialized in ThemeService constructor
 
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.Show();

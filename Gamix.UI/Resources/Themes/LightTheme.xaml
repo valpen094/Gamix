@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Light Theme Palette -->
+    <Color x:Key="Color_Background">#F3F3F3</Color> <!-- Light Gray -->
+    <Color x:Key="Color_Foreground">#333333</Color> <!-- Dark Gray -->
+    <Color x:Key="Color_CardBackground">#FFFFFF</Color> <!-- White -->
+    
+    <Color x:Key="Color_AccentPrimary">#0078D7</Color> <!-- Windows Blue -->
+    <Color x:Key="Color_AccentSecondary">#0099BC</Color> <!-- Teal -->
+    <Color x:Key="Color_AccentTertiary">#E81123</Color> <!-- Red -->
+
+    <SolidColorBrush x:Key="Brush_Background" Color="{StaticResource Color_Background}"/>
+    <SolidColorBrush x:Key="Brush_Foreground" Color="{StaticResource Color_Foreground}"/>
+    <SolidColorBrush x:Key="Brush_CardBackground" Color="{StaticResource Color_CardBackground}"/>
+    
+    <SolidColorBrush x:Key="Brush_AccentPrimary" Color="{StaticResource Color_AccentPrimary}"/>
+    <SolidColorBrush x:Key="Brush_AccentSecondary" Color="{StaticResource Color_AccentSecondary}"/>
+    <SolidColorBrush x:Key="Brush_AccentTertiary" Color="{StaticResource Color_AccentTertiary}"/>
+
+    <!-- Global Styles for this theme -->
+    <Style TargetType="Window">
+        <Setter Property="Background" Value="{StaticResource Brush_Background}"/>
+        <Setter Property="FontFamily" Value="Segoe UI Semibold"/>
+    </Style>
+
+</ResourceDictionary>
