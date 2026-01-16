@@ -256,10 +256,10 @@
                     <Border Background="{DynamicResource Brush_CardBackground}" 
                             CornerRadius="15" Margin="0,0,0,8" Padding="15">
                         <Grid>
+
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/> <!-- Icon -->
                                 <ColumnDefinition Width="*"/>    <!-- Content -->
-                                <ColumnDefinition Width="Auto"/> <!-- Percentage -->
                             </Grid.ColumnDefinitions>
                             
                             <!-- Gradient Circle Icon - Volume (Pink to Purple) -->
@@ -294,17 +294,22 @@
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="Volume" FontSize="14" FontWeight="SemiBold"
                                            Foreground="{DynamicResource Brush_Foreground}" Margin="0,0,0,5"/>
-                                <Slider Minimum="0" Maximum="100" 
-                                        Value="{Binding MasterVolume}" 
-                                        Style="{StaticResource PastelSlider}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Slider Grid.Column="0" Minimum="0" Maximum="100" 
+                                            Value="{Binding MasterVolume}" 
+                                            Style="{StaticResource PastelSlider}"/>
+                                    <TextBlock Grid.Column="1" 
+                                               Text="{Binding MasterVolume, StringFormat={}{0:F0}%}" 
+                                               FontSize="14" FontWeight="Bold"
+                                               Foreground="{DynamicResource Brush_AccentPrimary}"
+                                               VerticalAlignment="Center" Margin="10,0,0,0"
+                                               Width="40" TextAlignment="Right"/>
+                                </Grid>
                             </StackPanel>
-                            
-                            <TextBlock Grid.Column="2" 
-                                       Text="{Binding MasterVolume, StringFormat={}{0:F0}%}" 
-                                       FontSize="14" FontWeight="Bold"
-                                       Foreground="{DynamicResource Brush_AccentPrimary}"
-                                       VerticalAlignment="Center" Margin="10,0,0,0"
-                                       HorizontalAlignment="Right" Width="50" TextAlignment="Right"/>
                         </Grid>
                     </Border>
                     
