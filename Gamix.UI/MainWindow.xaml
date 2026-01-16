@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Gamix.UI"
         mc:Ignorable="d"
-        Title="Gamix!" Height="500" Width="420"
+        Title="Gamix!" Height="650" Width="420"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -137,7 +137,7 @@
                         <Button Content="💾" Command="{Binding SavePresetCommand}"
                                 Width="28" Height="28"
                                 Background="{DynamicResource Brush_AccentTertiary}" 
-                                Foreground="{DynamicResource Brush_Foreground}" BorderThickness="0" FontSize="14">
+                                Foreground="White" BorderThickness="0" FontSize="14">
                             <Button.Resources>
                                 <Style TargetType="Border">
                                     <Setter Property="CornerRadius" Value="14"/>
