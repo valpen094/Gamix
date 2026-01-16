@@ -62,6 +62,12 @@ namespace Gamix.UI.ViewModels
         /// </summary>
         [ObservableProperty]
         private float _masterVolume;
+        
+        /// <summary>
+        /// 出力デバイスがミュート状態かどうか。
+        /// </summary>
+        [ObservableProperty]
+        private bool _isOutputMuted;
 
         /// <summary>
         /// 入力デバイスのマスター音量。
@@ -201,9 +207,12 @@ namespace Gamix.UI.ViewModels
         /// </summary>
         private async Task LoadMasterVolumeAsync()
         {
-            if (SelectedOutputDevice == null) return;
-            var (volume, _) = await _audioService.GetDeviceMasterVolumeAsync(SelectedOutputDevice.Id);
-            MasterVolume = volume * 100f; // 0-1 を 0-100 にスケール
+            if (SelectedOutputDevice != null)
+            {
+                var (vol, isMuted) = await _audioService.GetDeviceMasterVolumeAsync(SelectedOutputDevice.Id);
+                MasterVolume = vol * 100f;
+                IsOutputMuted = isMuted;
+            }
         }
 
         /// <summary>
@@ -211,10 +220,12 @@ namespace Gamix.UI.ViewModels
         /// </summary>
         private async Task LoadInputMasterVolumeAsync()
         {
-            if (SelectedInputDevice == null) return;
-            var (volume, isMuted) = await _audioService.GetDeviceMasterVolumeAsync(SelectedInputDevice.Id);
-            InputMasterVolume = volume;
-            IsInputMuted = isMuted;
+            if (SelectedInputDevice != null)
+            {
+                var (vol, isMuted) = await _audioService.GetDeviceMasterVolumeAsync(SelectedInputDevice.Id);
+                InputMasterVolume = vol;
+                IsInputMuted = isMuted;
+            }
         }
 
         /// <summary>
@@ -326,16 +337,42 @@ namespace Gamix.UI.ViewModels
         }
 
         /// <summary>
-        /// プリセットのお気に入り状態をトグルします。
+        /// プリセットをお気に入りに設定します。
         /// </summary>
-        /// <param name="preset">対象プリセット。</param>
         [RelayCommand]
-        private async Task ToggleFavorite(Preset preset)
+        private async Task TogglePresetFavoriteAsync(Preset preset)
         {
-            if (preset == null || string.IsNullOrEmpty(preset.DeviceId)) return;
-            
-            await _presetService.SetFavoriteAsync(preset.Name, preset.DeviceId, !preset.IsFavorite);
-            LoadPresets();
+            if (preset != null && SelectedOutputDevice != null)
+            {
+                preset.IsFavorite = !preset.IsFavorite;
+                await _presetService.SetFavoriteAsync(preset.Name, SelectedOutputDevice.Id, preset.IsFavorite);
+            }
+        }
+
+        /// <summary>
+        /// 出力デバイスのミュートを切り替えます。
+        /// </summary>
+        [RelayCommand]
+        private void ToggleOutputMute()
+        {
+            if (SelectedOutputDevice != null)
+            {
+                IsOutputMuted = !IsOutputMuted;
+                _audioService.SetDeviceMasterMute(SelectedOutputDevice.Id, IsOutputMuted);
+            }
+        }
+
+        /// <summary>
+        /// 入力デバイスのミュートを切り替えます。
+        /// </summary>
+        [RelayCommand]
+        private void ToggleInputMute()
+        {
+            if (SelectedInputDevice != null)
+            {
+                IsInputMuted = !IsInputMuted;
+                _audioService.SetDeviceMasterMute(SelectedInputDevice.Id, IsInputMuted);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Gamix.Core.Audio;
 using Gamix.Core.Models;
 using Gamix.UI.Converters;
@@ -10,7 +11,7 @@ namespace Gamix.UI.ViewModels
     /// AudioSession モデルをラップする ViewModel。
     /// 音量変更時にオーディオサービスへ即座に反映します。
     /// </summary>
-    public class AudioSessionViewModel : ObservableObject
+    public partial class AudioSessionViewModel : ObservableObject
     {
         private readonly AudioSession _model;
         private readonly IAudioService _audioService;
@@ -39,7 +40,17 @@ namespace Gamix.UI.ViewModels
         /// <summary>
         /// ミュート状態かどうか。
         /// </summary>
-        public bool IsMuted => _model.IsMuted;
+        public bool IsMuted
+        {
+            get => _model.IsMuted;
+            set
+            {
+                if (SetProperty(_model.IsMuted, value, _model, (m, v) => m.IsMuted = v))
+                {
+                    _audioService.SetMute(_model.Id, value);
+                }
+            }
+        }
 
         /// <summary>
         /// アイコンパス。
@@ -69,6 +80,14 @@ namespace Gamix.UI.ViewModels
                     _audioService.SetVolume(_model.Id, _model.Volume);
                 }
             }
+        }
+        /// <summary>
+        /// ミュート状態を切り替えます。
+        /// </summary>
+        [RelayCommand]
+        private void ToggleMute()
+        {
+            IsMuted = !IsMuted;
         }
     }
 }

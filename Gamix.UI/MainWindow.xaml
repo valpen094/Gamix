@@ -263,19 +263,33 @@
                             </Grid.ColumnDefinitions>
                             
                             <!-- Gradient Circle Icon - Volume (Pink to Purple) -->
-                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" 
-                                    VerticalAlignment="Center" Margin="0,0,12,0">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="#FFB6C1" Offset="0"/>
-                                        <GradientStop Color="#DDA0DD" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                                <Path Data="M3,9 L7,9 L12,5 L12,19 L7,15 L3,15 Z M14,8 C15.5,9.5 15.5,14.5 14,16 M16.5,5.5 C19.5,8.5 19.5,15.5 16.5,18.5" 
-                                      Stroke="White" StrokeThickness="1.5" Fill="Transparent"
-                                      Width="20" Height="20" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                            <!-- Monitor (Output) Mute Button -->
+                            <Button Grid.Column="0" Command="{Binding ToggleOutputMuteCommand}" 
+                                    Width="36" Height="36" Margin="0,0,12,0" Cursor="Hand" BorderThickness="0" Background="Transparent">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="18">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#FFB6C1" Offset="0"/>
+                                                    <GradientStop Color="#DDA0DD" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <Path x:Name="IconPath" 
+                                                  Stroke="White" StrokeThickness="1.5" Fill="Transparent"
+                                                  Width="20" Height="20" Stretch="Uniform"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="M3,9 L7,9 L12,5 L12,19 L7,15 L3,15 Z M14,8 C15.5,9.5 15.5,14.5 14,16 M16.5,5.5 C19.5,8.5 19.5,15.5 16.5,18.5"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsOutputMuted}" Value="True">
+                                                <Setter TargetName="IconPath" Property="Data" Value="M3,9 L7,9 L12,5 L12,19 L7,15 L3,15 Z M16,9 L21,14 M16,14 L21,9"/>
+                                                <Setter TargetName="IconPath" Property="Stroke" Value="#E0E0E0"/>
+                                            </DataTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
                             
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="Volume" FontSize="14" FontWeight="SemiBold"
@@ -339,19 +353,34 @@
                             </Grid.ColumnDefinitions>
                             
                             <!-- Gradient Circle Icon - Input (Mint to Green) -->
-                            <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" 
-                                    VerticalAlignment="Center" Margin="0,0,12,0">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="#98FB98" Offset="0"/>
-                                        <GradientStop Color="#3CB371" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                                <Path Data="M12,2 C14,2 16,4 16,7 L16,12 C16,15 14,17 12,17 C10,17 8,15 8,12 L8,7 C8,4 10,2 12,2 Z M5,11 L5,12 C5,16 8,19 12,19 C16,19 19,16 19,12 L19,11 M12,19 L12,22" 
-                                      Stroke="White" StrokeThickness="1.5" Fill="Transparent"
-                                      Width="18" Height="20" Stretch="Uniform"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                            <!-- Mic (Input) Mute Button -->
+                            <Button Grid.Column="0" Command="{Binding ToggleInputMuteCommand}" 
+                                    Width="36" Height="36" Margin="0,0,12,0" Cursor="Hand" BorderThickness="0" Background="Transparent">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border CornerRadius="18">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#98FB98" Offset="0"/>
+                                                    <GradientStop Color="#3CB371" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <Path x:Name="MicIconPath"
+                                                  Stroke="White" StrokeThickness="1.5" Fill="Transparent"
+                                                  Width="18" Height="20" Stretch="Uniform"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Data="M12,2 C14,2 16,4 16,7 L16,12 C16,15 14,17 12,17 C10,17 8,15 8,12 L8,7 C8,4 10,2 12,2 Z M5,11 L5,12 C5,16 8,19 12,19 C16,19 19,16 19,12 L19,11 M12,19 L12,22"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsInputMuted}" Value="True">
+                                                <!-- Muted Mic: Add diagonal slash -->
+                                                <Setter TargetName="MicIconPath" Property="Data" Value="M12,2 C14,2 16,4 16,7 L16,12 C16,15 14,17 12,17 C10,17 8,15 8,12 L8,7 C8,4 10,2 12,2 Z M5,11 L5,12 C5,16 8,19 12,19 C16,19 19,16 19,12 L19,11 M12,19 L12,22 M4,4 L20,20"/>
+                                                <Setter TargetName="MicIconPath" Property="Stroke" Value="#E0E0E0"/>
+                                            </DataTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
                             
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock Text="Input Device" FontSize="14" FontWeight="SemiBold"
@@ -414,9 +443,31 @@
                                             </Grid>
                                         </StackPanel>
     
-                                        <TextBlock Grid.Column="2" Text="🔇" 
-                                                   FontSize="18" VerticalAlignment="Center" Margin="10,0,0,0"
-                                                   Visibility="{Binding IsMuted, Converter={StaticResource BoolToVis}}"/>
+                                        <Button Grid.Column="2" Command="{Binding ToggleMuteCommand}" 
+                                                Background="Transparent" BorderThickness="0" Margin="10,0,0,0" Padding="0" Cursor="Hand">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Content" Value="🔊"/>
+                                                    <Setter Property="FontSize" Value="18"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource Brush_AccentPrimary}"/>
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}">
+                                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMuted}" Value="True">
+                                                            <Setter Property="Content" Value="🔇"/>
+                                                            <Setter Property="Foreground" Value="#A0A0A0"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -492,7 +543,7 @@
                                         
                                         <!-- Favorite Toggle Button -->
                                         <Button Grid.Column="2" 
-                                                Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                Command="{Binding DataContext.TogglePresetFavoriteCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                 CommandParameter="{Binding}"
                                                 Width="32" Height="32" Margin="0,0,3,0"
                                                 Background="{DynamicResource Brush_AccentSecondary}"
