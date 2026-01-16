@@ -121,7 +121,7 @@
                    Effect="{DynamicResource Effect_Glow}"/>
         
         <!-- Preset Input -->
-        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
             <TextBox Width="100" Height="28" Margin="0,0,8,0" 
                      Text="{Binding NewPresetName, UpdateSourceTrigger=PropertyChanged}" 
                      VerticalContentAlignment="Center" Padding="8,0"
