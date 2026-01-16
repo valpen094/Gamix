@@ -58,6 +58,12 @@ namespace Gamix.UI.ViewModels
         private AudioDevice? _selectedInputDevice;
 
         /// <summary>
+        /// 出力デバイスのマスター音量（0-100）。
+        /// </summary>
+        [ObservableProperty]
+        private float _masterVolume;
+
+        /// <summary>
         /// 入力デバイスのマスター音量。
         /// </summary>
         [ObservableProperty]
@@ -127,6 +133,7 @@ namespace Gamix.UI.ViewModels
             {
                 _ = _settingsService.SetSelectedOutputDeviceIdAsync(value.Id);
                 _ = LoadSessionsAsync();
+                _ = LoadMasterVolumeAsync();
             }
         }
 
@@ -143,6 +150,17 @@ namespace Gamix.UI.ViewModels
         }
 
         /// <summary>
+        /// マスター音量が変更されたときの処理（0-100 スケール）。
+        /// </summary>
+        partial void OnMasterVolumeChanged(float value)
+        {
+            if (SelectedOutputDevice != null)
+            {
+                _audioService.SetDeviceMasterVolume(SelectedOutputDevice.Id, value / 100f);
+            }
+        }
+
+        /// <summary>
         /// 入力デバイスのマスター音量が変更されたときの処理。
         /// </summary>
         partial void OnInputMasterVolumeChanged(float value)
@@ -151,6 +169,16 @@ namespace Gamix.UI.ViewModels
             {
                 _audioService.SetDeviceMasterVolume(SelectedInputDevice.Id, value);
             }
+        }
+
+        /// <summary>
+        /// 出力デバイスのマスター音量を読み込みます。
+        /// </summary>
+        private async Task LoadMasterVolumeAsync()
+        {
+            if (SelectedOutputDevice == null) return;
+            var (volume, _) = await _audioService.GetDeviceMasterVolumeAsync(SelectedOutputDevice.Id);
+            MasterVolume = volume * 100f; // 0-1 を 0-100 にスケール
         }
 
         /// <summary>

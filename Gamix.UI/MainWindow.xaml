@@ -98,6 +98,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Header -->
+                    <RowDefinition Height="Auto"/> <!-- Device Selection -->
                     <RowDefinition Height="*"/>    <!-- Sessions -->
                 </Grid.RowDefinitions>
     
@@ -157,9 +158,67 @@
                         </Button.Resources>
                     </Button>
                 </Grid>
+
+                <!-- Volume & Device Selection Section -->
+                <Border Grid.Row="1" Background="{DynamicResource Brush_CardBackground}" 
+                        CornerRadius="12" Margin="15,0,15,10" Padding="15,12">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Master Volume -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="ボリューム" 
+                                   FontSize="14" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="0,0,15,12"
+                                   Foreground="{DynamicResource Brush_Foreground}"/>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12">
+                            <TextBlock Text="🔊" FontSize="14" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding MasterVolume, StringFormat={}{0:F0}}" 
+                                       FontSize="14" VerticalAlignment="Center" Width="30" Margin="0,0,8,0"
+                                       Foreground="{DynamicResource Brush_Foreground}"/>
+                            <Slider Minimum="0" Maximum="100" Width="200"
+                                    Value="{Binding MasterVolume}" 
+                                    Style="{StaticResource PastelSlider}"
+                                    VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <!-- Output Device (Speaker) -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,0,15,8">
+                            <TextBlock Text="🔊" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="出力デバイス" FontSize="13" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush_Foreground}"/>
+                        </StackPanel>
+                        <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                                  ItemsSource="{Binding OutputDevices}" 
+                                  SelectedItem="{Binding SelectedOutputDevice}"
+                                  DisplayMemberPath="Name"
+                                  Margin="0,0,0,8"
+                                  FontSize="12"/>
+                        
+                        <!-- Input Device (Microphone) -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="🎤" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="入力デバイス" FontSize="13" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush_Foreground}"/>
+                        </StackPanel>
+                        <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                  ItemsSource="{Binding InputDevices}" 
+                                  SelectedItem="{Binding SelectedInputDevice}"
+                                  DisplayMemberPath="Name"
+                                  FontSize="12"/>
+                    </Grid>
+                </Border>
     
                 <!-- Sessions List -->
-                <ScrollViewer Grid.Row="1" Margin="15,0,15,15" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.Row="2" Margin="15,0,15,15" VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Sessions}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
