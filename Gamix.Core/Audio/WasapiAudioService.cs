@@ -28,6 +28,12 @@ namespace Gamix.Core.Audio
         /// <inheritdoc/>
         public Task<List<AudioSession>> GetActiveSessionsAsync()
         {
+            return GetActiveSessionsAsync(null);
+        }
+
+        /// <inheritdoc/>
+        public Task<List<AudioSession>> GetActiveSessionsAsync(string? deviceId)
+        {
             return Task.Run(() =>
             {
                 var sessions = new List<AudioSession>();
@@ -36,7 +42,10 @@ namespace Gamix.Core.Audio
                 {
                     using (var enumerator = new MMDeviceEnumerator())
                     {
-                        var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                        var device = string.IsNullOrEmpty(deviceId)
+                            ? enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia)
+                            : enumerator.GetDevice(deviceId);
+                        
                         var sessionManager = device.AudioSessionManager;
 
                         for (int i = 0; i < sessionManager.Sessions.Count; i++)
@@ -93,6 +102,83 @@ namespace Gamix.Core.Audio
 
                 return sessions;
             });
+        }
+
+        /// <inheritdoc/>
+        public Task<List<AudioDevice>> GetAudioDevicesAsync(bool isOutput)
+        {
+            return Task.Run(() =>
+            {
+                var devices = new List<AudioDevice>();
+                
+                try
+                {
+                    using (var enumerator = new MMDeviceEnumerator())
+                    {
+                        var dataFlow = isOutput ? DataFlow.Render : DataFlow.Capture;
+                        var mmDevices = enumerator.EnumerateAudioEndPoints(dataFlow, DeviceState.Active);
+                        var defaultDevice = enumerator.GetDefaultAudioEndpoint(dataFlow, Role.Multimedia);
+
+                        foreach (var mmDevice in mmDevices)
+                        {
+                            devices.Add(new AudioDevice
+                            {
+                                Id = mmDevice.ID,
+                                Name = mmDevice.FriendlyName,
+                                IsDefault = mmDevice.ID == defaultDevice.ID,
+                                IsOutput = isOutput
+                            });
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error enumerating devices: {ex.Message}");
+                }
+
+                return devices;
+            });
+        }
+
+        /// <inheritdoc/>
+        public Task<(float Volume, bool IsMuted)> GetDeviceMasterVolumeAsync(string deviceId)
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    using (var enumerator = new MMDeviceEnumerator())
+                    {
+                        var device = enumerator.GetDevice(deviceId);
+                        return (device.AudioEndpointVolume.MasterVolumeLevelScalar, device.AudioEndpointVolume.Mute);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error getting master volume: {ex.Message}");
+                    return (0f, false);
+                }
+            });
+        }
+
+        /// <inheritdoc/>
+        public void SetDeviceMasterVolume(string deviceId, float volume)
+        {
+            using (var enumerator = new MMDeviceEnumerator())
+            {
+                var device = enumerator.GetDevice(deviceId);
+                device.AudioEndpointVolume.MasterVolumeLevelScalar = volume;
+            }
+        }
+
+        /// <inheritdoc/>
+        public void SetDeviceMasterMute(string deviceId, bool isMuted)
+        {
+            using (var enumerator = new MMDeviceEnumerator())
+            {
+                var device = enumerator.GetDevice(deviceId);
+                device.AudioEndpointVolume.Mute = isMuted;
+            }
         }
 
         /// <inheritdoc/>

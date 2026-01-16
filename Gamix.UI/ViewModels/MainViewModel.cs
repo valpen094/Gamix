@@ -1,6 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Gamix.Core.Models;
+using Gamix.Core.Services;
 using Gamix.UI.Services;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,16 +17,27 @@ namespace Gamix.UI.ViewModels
     {
         private readonly Gamix.Core.Audio.IAudioService _audioService;
         private readonly Gamix.Core.Services.IPresetService _presetService;
+        private readonly ISettingsService _settingsService;
         
         /// <summary>
         /// アクティブなオーディオセッションのコレクション。
         /// </summary>
-        public System.Collections.ObjectModel.ObservableCollection<AudioSessionViewModel> Sessions { get; } = new();
+        public ObservableCollection<AudioSessionViewModel> Sessions { get; } = new();
 
         /// <summary>
         /// 保存されたプリセットのコレクション。
         /// </summary>
-        public System.Collections.ObjectModel.ObservableCollection<Gamix.Core.Models.Preset> Presets { get; } = new();
+        public ObservableCollection<Preset> Presets { get; } = new();
+
+        /// <summary>
+        /// 利用可能な出力デバイス（スピーカー）のコレクション。
+        /// </summary>
+        public ObservableCollection<AudioDevice> OutputDevices { get; } = new();
+
+        /// <summary>
+        /// 利用可能な入力デバイス（マイク）のコレクション。
+        /// </summary>
+        public ObservableCollection<AudioDevice> InputDevices { get; } = new();
 
         /// <summary>
         /// 新規プリセット名の入力値。
@@ -32,24 +46,131 @@ namespace Gamix.UI.ViewModels
         private string _newPresetName = string.Empty;
 
         /// <summary>
+        /// 選択された出力デバイス。
+        /// </summary>
+        [ObservableProperty]
+        private AudioDevice? _selectedOutputDevice;
+
+        /// <summary>
+        /// 選択された入力デバイス。
+        /// </summary>
+        [ObservableProperty]
+        private AudioDevice? _selectedInputDevice;
+
+        /// <summary>
+        /// 入力デバイスのマスター音量。
+        /// </summary>
+        [ObservableProperty]
+        private float _inputMasterVolume;
+
+        /// <summary>
+        /// 入力デバイスがミュート状態かどうか。
+        /// </summary>
+        [ObservableProperty]
+        private bool _isInputMuted;
+
+        /// <summary>
         /// MainViewModel のコンストラクタ。
         /// </summary>
         /// <param name="audioService">オーディオセッション取得用のサービス。</param>
         /// <param name="presetService">プリセット管理用のサービス。</param>
-        public MainViewModel(Gamix.Core.Audio.IAudioService audioService, Gamix.Core.Services.IPresetService presetService)
+        /// <param name="settingsService">設定保存用のサービス。</param>
+        public MainViewModel(Gamix.Core.Audio.IAudioService audioService, Gamix.Core.Services.IPresetService presetService, ISettingsService settingsService)
         {
             _audioService = audioService;
             _presetService = presetService;
-            LoadSessions();
+            _settingsService = settingsService;
+            InitializeAsync();
+        }
+
+        /// <summary>
+        /// 非同期で初期化を行います。
+        /// </summary>
+        private async void InitializeAsync()
+        {
+            await LoadDevicesAsync();
+            await LoadSessionsAsync();
             LoadPresets();
+        }
+
+        /// <summary>
+        /// デバイス一覧を読み込みます。
+        /// </summary>
+        private async Task LoadDevicesAsync()
+        {
+            // 出力デバイスの読み込み
+            var outputDevices = await _audioService.GetAudioDevicesAsync(true);
+            OutputDevices.Clear();
+            foreach (var device in outputDevices) OutputDevices.Add(device);
+
+            // 入力デバイスの読み込み
+            var inputDevices = await _audioService.GetAudioDevicesAsync(false);
+            InputDevices.Clear();
+            foreach (var device in inputDevices) InputDevices.Add(device);
+
+            // 保存された設定を復元
+            var savedOutputId = await _settingsService.GetSelectedOutputDeviceIdAsync();
+            var savedInputId = await _settingsService.GetSelectedInputDeviceIdAsync();
+
+            SelectedOutputDevice = OutputDevices.FirstOrDefault(d => d.Id == savedOutputId) 
+                ?? OutputDevices.FirstOrDefault(d => d.IsDefault);
+            SelectedInputDevice = InputDevices.FirstOrDefault(d => d.Id == savedInputId) 
+                ?? InputDevices.FirstOrDefault(d => d.IsDefault);
+        }
+
+        /// <summary>
+        /// 出力デバイスが変更されたときの処理。
+        /// </summary>
+        partial void OnSelectedOutputDeviceChanged(AudioDevice? value)
+        {
+            if (value != null)
+            {
+                _ = _settingsService.SetSelectedOutputDeviceIdAsync(value.Id);
+                _ = LoadSessionsAsync();
+            }
+        }
+
+        /// <summary>
+        /// 入力デバイスが変更されたときの処理。
+        /// </summary>
+        partial void OnSelectedInputDeviceChanged(AudioDevice? value)
+        {
+            if (value != null)
+            {
+                _ = _settingsService.SetSelectedInputDeviceIdAsync(value.Id);
+                _ = LoadInputMasterVolumeAsync();
+            }
+        }
+
+        /// <summary>
+        /// 入力デバイスのマスター音量が変更されたときの処理。
+        /// </summary>
+        partial void OnInputMasterVolumeChanged(float value)
+        {
+            if (SelectedInputDevice != null)
+            {
+                _audioService.SetDeviceMasterVolume(SelectedInputDevice.Id, value);
+            }
+        }
+
+        /// <summary>
+        /// 入力デバイスのマスター音量を読み込みます。
+        /// </summary>
+        private async Task LoadInputMasterVolumeAsync()
+        {
+            if (SelectedInputDevice == null) return;
+            var (volume, isMuted) = await _audioService.GetDeviceMasterVolumeAsync(SelectedInputDevice.Id);
+            InputMasterVolume = volume;
+            IsInputMuted = isMuted;
         }
 
         /// <summary>
         /// オーディオセッションを読み込みます。
         /// </summary>
-        private async void LoadSessions()
+        private async Task LoadSessionsAsync()
         {
-            var sessions = await _audioService.GetActiveSessionsAsync();
+            var deviceId = SelectedOutputDevice?.Id;
+            var sessions = await _audioService.GetActiveSessionsAsync(deviceId);
             Sessions.Clear();
             foreach (var s in sessions)
             {
@@ -74,7 +195,7 @@ namespace Gamix.UI.ViewModels
         private async Task SavePreset()
         {
             if (string.IsNullOrWhiteSpace(NewPresetName)) return;
-            var currentModels = Sessions.Select(s => new Gamix.Core.Models.AudioSession 
+            var currentModels = Sessions.Select(s => new AudioSession 
             { 
                 Id = s.Id, 
                 ProcessName = s.ProcessName, 
@@ -92,14 +213,14 @@ namespace Gamix.UI.ViewModels
         /// </summary>
         /// <param name="preset">適用するプリセット。</param>
         [RelayCommand]
-        private async Task ApplyPreset(Gamix.Core.Models.Preset preset)
+        private async Task ApplyPreset(Preset preset)
         {
             if (preset == null) return;
             
             var currentSessions = await _audioService.GetActiveSessionsAsync();
             await _presetService.ApplyPresetAsync(preset, currentSessions);
             
-            LoadSessions();
+            await LoadSessionsAsync();
         }
 
         /// <summary>
@@ -107,7 +228,7 @@ namespace Gamix.UI.ViewModels
         /// </summary>
         /// <param name="preset">削除するプリセット。</param>
         [RelayCommand]
-        private async Task DeletePreset(Gamix.Core.Models.Preset preset)
+        private async Task DeletePreset(Preset preset)
         {
             if (preset == null) return;
             

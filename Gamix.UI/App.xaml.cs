@@ -24,6 +24,7 @@ namespace Gamix.UI
             services.AddSingleton<IThemeService, ThemeService>();
             services.AddSingleton<Gamix.Core.Audio.IAudioService, Gamix.Core.Audio.WasapiAudioService>();
             services.AddSingleton<Gamix.Core.Services.IPresetService, Gamix.Core.Services.PresetService>();
+            services.AddSingleton<Gamix.Core.Services.ISettingsService, Gamix.Core.Services.SettingsService>();
 
             // ViewModels
             services.AddSingleton<MainViewModel>();
