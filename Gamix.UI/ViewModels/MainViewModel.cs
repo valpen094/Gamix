@@ -132,9 +132,13 @@ namespace Gamix.UI.ViewModels
         {
             if (value != null)
             {
+                // Windows のデフォルト出力デバイスも切り替え
+                Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
+                
                 _ = _settingsService.SetSelectedOutputDeviceIdAsync(value.Id);
                 _ = LoadSessionsAsync();
                 _ = LoadMasterVolumeAsync();
+                LoadPresets(); // デバイス変更時にプリセット一覧も更新
             }
         }
 
@@ -211,12 +215,22 @@ namespace Gamix.UI.ViewModels
 
         /// <summary>
         /// プリセットを読み込みます。
+        /// 選択中の出力デバイスに関連するプリセットのみを表示します。
         /// </summary>
         private async void LoadPresets()
         {
-            var presets = await _presetService.LoadPresetsAsync();
+            var allPresets = await _presetService.LoadPresetsAsync();
+            var deviceId = SelectedOutputDevice?.Id;
+            
             Presets.Clear();
-            foreach (var p in presets) Presets.Add(p);
+            foreach (var p in allPresets)
+            {
+                // 現在のデバイス用のプリセットのみ表示
+                if (p.DeviceId == deviceId)
+                {
+                    Presets.Add(p);
+                }
+            }
         }
 
         /// <summary>
@@ -225,7 +239,7 @@ namespace Gamix.UI.ViewModels
         [RelayCommand]
         private async Task SavePreset()
         {
-            if (string.IsNullOrWhiteSpace(NewPresetName)) return;
+            if (string.IsNullOrWhiteSpace(NewPresetName) || SelectedOutputDevice == null) return;
             var currentModels = Sessions.Select(s => new AudioSession 
             { 
                 Id = s.Id, 
@@ -234,7 +248,12 @@ namespace Gamix.UI.ViewModels
                 IsMuted = s.IsMuted 
             }).ToList();
             
-            await _presetService.SavePresetAsync(NewPresetName, currentModels);
+            await _presetService.SavePresetAsync(
+                NewPresetName, 
+                SelectedOutputDevice.Id, 
+                MasterVolume / 100f, // 0-100 を 0-1 に変換
+                false, // 現在はミュート状態は未サポート
+                currentModels);
             NewPresetName = string.Empty;
             LoadPresets();
         }
@@ -248,8 +267,14 @@ namespace Gamix.UI.ViewModels
         {
             if (preset == null) return;
             
-            var currentSessions = await _audioService.GetActiveSessionsAsync();
+            var currentSessions = await _audioService.GetActiveSessionsAsync(SelectedOutputDevice?.Id);
             await _presetService.ApplyPresetAsync(preset, currentSessions);
+            
+            // UIのマスター音量も更新
+            if (preset.MasterVolume.HasValue)
+            {
+                MasterVolume = preset.MasterVolume.Value * 100f; // 0-1 を 0-100 に変換
+            }
             
             await LoadSessionsAsync();
         }

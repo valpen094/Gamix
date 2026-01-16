@@ -13,6 +13,21 @@ namespace Gamix.Core.Models
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
+        /// このプリセットが関連付けられている出力デバイスID。
+        /// </summary>
+        public string? DeviceId { get; set; }
+
+        /// <summary>
+        /// マスター音量 (0.0 〜 1.0)。
+        /// </summary>
+        public float? MasterVolume { get; set; }
+
+        /// <summary>
+        /// マスターがミュート状態かどうか。
+        /// </summary>
+        public bool? IsMasterMuted { get; set; }
+
+        /// <summary>
         /// 各プロセスの音量設定リスト。
         /// </summary>
         public List<ProcessVolumeSetting> Settings { get; set; } = new();

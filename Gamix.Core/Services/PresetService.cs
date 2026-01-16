@@ -32,12 +32,15 @@ namespace Gamix.Core.Services
         }
 
         /// <inheritdoc/>
-        public async Task SavePresetAsync(string name, List<AudioSession> currentSessions)
+        public async Task SavePresetAsync(string name, string deviceId, float masterVolume, bool isMasterMuted, List<AudioSession> currentSessions)
         {
             var presets = await LoadPresetsAsync();
             var newPreset = new Preset
             {
                 Name = name,
+                DeviceId = deviceId,
+                MasterVolume = masterVolume,
+                IsMasterMuted = isMasterMuted,
                 Settings = currentSessions.Select(s => new ProcessVolumeSetting
                 {
                     ProcessName = s.ProcessName,
@@ -46,8 +49,8 @@ namespace Gamix.Core.Services
                 }).ToList()
             };
 
-            // 同名のプリセットがあれば上書き
-            presets.RemoveAll(p => p.Name == name);
+            // 同名かつ同デバイスのプリセットがあれば上書き
+            presets.RemoveAll(p => p.Name == name && p.DeviceId == deviceId);
             presets.Add(newPreset);
 
             await SaveToFileAsync(presets);
@@ -72,6 +75,17 @@ namespace Gamix.Core.Services
         /// <inheritdoc/>
         public async Task ApplyPresetAsync(Preset preset, List<AudioSession> currentSessions)
         {
+            // マスター音量を復元
+            if (preset.MasterVolume.HasValue && !string.IsNullOrEmpty(preset.DeviceId))
+            {
+                _audioService.SetDeviceMasterVolume(preset.DeviceId, preset.MasterVolume.Value);
+            }
+            if (preset.IsMasterMuted.HasValue && !string.IsNullOrEmpty(preset.DeviceId))
+            {
+                _audioService.SetDeviceMasterMute(preset.DeviceId, preset.IsMasterMuted.Value);
+            }
+
+            // 各アプリの音量を復元
             foreach (var setting in preset.Settings)
             {
                 var target = currentSessions.FirstOrDefault(s => s.ProcessName == setting.ProcessName);

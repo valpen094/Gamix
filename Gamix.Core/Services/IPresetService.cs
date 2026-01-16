@@ -13,8 +13,11 @@ namespace Gamix.Core.Services
         /// 現在のセッション状態を名前付きプリセットとして保存します。
         /// </summary>
         /// <param name="name">プリセット名。</param>
+        /// <param name="deviceId">対象の出力デバイスID。</param>
+        /// <param name="masterVolume">マスター音量 (0.0 〜 1.0)。</param>
+        /// <param name="isMasterMuted">マスターがミュート状態かどうか。</param>
         /// <param name="currentSessions">現在のオーディオセッション一覧。</param>
-        Task SavePresetAsync(string name, List<AudioSession> currentSessions);
+        Task SavePresetAsync(string name, string deviceId, float masterVolume, bool isMasterMuted, List<AudioSession> currentSessions);
 
         /// <summary>
         /// 保存されたプリセット一覧を読み込みます。
