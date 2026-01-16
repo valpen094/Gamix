@@ -10,6 +10,10 @@
         AllowsTransparency="True"
         Background="Transparent"
         ResizeMode="NoResize">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="0" GlassFrameThickness="0" CornerRadius="0"/>
+    </WindowChrome.WindowChrome>
+
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <local:BoolToHeartConverter x:Key="BoolToHeartConverter"/>
@@ -88,11 +92,8 @@
     <!-- Outer Border for rounded corners and shadow -->
     <Border Background="{DynamicResource Brush_Background}" 
             CornerRadius="20" 
-            Margin="10"
+            Margin="0"
             MouseLeftButtonDown="Border_MouseLeftButtonDown">
-        <Border.Effect>
-            <DropShadowEffect Color="#FFD1DC" BlurRadius="20" ShadowDepth="0" Opacity="0.5"/>
-        </Border.Effect>
         
         <Grid>
              <!-- Main Content Grid -->
