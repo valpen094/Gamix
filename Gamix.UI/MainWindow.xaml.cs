@@ -41,6 +41,14 @@ namespace Gamix.UI
         }
 
         /// <summary>
+        /// ウィンドウを閉じます。
+        /// </summary>
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        /// <summary>
         /// プリセットの名前変更ダイアログを表示します。
         /// </summary>
         private async void RenamePreset_Click(object sender, RoutedEventArgs e)
