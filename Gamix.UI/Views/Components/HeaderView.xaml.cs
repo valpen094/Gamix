@@ -5,7 +5,7 @@ namespace Gamix.UI.Views.Components
 {
     public partial class HeaderView : UserControl
     {
-        public event RoutedEventHandler SidebarRequested;
+        public event RoutedEventHandler? SidebarRequested;
 
         public HeaderView()
         {

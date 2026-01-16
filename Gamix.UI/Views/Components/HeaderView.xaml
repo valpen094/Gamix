@@ -138,7 +138,7 @@
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="{DynamicResource Brush_AccentTertiary}"/>
-                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Foreground" Value="{DynamicResource Brush_ButtonForeground}"/>
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
@@ -182,7 +182,7 @@
             <Button.Style>
                 <Style TargetType="Button">
                     <Setter Property="Background" Value="{DynamicResource Brush_AccentPrimary}"/>
-                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Brush_ButtonForeground}"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="Button">
@@ -207,7 +207,7 @@
             <Button.Style>
                 <Style TargetType="Button">
                     <Setter Property="Background" Value="{DynamicResource Brush_AccentSecondary}"/>
-                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Brush_ButtonForeground}"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="Button">
@@ -233,7 +233,7 @@
              <Button.Style>
                 <Style TargetType="Button">
                     <Setter Property="Background" Value="{DynamicResource Brush_AccentSecondary}"/>
-                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Foreground" Value="{DynamicResource Brush_ButtonForeground}"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="Button">

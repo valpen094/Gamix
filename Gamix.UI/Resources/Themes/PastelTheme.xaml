@@ -5,6 +5,7 @@
     <Color x:Key="Color_Background">#FFF0F5</Color> <!-- Lavender Blush -->
     <Color x:Key="Color_Foreground">#5D5D5D</Color> <!-- Soft Gray Text -->
     <Color x:Key="Color_CardBackground">#FFFFFF</Color>
+    <Color x:Key="Color_ButtonForeground">#FFFFFF</Color> <!-- White -->
     
     <Color x:Key="Color_AccentPrimary">#FFD1DC</Color> <!-- Pastel Pink -->
     <Color x:Key="Color_AccentSecondary">#B2F7EF</Color> <!-- Mint -->
@@ -13,6 +14,7 @@
     <SolidColorBrush x:Key="Brush_Background" Color="{StaticResource Color_Background}"/>
     <SolidColorBrush x:Key="Brush_Foreground" Color="{StaticResource Color_Foreground}"/>
     <SolidColorBrush x:Key="Brush_CardBackground" Color="{StaticResource Color_CardBackground}"/>
+    <SolidColorBrush x:Key="Brush_ButtonForeground" Color="{StaticResource Color_ButtonForeground}"/>
     
     <SolidColorBrush x:Key="Brush_AccentPrimary" Color="{StaticResource Color_AccentPrimary}"/>
     <SolidColorBrush x:Key="Brush_AccentSecondary" Color="{StaticResource Color_AccentSecondary}"/>

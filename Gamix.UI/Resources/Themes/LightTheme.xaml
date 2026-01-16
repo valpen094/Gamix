@@ -3,16 +3,18 @@
 
     <!-- Light Theme Palette -->
     <Color x:Key="Color_Background">#F3F3F3</Color> <!-- Light Gray -->
-    <Color x:Key="Color_Foreground">#333333</Color> <!-- Dark Gray -->
+    <Color x:Key="Color_Foreground">#000000</Color> <!-- Black -->
     <Color x:Key="Color_CardBackground">#FFFFFF</Color> <!-- White -->
+    <Color x:Key="Color_ButtonForeground">#000000</Color> <!-- Black for Buttons -->
     
-    <Color x:Key="Color_AccentPrimary">#0078D7</Color> <!-- Windows Blue -->
-    <Color x:Key="Color_AccentSecondary">#0099BC</Color> <!-- Teal -->
-    <Color x:Key="Color_AccentTertiary">#E81123</Color> <!-- Red -->
+    <Color x:Key="Color_AccentPrimary">#64748B</Color> <!-- Slate Gray (Subdued Blue-Gray) -->
+    <Color x:Key="Color_AccentSecondary">#94A3B8</Color> <!-- Light Slate Gray -->
+    <Color x:Key="Color_AccentTertiary">#F87171</Color> <!-- Soft Red -->
 
     <SolidColorBrush x:Key="Brush_Background" Color="{StaticResource Color_Background}"/>
     <SolidColorBrush x:Key="Brush_Foreground" Color="{StaticResource Color_Foreground}"/>
     <SolidColorBrush x:Key="Brush_CardBackground" Color="{StaticResource Color_CardBackground}"/>
+    <SolidColorBrush x:Key="Brush_ButtonForeground" Color="{StaticResource Color_ButtonForeground}"/>
     
     <SolidColorBrush x:Key="Brush_AccentPrimary" Color="{StaticResource Color_AccentPrimary}"/>
     <SolidColorBrush x:Key="Brush_AccentSecondary" Color="{StaticResource Color_AccentSecondary}"/>

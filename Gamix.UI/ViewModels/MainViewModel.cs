@@ -23,27 +23,27 @@ namespace Gamix.UI.ViewModels
         /// <summary>
         /// アクティブなオーディオセッションのコレクション。
         /// </summary>
-        public ObservableCollection<AudioSessionViewModel> Sessions { get; } = new();
+        public ObservableCollection<AudioSessionViewModel> Sessions { get; } = [];
 
         /// <summary>
         /// 保存されたプリセットのコレクション。
         /// </summary>
-        public ObservableCollection<Preset> Presets { get; } = new();
+        public ObservableCollection<Preset> Presets { get; } = [];
 
         /// <summary>
         /// 利用可能なテーマ名のコレクション。
         /// </summary>
-        public ObservableCollection<string> AvailableThemes { get; } = new();
+        public ObservableCollection<string> AvailableThemes { get; } = [];
 
         /// <summary>
         /// 利用可能な出力デバイス（スピーカー）のコレクション。
         /// </summary>
-        public ObservableCollection<AudioDevice> OutputDevices { get; } = new();
+        public ObservableCollection<AudioDevice> OutputDevices { get; } = [];
 
         /// <summary>
         /// 利用可能な入力デバイス（マイク）のコレクション。
         /// </summary>
-        public ObservableCollection<AudioDevice> InputDevices { get; } = new();
+        public ObservableCollection<AudioDevice> InputDevices { get; } = [];
 
         /// <summary>
         /// 新規プリセット名の入力値。
