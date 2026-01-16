@@ -33,61 +33,11 @@ namespace Gamix.UI
         }
 
         /// <summary>
-        /// ウィンドウを最小化します。
-        /// </summary>
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
-
-        /// <summary>
-        /// ウィンドウを閉じます。
-        /// </summary>
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        /// <summary>
-        /// プリセットの名前変更ダイアログを表示します。
-        /// </summary>
-        private async void RenamePreset_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is System.Windows.Controls.Button button && button.Tag is Preset preset)
-            {
-                var newName = Microsoft.VisualBasic.Interaction.InputBox(
-                    "新しいプリセット名を入力してください:",
-                    "名前変更",
-                    preset.Name);
-                
-                if (!string.IsNullOrWhiteSpace(newName) && newName != preset.Name)
-                {
-                    var vm = DataContext as MainViewModel;
-                    if (vm?.RenamePresetCommand.CanExecute((preset, newName)) == true)
-                    {
-                        await vm.RenamePresetCommand.ExecuteAsync((preset, newName));
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
         /// サイドバーを表示します。
         /// </summary>
-        private void ShowSidebar_Click(object sender, RoutedEventArgs e)
+        private void HeaderView_SidebarRequested(object sender, RoutedEventArgs e)
         {
-            (FindResource("ShowSidebar") as System.Windows.Media.Animation.Storyboard)?.Begin();
-            DimOverlay.IsHitTestVisible = true;
-        }
-
-        /// <summary>
-        /// サイドバーを非表示にします。
-        /// </summary>
-        private void HideSidebar_Click(object sender, RoutedEventArgs e)
-        {
-            (FindResource("HideSidebar") as System.Windows.Media.Animation.Storyboard)?.Begin();
-            DimOverlay.IsHitTestVisible = false;
+            Sidebar.Show();
         }
     }
 
