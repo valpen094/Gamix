@@ -186,19 +186,9 @@ namespace Gamix.UI.ViewModels
             {
                 item.IsSelected = item == option;
             }
-        }
 
-        /// <summary>
-        /// 選択中のテーマを適用します。
-        /// </summary>
-        [RelayCommand]
-        private void ApplyTheme()
-        {
-            var selected = ThemeOptions.FirstOrDefault(t => t.IsSelected);
-            if (selected != null)
-            {
-                _onApplyTheme?.Invoke(selected.Name);
-            }
+            // 選択と同時にテーマを適用
+            _onApplyTheme?.Invoke(option.Name);
         }
 
         #endregion

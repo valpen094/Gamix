@@ -181,36 +181,21 @@
 
                 <!-- Footer Buttons -->
                 <StackPanel Grid.Row="3" 
-                            Orientation="Horizontal" 
                             HorizontalAlignment="Center" 
                             Margin="0,25,0,0">
                     
                     <!-- Close Button -->
                     <Button Content="Close" 
                             Click="CancelButton_Click"
-                            Width="120" Height="40" Margin="0,0,15,0"
-                            FontSize="14"
+                            Width="200" Height="45"
+                            FontSize="16" FontWeight="SemiBold"
                             Background="{DynamicResource Brush_CardBackground}"
                             Foreground="{DynamicResource Brush_Foreground}"
-                            BorderThickness="0">
+                            BorderThickness="0"
+                            Cursor="Hand">
                         <Button.Resources>
                             <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="10"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-                    
-                    <!-- Apply Button -->
-                    <Button Content="Apply" 
-                            Command="{Binding ApplyThemeCommand}"
-                            Width="120" Height="40"
-                            FontSize="14" FontWeight="Bold"
-                            Background="{DynamicResource Brush_AccentPrimary}"
-                            Foreground="{DynamicResource Brush_ButtonForeground}"
-                            BorderThickness="0">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="10"/>
+                                <Setter Property="CornerRadius" Value="12"/>
                             </Style>
                         </Button.Resources>
                     </Button>
