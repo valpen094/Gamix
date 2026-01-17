@@ -11,6 +11,7 @@ namespace Gamix.Core.Services
     /// </summary>
     public class SettingsService : ISettingsService
     {
+        private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
         private readonly string _filePath;
         private AppSettings _settings;
 
@@ -91,7 +92,7 @@ namespace Gamix.Core.Services
         /// </summary>
         private async Task SaveSettingsAsync()
         {
-            var json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
+            var json = JsonSerializer.Serialize(_settings, _jsonOptions);
             await File.WriteAllTextAsync(_filePath, json);
         }
 

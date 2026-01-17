@@ -61,11 +61,11 @@ namespace Gamix.UI.Services
         {
             // In a real application, you might scan the directory or resources.
             // For now, we return our known themes.
-            return new List<string>
-            {
+            return
+            [
                 "Pastel",
                 "Gaming"
-            };
+            ];
         }
     }
 }

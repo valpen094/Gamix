@@ -104,8 +104,6 @@ namespace Gamix.UI.ViewModels
         /// <param name="audioService">オーディオセッション取得用のサービス。</param>
         /// <param name="presetService">プリセット管理用のサービス。</param>
         /// <param name="settingsService">設定保存用のサービス。</param>
-        /// <param name="presetService">プリセット管理用のサービス。</param>
-        /// <param name="settingsService">設定保存用のサービス。</param>
         /// <param name="themeService">テーマ管理用のサービス。</param>
         public MainViewModel(Gamix.Core.Audio.IAudioService audioService, Gamix.Core.Services.IPresetService presetService, ISettingsService settingsService, IThemeService themeService)
         {
@@ -123,7 +121,6 @@ namespace Gamix.UI.ViewModels
 
         private void OnSessionsChanged()
         {
-            Console.WriteLine("[MainViewModel] OnSessionsChanged triggered!");
             // セッション変更イベントのデバウンス
             _sessionsChangedCts?.Cancel();
             _sessionsChangedCts = new System.Threading.CancellationTokenSource();
@@ -133,7 +130,6 @@ namespace Gamix.UI.ViewModels
             {
                 if (token.IsCancellationRequested) return;
 
-                Console.WriteLine("[MainViewModel] Debounce complete, refreshing sessions.");
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
                 {
                     await LoadSessionsAsync();
@@ -532,7 +528,7 @@ namespace Gamix.UI.ViewModels
         /// <summary>
         /// デバイスリストを差分更新します（既存のインスタンスを保持し、選択状態が変化しないようにする）。
         /// </summary>
-        private void UpdateDeviceList(ObservableCollection<AudioDevice> currentList, List<AudioDevice> newList)
+        private static void UpdateDeviceList(ObservableCollection<AudioDevice> currentList, List<AudioDevice> newList)
         {
             // 削除されたデバイスをリストから除去
             for (int i = currentList.Count - 1; i >= 0; i--)

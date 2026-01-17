@@ -35,7 +35,7 @@ namespace Gamix.Core.Models
         /// <summary>
         /// 各プロセスの音量設定リスト。
         /// </summary>
-        public List<ProcessVolumeSetting> Settings { get; set; } = new();
+        public List<ProcessVolumeSetting> Settings { get; set; } = [];
     }
 
     /// <summary>

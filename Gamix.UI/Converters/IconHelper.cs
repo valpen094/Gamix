@@ -66,7 +66,7 @@ namespace Gamix.UI.Converters
         /// </summary>
         /// <param name="iconIndex">アイコンインデックス。</param>
         /// <returns>アイコンの ImageSource。</returns>
-        private static ImageSource? GetShellIcon(int iconIndex)
+        private static BitmapSource? GetShellIcon(int iconIndex)
         {
             try
             {

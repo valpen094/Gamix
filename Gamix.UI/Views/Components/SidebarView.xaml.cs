@@ -43,9 +43,11 @@ namespace Gamix.UI.Views.Components
         {
             if (sender is System.Windows.Controls.Button button && button.Tag is Preset preset)
             {
-                var dialog = new Gamix.UI.Views.InputDialog(preset.Name);
-                dialog.Owner = Window.GetWindow(this);
-                
+                var dialog = new Gamix.UI.Views.InputDialog(preset.Name)
+                {
+                    Owner = Window.GetWindow(this)
+                };
+
                 if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.Result) && dialog.Result != preset.Name)
                 {
                     var vm = DataContext as MainViewModel;

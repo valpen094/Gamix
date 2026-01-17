@@ -13,7 +13,7 @@ namespace Gamix.UI.Views
 {
     public partial class ThemeSelectionDialog : Window
     {
-        public ObservableCollection<ThemeOption> ThemeOptions { get; } = new ObservableCollection<ThemeOption>();
+        public ObservableCollection<ThemeOption> ThemeOptions { get; } = [];
         public string Result { get; private set; } = string.Empty;
 
         public ICommand SelectThemeCommand { get; }

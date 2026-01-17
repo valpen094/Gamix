@@ -30,7 +30,6 @@ namespace Gamix.Core.Audio
         /// </summary>
         protected virtual void OnSessionsChanged()
         {
-            Console.WriteLine("[WasapiAudioService] Firing SessionsChanged event.");
             SessionsChanged?.Invoke();
         }
 
@@ -255,17 +254,15 @@ namespace Gamix.Core.Audio
         private AudioSessionManager? _currentSessionManager;
         private MMDevice? _monitoringDevice;
         private string? _monitoringDeviceId;
-        private readonly List<(AudioSessionControl Session, SessionEventsListener Listener)> _monitoredWrapperSessions = new();
-        private readonly object _lock = new object();
+        private readonly List<(AudioSessionControl Session, SessionEventsListener Listener)> _monitoredWrapperSessions = [];
+        private readonly object _lock = new();
 
         /// <inheritdoc/>
         public void StartSessionMonitoring(string deviceId)
         {
-            Console.WriteLine($"[WasapiAudioService] StartSessionMonitoring: {deviceId}");
             // Check if we are already monitoring and the device is alive
             if (_monitoringDeviceId == deviceId && _currentSessionManager != null && _monitoringDevice != null) 
             {
-                Console.WriteLine("[WasapiAudioService] Already monitoring this device.");
                 return;
             }
 
@@ -282,11 +279,9 @@ namespace Gamix.Core.Audio
                 _currentSessionManager.RefreshSessions();
                 
                 _currentSessionManager.OnSessionCreated += OnSessionCreated;
-                Console.WriteLine("[WasapiAudioService] Subscribed to OnSessionCreated after RefreshSessions.");
                 
                 // 既存セッションも監視
                 var sessions = _currentSessionManager.Sessions;
-                Console.WriteLine($"[WasapiAudioService] Found {sessions.Count} existing sessions.");
                 for (int i = 0; i < sessions.Count; i++)
                 {
                     var session = sessions[i];
@@ -295,15 +290,14 @@ namespace Gamix.Core.Audio
 
                 _monitoringDeviceId = deviceId;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"[WasapiAudioService] Error starting session monitoring: {ex.Message}");
+                // セッション監視の開始に失敗しても、アプリ自体は動作を継続する
             }
         }
 
         private void StopSessionMonitoring()
         {
-            Console.WriteLine("[WasapiAudioService] StopSessionMonitoring");
             if (_currentSessionManager != null)
             {
                 _currentSessionManager.OnSessionCreated -= OnSessionCreated;
@@ -319,7 +313,10 @@ namespace Gamix.Core.Audio
                         session.UnRegisterEventClient(listener);
                         session.Dispose();
                     }
-                    catch { /* 無視 */ }
+                    catch
+                    {
+                        // セッション解除に失敗しても継続
+                    }
                 }
                 _monitoredWrapperSessions.Clear();
             }
@@ -329,7 +326,6 @@ namespace Gamix.Core.Audio
 
         private void OnSessionCreated(object? sender, IAudioSessionControl e)
         {
-            Console.WriteLine("[WasapiAudioService] OnSessionCreated fired!");
             try
             {
                 // NAudio の AudioSessionControl ラッパーを作成
@@ -337,9 +333,9 @@ namespace Gamix.Core.Audio
                 RegisterSessionEvents(wrapper);
                 OnSessionsChanged();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                 Console.WriteLine($"[WasapiAudioService] OnSessionCreated Error: {ex.Message}");
+                // セッション作成イベントの処理に失敗しても継続
             }
         }
 
@@ -347,7 +343,6 @@ namespace Gamix.Core.Audio
         {
             try 
             {
-                Console.WriteLine($"[WasapiAudioService] Registering events for session: {session.GetSessionIdentifier} State:{session.State}");
                 if (session.State == AudioSessionState.AudioSessionStateExpired) return;
 
                 var listener = new SessionEventsListener(this);
@@ -358,9 +353,9 @@ namespace Gamix.Core.Audio
                     _monitoredWrapperSessions.Add((session, listener));
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"[WasapiAudioService] RegisterSessionEvents Error: {ex.Message}");
+                // イベント登録に失敗しても継続
             }
         }
 
@@ -395,6 +390,7 @@ namespace Gamix.Core.Audio
             StopSessionMonitoring();
             UnregisterNotificationClient();
             _enumerator?.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         private class NotificationClient : IMMNotificationClient

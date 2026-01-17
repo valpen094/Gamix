@@ -15,7 +15,7 @@ namespace Gamix.UI
     public partial class App : System.Windows.Application
     {
         public new static App Current => (App)System.Windows.Application.Current;
-        public IServiceProvider Services { get; }
+        public ServiceProvider Services { get; }
         private Forms.NotifyIcon? _notifyIcon;
 
         public App()
@@ -23,7 +23,7 @@ namespace Gamix.UI
             Services = ConfigureServices();
         }
 
-        private static IServiceProvider ConfigureServices()
+        private static ServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
 
@@ -94,7 +94,7 @@ namespace Gamix.UI
         /// 通知領域でアイコンを「常に表示」に設定することを試みる
         /// Windows がレジストリにエントリを作成している場合のみ有効
         /// </summary>
-        private void TryPromoteIcon()
+        private static void TryPromoteIcon()
         {
             try
             {
@@ -217,13 +217,14 @@ namespace Gamix.UI
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
-        extern static bool DestroyIcon(IntPtr handle);
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto, SetLastError = true)]
+        [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+        private static extern bool DestroyIcon(IntPtr handle);
 
         /// <summary>
         /// テキストからビットマップを生成する
         /// </summary>
-        private Bitmap CreateBitmapFromText(string text, Color color)
+        private static Bitmap CreateBitmapFromText(string text, Color color)
         {
             // トレイアイコン用に 32x32 で描画
             int size = 32;

@@ -41,12 +41,12 @@ namespace Gamix.Core.Services
                 DeviceId = deviceId,
                 MasterVolume = masterVolume,
                 IsMasterMuted = isMasterMuted,
-                Settings = currentSessions.Select(s => new ProcessVolumeSetting
+                Settings = [.. currentSessions.Select(s => new ProcessVolumeSetting
                 {
                     ProcessName = s.ProcessName,
                     Volume = s.Volume,
                     IsMuted = s.IsMuted
-                }).ToList()
+                })]
             };
 
             // 同名かつ同デバイスのプリセットがあれば、その位置で更新（順序維持）
@@ -70,16 +70,16 @@ namespace Gamix.Core.Services
         /// <inheritdoc/>
         public async Task<List<Preset>> LoadPresetsAsync()
         {
-            if (!File.Exists(_filePath)) return new List<Preset>();
+            if (!File.Exists(_filePath)) return [];
 
             try
             {
                 using var stream = File.OpenRead(_filePath);
-                return await JsonSerializer.DeserializeAsync<List<Preset>>(stream) ?? new List<Preset>();
+                return await JsonSerializer.DeserializeAsync<List<Preset>>(stream) ?? [];
             }
             catch
             {
-                return new List<Preset>();
+                return [];
             }
         }
 
