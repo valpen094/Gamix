@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Gamix.Core.Models;
 using Gamix.Core.Services;
 using Gamix.UI.Services;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +20,11 @@ namespace Gamix.UI.ViewModels
         private readonly Gamix.Core.Services.IPresetService _presetService;
         private readonly ISettingsService _settingsService;
         private readonly IThemeService _themeService;
-        
+
+        /// <summary>
+        /// プリセットが適用されたときに発火するイベント。
+        /// </summary>
+        public event Action? PresetApplied;
         /// <summary>
         /// アクティブなオーディオセッションのコレクション。
         /// </summary>
@@ -340,6 +345,9 @@ namespace Gamix.UI.ViewModels
             }
             
             await LoadSessionsAsync();
+
+            // サイドバーを閉じるためにイベントを発火
+            PresetApplied?.Invoke();
         }
 
         /// <summary>

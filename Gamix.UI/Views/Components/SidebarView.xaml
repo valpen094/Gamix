@@ -73,24 +73,13 @@
                             <DataTemplate>
                                 <Grid Margin="0,0,0,10">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/> <!-- Favorite Icon -->
                                         <ColumnDefinition Width="*"/>    <!-- Name -->
-                                        <ColumnDefinition Width="Auto"/> <!-- Favorite Button -->
                                         <ColumnDefinition Width="Auto"/> <!-- Rename Button -->
                                         <ColumnDefinition Width="Auto"/> <!-- Delete Button -->
                                     </Grid.ColumnDefinitions>
                                     
-                                    <!-- Favorite Icon (visible when IsFavorite) -->
-                                    <TextBlock Grid.Column="0" Text="💖" FontSize="16" 
-                                               VerticalAlignment="Center" Margin="0,0,5,0"
-                                               Visibility="{Binding IsFavorite, Converter={StaticResource BoolToVis}}">
-                                         <TextBlock.Effect>
-                                            <DynamicResource ResourceKey="Effect_Glow"/>
-                                         </TextBlock.Effect>
-                                    </TextBlock>
-                                    
                                     <!-- Apply Button (Name) -->
-                                    <Button Grid.Column="1" Content="{Binding Name}" 
+                                    <Button Grid.Column="0" Content="{Binding Name}" 
                                             Command="{Binding DataContext.ApplyPresetCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
                                             CommandParameter="{Binding}"
                                             HorizontalContentAlignment="Left"
@@ -105,27 +94,8 @@
                                         </Button.Resources>
                                     </Button>
                                     
-                                    <!-- Favorite Toggle Button -->
-                                    <Button Grid.Column="2" 
-                                            Command="{Binding DataContext.TogglePresetFavoriteCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
-                                            CommandParameter="{Binding}"
-                                            Width="32" Height="32" Margin="0,0,3,0"
-                                            Background="{DynamicResource Brush_AccentSecondary}"
-                                            Foreground="White"
-                                            BorderThickness="0" FontSize="14"
-                                            ToolTip="お気に入り">
-                                        <Button.Content>
-                                            <TextBlock Text="{Binding IsFavorite, Converter={StaticResource BoolToHeartConverter}}"/>
-                                        </Button.Content>
-                                         <Button.Resources>
-                                            <Style TargetType="Border">
-                                                <Setter Property="CornerRadius" Value="8"/>
-                                            </Style>
-                                        </Button.Resources>
-                                    </Button>
-                                    
                                     <!-- Rename Button -->
-                                    <Button Grid.Column="3" Content="✏️" 
+                                    <Button Grid.Column="1" Content="✏️" 
                                             Click="RenamePreset_Click"
                                             Tag="{Binding}"
                                             Width="32" Height="32" Margin="0,0,3,0"
@@ -141,7 +111,7 @@
                                     </Button>
                                     
                                     <!-- Delete Button -->
-                                    <Button Grid.Column="4" Content="🗑️" 
+                                    <Button Grid.Column="2" Content="🗑️" 
                                             Command="{Binding DataContext.DeletePresetCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
                                             CommandParameter="{Binding}"
                                             Width="32" Height="32"

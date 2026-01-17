@@ -23,6 +23,9 @@ namespace Gamix.UI
             DataContext = viewModel;
 
             this.Closing += MainWindow_Closing;
+            
+            // プリセット適用時にサイドバーを自動で閉じる
+            viewModel.PresetApplied += () => Sidebar.Hide();
         }
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
