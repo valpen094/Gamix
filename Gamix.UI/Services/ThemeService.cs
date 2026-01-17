@@ -32,15 +32,15 @@ namespace Gamix.UI.Services
             {
                 var dict = new ResourceDictionary { Source = uri };
 
-                var oldDict = Application.Current.Resources.MergedDictionaries
+                var oldDict = System.Windows.Application.Current.Resources.MergedDictionaries
                     .FirstOrDefault(d => d.Source != null && d.Source.OriginalString.Contains("Theme.xaml"));
 
                 if (oldDict != null)
                 {
-                    Application.Current.Resources.MergedDictionaries.Remove(oldDict);
+                    System.Windows.Application.Current.Resources.MergedDictionaries.Remove(oldDict);
                 }
 
-                Application.Current.Resources.MergedDictionaries.Add(dict);
+                System.Windows.Application.Current.Resources.MergedDictionaries.Add(dict);
                 CurrentTheme = themeName;
 
                 // Save setting (avoid overwriting on init if same)

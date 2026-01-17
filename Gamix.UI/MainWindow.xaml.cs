@@ -1,6 +1,8 @@
 ﻿using System.Windows;
+using System.Drawing;
 using System.Windows.Input;
 using System.Globalization;
+using System.IO;
 using Gamix.UI.ViewModels;
 using Gamix.Core.Models;
 
@@ -19,6 +21,15 @@ namespace Gamix.UI
         {
             InitializeComponent();
             DataContext = viewModel;
+
+            this.Closing += MainWindow_Closing;
+        }
+
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // アプリを終了するのではなく、非表示にする（トレイに隠れる）
+            e.Cancel = true;
+            this.Hide();
         }
 
         /// <summary>

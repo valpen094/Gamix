@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace Gamix.UI.Views.Components
 {
-    public partial class HeaderView : UserControl
+    public partial class HeaderView : System.Windows.Controls.UserControl
     {
         public event RoutedEventHandler? SidebarRequested;
 
@@ -33,7 +33,7 @@ namespace Gamix.UI.Views.Components
 
         private void PaletteButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Resources["ThemeMenu"] is ContextMenu menu)
+            if (sender is System.Windows.Controls.Button button && button.Resources["ThemeMenu"] is System.Windows.Controls.ContextMenu menu)
             {
                 // Ensure DataContext is passed down since it's not in the visual tree
                 menu.DataContext = button.DataContext;

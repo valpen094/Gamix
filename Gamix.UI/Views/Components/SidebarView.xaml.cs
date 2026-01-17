@@ -7,7 +7,7 @@ using Microsoft.VisualBasic;
 
 namespace Gamix.UI.Views.Components
 {
-    public partial class SidebarView : UserControl
+    public partial class SidebarView : System.Windows.Controls.UserControl
     {
         public SidebarView()
         {
@@ -33,7 +33,7 @@ namespace Gamix.UI.Views.Components
 
         private async void RenamePreset_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is Preset preset)
+            if (sender is System.Windows.Controls.Button button && button.Tag is Preset preset)
             {
                 var newName = Interaction.InputBox(
                     "新しいプリセット名を入力してください:",

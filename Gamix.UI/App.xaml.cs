@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Windows;
+using System.Drawing;
+using System.IO;
+using Microsoft.Win32;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Gamix.UI.Services;
 using Gamix.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using Forms = System.Windows.Forms;
 
 namespace Gamix.UI
 {
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
-        public new static App Current => (App)Application.Current;
+        public new static App Current => (App)System.Windows.Application.Current;
         public IServiceProvider Services { get; }
+        private Forms.NotifyIcon? _notifyIcon;
 
         public App()
         {
@@ -38,8 +45,112 @@ namespace Gamix.UI
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            SetupTrayIcon();
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.Show();
+        }
+
+        private void SetupTrayIcon()
+        {
+            _notifyIcon = new Forms.NotifyIcon
+            {
+                Text = "Gamix",
+                Visible = true
+            };
+
+            // アイコンの設定
+            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Icons", "tray_icon.png");
+            if (File.Exists(iconPath))
+            {
+                using var bitmap = new Bitmap(iconPath);
+                _notifyIcon.Icon = Icon.FromHandle(bitmap.GetHicon());
+            }
+            else
+            {
+                // フォールバック（システム標準のアイコンなど）
+                _notifyIcon.Icon = SystemIcons.Application;
+            }
+
+            _notifyIcon.MouseClick += (s, e) =>
+            {
+                if (e.Button == Forms.MouseButtons.Left)
+                {
+                    ShowMainWindow();
+                }
+            };
+
+            // コンテキストメニュー（終了ボタン）
+            var contextMenu = new Forms.ContextMenuStrip();
+            contextMenu.Items.Add("開く", null, (s, e) => ShowMainWindow());
+            contextMenu.Items.Add(new Forms.ToolStripSeparator());
+            contextMenu.Items.Add("終了", null, (s, e) => ShutdownApp());
+            _notifyIcon.ContextMenuStrip = contextMenu;
+
+            // アイコン登録後に少し待ってから「常に表示」設定を試みる
+            Task.Delay(2000).ContinueWith(_ => EnsureIconPromoted());
+        }
+
+        private void EnsureIconPromoted()
+        {
+            try
+            {
+                string currentPath = Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty;
+                if (string.IsNullOrEmpty(currentPath)) return;
+
+                // Windows 11 / Modern Windows 10 Registry Path for Notify Icons
+                string keyPath = @"Control Panel\NotifyIconSettings";
+                using var key = Registry.CurrentUser.OpenSubKey(keyPath, true);
+                if (key == null) return;
+
+                foreach (string subKeyName in key.GetSubKeyNames())
+                {
+                    using var subKey = key.OpenSubKey(subKeyName, true);
+                    if (subKey == null) continue;
+
+                    object? exePathObj = subKey.GetValue("ExecutablePath");
+                    if (exePathObj is string exePath && exePath.Contains(currentPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Found our entry, set IsPromoted to 1 (Always Show)
+                        subKey.SetValue("IsPromoted", 1, RegistryValueKind.DWord);
+                        break;
+                    }
+                }
+            }
+            catch
+            {
+                // Silently fail if permissions prevent this or key structure differs
+            }
+        }
+
+        private void ShowMainWindow()
+        {
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+            if (mainWindow.WindowState == System.Windows.WindowState.Minimized)
+            {
+                mainWindow.WindowState = System.Windows.WindowState.Normal;
+            }
+            mainWindow.Activate();
+        }
+
+        private void ShutdownApp()
+        {
+            if (_notifyIcon != null)
+            {
+                _notifyIcon.Visible = false;
+                _notifyIcon.Dispose();
+            }
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            if (_notifyIcon != null)
+            {
+                _notifyIcon.Visible = false;
+                _notifyIcon.Dispose();
+            }
+            base.OnExit(e);
         }
     }
 }
