@@ -328,10 +328,10 @@ namespace Gamix.UI.ViewModels
             await _presetService.SavePresetAsync(
                 NewPresetName, 
                 SelectedOutputDevice.Id, 
-                MasterVolume / 100f, // 0-100 を 0-1 に変換
+                MasterVolume / 100f, // 0-1 を 0-100 に変換
                 false, // 現在はミュート状態は未サポート
                 currentModels);
-            NewPresetName = string.Empty;
+
             LoadPresets();
         }
 
@@ -353,6 +353,8 @@ namespace Gamix.UI.ViewModels
                 MasterVolume = preset.MasterVolume.Value * 100f; // 0-1 を 0-100 に変換
             }
             
+            NewPresetName = preset.Name;
+
             await LoadSessionsAsync();
 
             // サイドバーを閉じるためにイベントを発火

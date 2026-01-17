@@ -49,9 +49,20 @@ namespace Gamix.Core.Services
                 }).ToList()
             };
 
-            // 同名かつ同デバイスのプリセットがあれば上書き
-            presets.RemoveAll(p => p.Name == name && p.DeviceId == deviceId);
-            presets.Add(newPreset);
+            // 同名かつ同デバイスのプリセットがあれば、その位置で更新（順序維持）
+            var existingIndex = presets.FindIndex(p => p.Name == name && p.DeviceId == deviceId);
+            if (existingIndex >= 0)
+            {
+                // 既存の IsFavorite 状態などを引き継ぎたい場合はここでコピーするが、
+                // 今回は上書き保存なので単純に入れ替える（ただしFavorite状態は維持すべきかも？ユーザ要望は順序だが念のため）
+                // Presetモデルには IsFavorite があるので、それを保持するロジックを追加しておくと親切。
+                newPreset.IsFavorite = presets[existingIndex].IsFavorite;
+                presets[existingIndex] = newPreset;
+            }
+            else
+            {
+                presets.Add(newPreset);
+            }
 
             await SaveToFileAsync(presets);
         }
