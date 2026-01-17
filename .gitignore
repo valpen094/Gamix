@@ -3,3 +3,8 @@ bin/
 obj/
 *.user
 *.suo
+*.json
+*.bak
+*.png
+*.exe
+*.dll

@@ -181,8 +181,11 @@ namespace Gamix.UI.ViewModels
         {
             if (value != null)
             {
-                // Windows のデフォルト出力デバイスも切り替え
-                Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
+                // すでにデフォルトなら、システム側の切り替えをスキップしてノイズを防止
+                if (!value.IsDefault)
+                {
+                    Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
+                }
                 
                 _ = _settingsService.SetSelectedOutputDeviceIdAsync(value.Id);
                 _ = LoadSessionsAsync();
@@ -198,8 +201,11 @@ namespace Gamix.UI.ViewModels
         {
             if (value != null)
             {
-                // Windows のデフォルト入力デバイスも切り替え
-                Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
+                // すでにデフォルトならスキップ
+                if (!value.IsDefault)
+                {
+                    Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
+                }
 
                 _ = _settingsService.SetSelectedInputDeviceIdAsync(value.Id);
                 _ = LoadInputMasterVolumeAsync();
