@@ -10,8 +10,11 @@ namespace Gamix.Core
         public static class Themes
         {
             public const string Gaming = "Gaming";
+            public const string NeonStream = "NeonStream";
+            public const string RetroWave = "RetroWave";
+            public const string Forest = "Forest";
+            public const string Ocean = "Ocean";
             public const string Pastel = "Pastel";
-            public const string Dark = "Dark";
         }
 
         public static class TrayIcons

@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-
     <Content Include="Resources\Images\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

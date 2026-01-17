@@ -63,8 +63,12 @@ namespace Gamix.UI.Services
             // For now, we return our known themes.
             return
             [
-                "Pastel",
-                "Gaming"
+                "Gaming",
+                "NeonStream",
+                "RetroWave",
+                "Forest",
+                "Ocean",
+                "Pastel"
             ];
         }
     }
