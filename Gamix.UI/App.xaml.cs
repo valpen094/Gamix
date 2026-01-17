@@ -188,23 +188,47 @@ namespace Gamix.UI
             // 古いアイコンがあれば破棄
             var oldIcon = _notifyIcon.Icon;
             
-            _notifyIcon.Icon = CreateIconFromText("🎵", color);
+            // 新しいアイコンを設定
+            // 注意: Icon.FromHandleで作ったアイコンは元のハンドルを所有しないため
+            // 呼び出し元が責任を持ってDestroyIconする必要がある。
+            // しかし、Iconクラスの仕様としてFromHandleで作成したIconをDisposeしても元のハンドルは消えないため
+            // 自分で管理する必要がある。
+            
+            using var tempBitmap = CreateBitmapFromText("🎵", color);
+            IntPtr hIcon = tempBitmap.GetHicon();
+            
+            try 
+            {
+                // FromHandleで作成したIconは、内部でハンドルをコピーするわけではなくラップするだけ。
+                // ただし、System.Drawing.IconのコンストラクタやCloneを使うことで所有権を移動またはコピーできる。
+                // ここでは安全のため、FromHandleで一時的に作成し、それをCloneしてNotifyIconに渡し、
+                // 元のハンドルは即座に破棄するパターンを採用する。
+                using var tempIcon = Icon.FromHandle(hIcon);
+                _notifyIcon.Icon = (Icon)tempIcon.Clone();
+            }
+            finally
+            {
+                DestroyIcon(hIcon);
+            }
             
             if (oldIcon != null && oldIcon != SystemIcons.Application)
             {
-                // DestroyIcon APIを直接叩かない場合、完壁な破棄は難しいがDisposeは呼ぶ
                 oldIcon.Dispose();
             }
         }
 
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        extern static bool DestroyIcon(IntPtr handle);
+
         /// <summary>
-        /// テキストのみからアイコン画像を生成する（フォントに依存）
+        /// テキストからビットマップを生成する
         /// </summary>
-        private Icon CreateIconFromText(string text, Color color)
+        private Bitmap CreateBitmapFromText(string text, Color color)
         {
             // トレイアイコン用に 32x32 で描画
             int size = 32;
-            using var bitmap = new Bitmap(size, size);
+            var bitmap = new Bitmap(size, size);
+            
             using var g = Graphics.FromImage(bitmap);
 
             // 高品質な描画設定
@@ -226,8 +250,7 @@ namespace Gamix.UI
 
             g.DrawString(text, font, brush, x, y);
 
-            // そのままハンドルを取得してアイコン化
-            return Icon.FromHandle(bitmap.GetHicon());
+            return bitmap;
         }
     }
 }

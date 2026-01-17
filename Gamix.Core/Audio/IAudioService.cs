@@ -69,5 +69,10 @@ namespace Gamix.Core.Audio
         /// セッション構成が変更されたときに発火するイベント。
         /// </summary>
         event Action? SessionsChanged;
+
+        /// <summary>
+        /// オーディオデバイスの構成（追加・削除・デフォルト変更）が変更されたときに発火するイベント。
+        /// </summary>
+        event Action? DevicesChanged;
     }
 }

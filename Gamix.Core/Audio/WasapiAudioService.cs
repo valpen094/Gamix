@@ -19,6 +19,7 @@ namespace Gamix.Core.Audio
         public WasapiAudioService()
         {
             _enumerator = new MMDeviceEnumerator();
+            RegisterNotificationClient();
         }
 
         /// <inheritdoc/>
@@ -219,9 +220,76 @@ namespace Gamix.Core.Audio
             }
         }
 
+        /// <inheritdoc/>
+        public event Action? DevicesChanged;
+
+        /// <summary>
+        /// DevicesChanged イベントを発火します。
+        /// </summary>
+        protected virtual void OnDevicesChanged()
+        {
+            DevicesChanged?.Invoke();
+        }
+
+        private NotificationClient? _notificationClient;
+
+        private void RegisterNotificationClient()
+        {
+            if (_notificationClient == null)
+            {
+                _notificationClient = new NotificationClient(this);
+                _enumerator.RegisterEndpointNotificationCallback(_notificationClient);
+            }
+        }
+
+        private void UnregisterNotificationClient()
+        {
+            if (_notificationClient != null)
+            {
+                _enumerator.UnregisterEndpointNotificationCallback(_notificationClient);
+                _notificationClient = null;
+            }
+        }
+
         public void Dispose()
         {
+            UnregisterNotificationClient();
             _enumerator?.Dispose();
+        }
+
+        private class NotificationClient : IMMNotificationClient
+        {
+            private readonly WasapiAudioService _parent;
+
+            public NotificationClient(WasapiAudioService parent)
+            {
+                _parent = parent;
+            }
+
+            public void OnDeviceStateChanged(string deviceId, DeviceState newState)
+            {
+                _parent.OnDevicesChanged();
+            }
+
+            public void OnDeviceAdded(string pwstrDeviceId)
+            {
+                _parent.OnDevicesChanged();
+            }
+
+            public void OnDeviceRemoved(string deviceId)
+            {
+                _parent.OnDevicesChanged();
+            }
+
+            public void OnDefaultDeviceChanged(DataFlow flow, Role role, string defaultDeviceId)
+            {
+                _parent.OnDevicesChanged();
+            }
+
+            public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key)
+            {
+                // 無視
+            }
         }
     }
 }

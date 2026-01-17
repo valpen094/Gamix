@@ -113,7 +113,32 @@ namespace Gamix.UI.ViewModels
             _presetService = presetService;
             _settingsService = settingsService;
             _themeService = themeService;
+            _audioService.DevicesChanged += OnDevicesChanged;
             InitializeAsync();
+        }
+
+        private System.Threading.CancellationTokenSource? _devicesChangedCts;
+
+        private void OnDevicesChanged()
+        {
+            // デバウンス: 連続したイベントを300msまとめる
+            _devicesChangedCts?.Cancel();
+            _devicesChangedCts = new System.Threading.CancellationTokenSource();
+            var token = _devicesChangedCts.Token;
+
+            Task.Delay(300, token).ContinueWith(async _ =>
+            {
+                if (token.IsCancellationRequested) return;
+
+                // UIスレッドで実行
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    await LoadDevicesAsync();
+                    
+                    // セッション一覧も更新（デバイス変更に伴いセッションも変わる可能性があるため）
+                    await LoadSessionsAsync();
+                });
+            }, TaskScheduler.Default);
         }
 
         /// <summary>
@@ -155,29 +180,52 @@ namespace Gamix.UI.ViewModels
             }
         }
 
+        private bool _shouldSaveSettings = true;
+
         /// <summary>
         /// デバイス一覧を読み込みます。
         /// </summary>
         private async Task LoadDevicesAsync()
         {
-            // 出力デバイスの読み込み
+            // 1. デバイスリストの差分更新
             var outputDevices = await _audioService.GetAudioDevicesAsync(true);
-            OutputDevices.Clear();
-            foreach (var device in outputDevices) OutputDevices.Add(device);
+            UpdateDeviceList(OutputDevices, outputDevices);
 
-            // 入力デバイスの読み込み
             var inputDevices = await _audioService.GetAudioDevicesAsync(false);
-            InputDevices.Clear();
-            foreach (var device in inputDevices) InputDevices.Add(device);
+            UpdateDeviceList(InputDevices, inputDevices);
 
-            // 保存された設定を復元
+            // 2. 選択状態の復元（またはデフォルトへのフォールバック）
+            // 保存された設定を取得
             var savedOutputId = await _settingsService.GetSelectedOutputDeviceIdAsync();
             var savedInputId = await _settingsService.GetSelectedInputDeviceIdAsync();
 
-            SelectedOutputDevice = OutputDevices.FirstOrDefault(d => d.Id == savedOutputId) 
-                ?? OutputDevices.FirstOrDefault(d => d.IsDefault);
-            SelectedInputDevice = InputDevices.FirstOrDefault(d => d.Id == savedInputId) 
-                ?? InputDevices.FirstOrDefault(d => d.IsDefault);
+            // 優先度: 保存されたID -> デフォルトデバイス -> リストの先頭
+            var targetOutput = OutputDevices.FirstOrDefault(d => d.Id == savedOutputId) 
+                             ?? OutputDevices.FirstOrDefault(d => d.IsDefault)
+                             ?? OutputDevices.FirstOrDefault();
+            
+            var targetInput = InputDevices.FirstOrDefault(d => d.Id == savedInputId) 
+                            ?? InputDevices.FirstOrDefault(d => d.IsDefault)
+                            ?? InputDevices.FirstOrDefault();
+
+            // 自動選択中は設定保存を抑制する
+            _shouldSaveSettings = false;
+            try
+            {
+                // 現在の選択と異なる場合のみ更新（カスケード更新防止）
+                if (SelectedOutputDevice?.Id != targetOutput?.Id)
+                {
+                    SelectedOutputDevice = targetOutput;
+                }
+                if (SelectedInputDevice?.Id != targetInput?.Id)
+                {
+                    SelectedInputDevice = targetInput;
+                }
+            }
+            finally
+            {
+                _shouldSaveSettings = true;
+            }
 
             _isInitialized = true;
         }
@@ -199,7 +247,12 @@ namespace Gamix.UI.ViewModels
                     foreach (var d in OutputDevices) d.IsDefault = (d.Id == value.Id);
                 }
                 
-                _ = _settingsService.SetSelectedOutputDeviceIdAsync(value.Id);
+                // 自動フォールバック等の場合は設定を上書きしない
+                if (_shouldSaveSettings)
+                {
+                    _ = _settingsService.SetSelectedOutputDeviceIdAsync(value.Id);
+                }
+
                 _ = LoadSessionsAsync();
                 _ = LoadMasterVolumeAsync();
                 LoadPresets(); // デバイス変更時にプリセット一覧も更新
@@ -221,7 +274,11 @@ namespace Gamix.UI.ViewModels
                     foreach (var d in InputDevices) d.IsDefault = (d.Id == value.Id);
                 }
 
-                _ = _settingsService.SetSelectedInputDeviceIdAsync(value.Id);
+                if (_shouldSaveSettings)
+                {
+                    _ = _settingsService.SetSelectedInputDeviceIdAsync(value.Id);
+                }
+
                 _ = LoadInputMasterVolumeAsync();
             }
         }
@@ -437,6 +494,41 @@ namespace Gamix.UI.ViewModels
             {
                 _themeService.SetTheme(themeName);
                 OnPropertyChanged(nameof(CurrentTheme));
+            }
+        }
+
+        /// <summary>
+        /// デバイスリストを差分更新します（既存のインスタンスを保持し、選択状態が変化しないようにする）。
+        /// </summary>
+        private void UpdateDeviceList(ObservableCollection<AudioDevice> currentList, List<AudioDevice> newList)
+        {
+            // 削除されたデバイスをリストから除去
+            for (int i = currentList.Count - 1; i >= 0; i--)
+            {
+                var current = currentList[i];
+                if (!newList.Any(d => d.Id == current.Id))
+                {
+                    currentList.RemoveAt(i);
+                }
+            }
+
+            // 新しいデバイスを追加、既存デバイスはプロパティ更新
+            foreach (var newDevice in newList)
+            {
+                var existing = currentList.FirstOrDefault(d => d.Id == newDevice.Id);
+                if (existing == null)
+                {
+                    currentList.Add(newDevice);
+                }
+                else
+                {
+                    // 必要であれば名前などのプロパティを更新（今回は参照維持が目的なのでIdが同じなら既存を使う）
+                    if (existing.Name != newDevice.Name)
+                    {
+                        existing.Name = newDevice.Name;
+                    }
+                    existing.IsDefault = newDevice.IsDefault;
+                }
             }
         }
     }
