@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
+using System.Threading.Tasks;
 
 namespace Gamix.UI.Views
 {
@@ -31,13 +33,47 @@ namespace Gamix.UI.Views
                 var isSelected = theme == currentTheme;
                 var imagePath = $"/Gamix.UI;component/Resources/Images/{theme.ToLower()}_theme_preview.png";
                 
-                ThemeOptions.Add(new ThemeOption
+                var option = new ThemeOption
                 {
                     Name = theme,
                     ImagePath = imagePath,
                     IsSelected = isSelected
-                });
+                };
+
+                // プリロード済みのキャッシュがあればそれを使用する（WPFはURIが同じなら自動的にキャッシュするが、デコード済みであることを確実にする）
+                ThemeOptions.Add(option);
             }
+        }
+
+        /// <summary>
+        /// テーマ画像をあらかじめメモリに読み込み、デコードを完了させます。
+        /// </summary>
+        public static async Task PreloadImagesAsync(IEnumerable<string> availableThemes)
+        {
+            await Task.Run(() =>
+            {
+                foreach (var theme in availableThemes)
+                {
+                    try
+                    {
+                        var uri = new System.Uri($"/Gamix.UI;component/Resources/Images/{theme.ToLower()}_theme_preview.png", System.UriKind.Relative);
+                        // UIスレッドで実行する必要があるため、Application.Current.Dispatcher を使用
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.UriSource = uri;
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad; // これで即座に読み込み・デコード
+                            bitmap.EndInit();
+                            bitmap.Freeze(); // スレッドをまたいで利用可能にする
+                        });
+                    }
+                    catch
+                    {
+                        // 読み込み失敗は無視（実行時に再度試行される）
+                    }
+                }
+            });
         }
 
         private void SelectTheme(ThemeOption? option)
