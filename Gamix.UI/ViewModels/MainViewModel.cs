@@ -123,6 +123,7 @@ namespace Gamix.UI.ViewModels
 
         private void OnSessionsChanged()
         {
+            Console.WriteLine("[MainViewModel] OnSessionsChanged triggered!");
             // セッション変更イベントのデバウンス
             _sessionsChangedCts?.Cancel();
             _sessionsChangedCts = new System.Threading.CancellationTokenSource();
@@ -132,6 +133,7 @@ namespace Gamix.UI.ViewModels
             {
                 if (token.IsCancellationRequested) return;
 
+                Console.WriteLine("[MainViewModel] Debounce complete, refreshing sessions.");
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
                 {
                     await LoadSessionsAsync();
@@ -175,6 +177,12 @@ namespace Gamix.UI.ViewModels
             await ApplyFavoritePresetAsync();
 
             LoadThemes();
+            
+            // 初期化完了後にセッション監視を明示的に開始
+            if (SelectedOutputDevice != null)
+            {
+                _audioService.StartSessionMonitoring(SelectedOutputDevice.Id);
+            }
         }
 
         private void LoadThemes()
