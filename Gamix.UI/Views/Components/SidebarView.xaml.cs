@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using Gamix.UI.ViewModels;
 using Gamix.Core.Models;
-using Microsoft.VisualBasic;
+
 
 namespace Gamix.UI.Views.Components
 {
@@ -43,17 +43,15 @@ namespace Gamix.UI.Views.Components
         {
             if (sender is System.Windows.Controls.Button button && button.Tag is Preset preset)
             {
-                var newName = Interaction.InputBox(
-                    "新しいプリセット名を入力してください:",
-                    "名前変更",
-                    preset.Name);
+                var dialog = new Gamix.UI.Views.InputDialog(preset.Name);
+                dialog.Owner = Window.GetWindow(this);
                 
-                if (!string.IsNullOrWhiteSpace(newName) && newName != preset.Name)
+                if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.Result) && dialog.Result != preset.Name)
                 {
                     var vm = DataContext as MainViewModel;
-                    if (vm?.RenamePresetCommand.CanExecute((preset, newName)) == true)
+                    if (vm?.RenamePresetCommand.CanExecute((preset, dialog.Result)) == true)
                     {
-                        await vm.RenamePresetCommand.ExecuteAsync((preset, newName));
+                        await vm.RenamePresetCommand.ExecuteAsync((preset, dialog.Result));
                     }
                 }
             }
