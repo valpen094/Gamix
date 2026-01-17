@@ -41,18 +41,27 @@
                 <TextBox x:Name="InputTextBox" 
                          Grid.Row="1" 
                          FontSize="14"
-                         Padding="12,10"
+                         Padding="12,0"
+                         Height="40"
                          VerticalContentAlignment="Center"
                          Background="{DynamicResource Brush_CardBackground}"
                          Foreground="{DynamicResource Brush_Foreground}"
+                         CaretBrush="{DynamicResource Brush_Foreground}"
                          BorderBrush="{DynamicResource Brush_AccentSecondary}"
                          BorderThickness="2"
                          TextChanged="InputTextBox_TextChanged">
-                    <TextBox.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="10"/>
-                        </Style>
-                    </TextBox.Resources>
+                    <TextBox.Template>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                <ScrollViewer x:Name="PART_ContentHost" 
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </ControlTemplate>
+                    </TextBox.Template>
                 </TextBox>
                 
                 <!-- Buttons -->

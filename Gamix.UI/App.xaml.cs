@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Drawing;
 using System.IO;
 using Microsoft.Win32;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 using Gamix.UI.Services;
 using Gamix.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using Forms = System.Windows.Forms;
+using Hardcodet.Wpf.TaskbarNotification;
 
 namespace Gamix.UI
 {
@@ -16,7 +17,7 @@ namespace Gamix.UI
     {
         public new static App Current => (App)System.Windows.Application.Current;
         public ServiceProvider Services { get; }
-        private Forms.NotifyIcon? _notifyIcon;
+        private TaskbarIcon? _taskbarIcon;
 
         public App()
         {
@@ -48,7 +49,6 @@ namespace Gamix.UI
             SetupTrayIcon();
             
             // テーマ画像のプリロード（初回表示時の遅延解消）
-            // 利用可能なテーマ一覧を取得して非同期で読み込む
             var themes = new[] { "Gaming", "Pastel" };
             _ = Views.ThemeSelectionDialog.PreloadImagesAsync(themes);
 
@@ -57,11 +57,16 @@ namespace Gamix.UI
         }
 
         /// <summary>
-        /// システムトレイにアイコンを設定する
+        /// システムトレイにアイコンを設定する (Hardcodet.NotifyIcon.Wpf 使用)
         /// </summary>
         private void SetupTrayIcon()
         {
-            _notifyIcon = new Forms.NotifyIcon { Text = "Gamix" };
+            _taskbarIcon = new TaskbarIcon
+            {
+                ToolTipText = "Gamix",
+                // メニュー位置をタスクバー上に表示（デフォルト動作を利用）
+                MenuActivation = PopupActivationMode.RightClick
+            };
 
             // アイコンの初期設定（テーマに合わせて動的生成）
             UpdateTrayIcon();
@@ -69,102 +74,124 @@ namespace Gamix.UI
             // システムのテーマ変更等を監視
             SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
 
-            // アイコン設定後に表示
-            _notifyIcon.Visible = true;
-
             // 左クリックでウィンドウを表示
-            _notifyIcon.MouseClick += (s, e) =>
+            _taskbarIcon.TrayLeftMouseDown += (s, e) => ShowMainWindow();
+
+            // 右クリックでコンテキストメニューを表示（毎回最新のテーマで再作成）
+            _taskbarIcon.TrayRightMouseUp += (s, e) =>
             {
-                if (e.Button == Forms.MouseButtons.Left)
-                    ShowMainWindow();
+                _taskbarIcon.ContextMenu = CreateTrayContextMenu();
+                _taskbarIcon.ContextMenu.IsOpen = true;
             };
-
-            // 右クリックメニュー
-            var contextMenu = new Forms.ContextMenuStrip();
-            contextMenu.Items.Add("開く", null, (s, e) => ShowMainWindow());
-
-            // プリセットメニューの追加
-            var presetsMenuItem = new Forms.ToolStripMenuItem("プリセット");
-            contextMenu.Items.Add(presetsMenuItem);
-
-            // メニューが開かれる直前に動的にプリセット一覧を生成
-            contextMenu.Opening += (s, e) =>
-            {
-                try
-                {
-                    // GDIリソースリークを防ぐため、Clear()前に既存項目をDisposeする
-                    // foreachでコレクションを変更しないよう、先に配列にコピー
-                    var itemsToDispose = presetsMenuItem.DropDownItems.Cast<Forms.ToolStripItem>().ToArray();
-                    presetsMenuItem.DropDownItems.Clear();
-                    foreach (var item in itemsToDispose)
-                    {
-                        item.Dispose();
-                    }
-                    
-                    // ViewModel から現在のプリセット一覧を取得
-                    // WPF Dispatcher経由でスレッドセーフにアクセス
-                    var viewModel = Services.GetRequiredService<MainViewModel>();
-                    List<Gamix.Core.Models.Preset> currentPresets = [];
-                    
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        currentPresets = viewModel.Presets.ToList();
-                    });
-
-                    if (currentPresets.Count != 0)
-                    {
-                        // 現在適用中のプリセット名を取得
-                        string currentPresetName = "";
-                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            currentPresetName = viewModel.NewPresetName ?? "";
-                        });
-                        
-                        foreach (var preset in currentPresets)
-                        {
-                            var item = new Forms.ToolStripMenuItem(preset.Name);
-                            
-                            // 現在適用中のプリセットにチェックマークを表示
-                            item.Checked = preset.Name == currentPresetName;
-                            
-                            item.Click += (sender, args) =>
-                            {
-                                // プリセット適用コマンドを実行 (WPF Dispatcher経由)
-                                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    if (viewModel.ApplyPresetCommand.CanExecute(preset))
-                                    {
-                                        viewModel.ApplyPresetCommand.Execute(preset);
-                                    }
-                                });
-                            };
-                            presetsMenuItem.DropDownItems.Add(item);
-                        }
-                        presetsMenuItem.Enabled = true;
-                    }
-                    else
-                    {
-                        presetsMenuItem.Enabled = false;
-                    }
-                }
-                catch (Exception)
-                {
-                    // エラーが発生してもメニュー表示は継続（空の状態で表示）
-                    presetsMenuItem.Enabled = false;
-                }
-            };
-
-            contextMenu.Items.Add(new Forms.ToolStripSeparator());
-            contextMenu.Items.Add("終了", null, (s, e) => ShutdownApp());
-            _notifyIcon.ContextMenuStrip = contextMenu;
 
             // 通知領域の「常に表示」設定を試みる（Windows のレジストリに依存）
             Task.Delay(3000).ContinueWith(_ => TryPromoteIcon(), TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         /// <summary>
+        /// WPF スタイルのコンテキストメニューを作成
+        /// </summary>
+        private ContextMenu CreateTrayContextMenu()
+        {
+            var contextMenu = new ContextMenu
+            {
+                // タスクバーと重ならないように上に配置
+                Placement = System.Windows.Controls.Primitives.PlacementMode.Top,
+                VerticalOffset = -8  // タスクバーとの隙間
+            };
+            
+            // App.xaml で定義したスタイルを適用
+            if (TryFindResource("TrayMenuStyle") is Style menuStyle)
+            {
+                contextMenu.Style = menuStyle;
+            }
+
+            var menuItemStyle = TryFindResource("TrayMenuItemStyle") as Style;
+            var separatorStyle = TryFindResource("TraySeparatorStyle") as Style;
+
+            // 開く
+            var openItem = new MenuItem { Header = "Gamix!", Tag = "🎵" };
+            if (menuItemStyle != null) openItem.Style = menuItemStyle;
+            openItem.Click += (s, e) => ShowMainWindow();
+            contextMenu.Items.Add(openItem);
+
+            // セパレーター (開く と プリセットの間)
+            var separator1 = new Separator();
+            if (separatorStyle != null) separator1.Style = separatorStyle;
+            contextMenu.Items.Add(separator1);
+
+            // プリセット (サブメニュー)
+            var presetsItem = new MenuItem { Header = "プリセット", Tag = "📁" };
+            if (menuItemStyle != null) presetsItem.Style = menuItemStyle;
+            contextMenu.Items.Add(presetsItem);
+
+            // メニューが開かれる直前に動的にプリセット一覧を生成
+            contextMenu.Opened += (s, e) => PopulatePresetsMenu(presetsItem, menuItemStyle);
+
+            // セパレーター
+            var separator = new Separator();
+            if (separatorStyle != null) separator.Style = separatorStyle;
+            contextMenu.Items.Add(separator);
+
+            // 終了
+            var exitItem = new MenuItem { Header = "終了", Tag = "✕" };
+            if (menuItemStyle != null) exitItem.Style = menuItemStyle;
+            exitItem.Click += (s, e) => ShutdownApp();
+            contextMenu.Items.Add(exitItem);
+
+            return contextMenu;
+        }
+
+        /// <summary>
+        /// プリセットサブメニューを動的に生成
+        /// </summary>
+        private void PopulatePresetsMenu(MenuItem presetsItem, Style? menuItemStyle)
+        {
+            try
+            {
+                presetsItem.Items.Clear();
+
+                var viewModel = Services.GetRequiredService<MainViewModel>();
+                var currentPresets = viewModel.Presets.ToList();
+
+                if (currentPresets.Count != 0)
+                {
+                    string currentPresetName = viewModel.NewPresetName ?? "";
+
+                    foreach (var preset in currentPresets)
+                    {
+                        var item = new MenuItem
+                        {
+                            Header = preset.Name,
+                            IsCheckable = false,
+                            Tag = preset.Name == currentPresetName ? "✓" : ""
+                        };
+                        if (menuItemStyle != null) item.Style = menuItemStyle;
+
+                        item.Click += (sender, args) =>
+                        {
+                            if (viewModel.ApplyPresetCommand.CanExecute(preset))
+                            {
+                                viewModel.ApplyPresetCommand.Execute(preset);
+                            }
+                        };
+                        presetsItem.Items.Add(item);
+                    }
+                    presetsItem.IsEnabled = true;
+                }
+                else
+                {
+                    presetsItem.IsEnabled = false;
+                }
+            }
+            catch
+            {
+                presetsItem.IsEnabled = false;
+            }
+        }
+
+        /// <summary>
         /// 通知領域でアイコンを「常に表示」に設定することを試みる
-        /// Windows がレジストリにエントリを作成している場合のみ有効
         /// </summary>
         private static void TryPromoteIcon()
         {
@@ -205,22 +232,14 @@ namespace Gamix.UI
 
         private void ShutdownApp()
         {
-            if (_notifyIcon != null)
-            {
-                _notifyIcon.Visible = false;
-                _notifyIcon.Dispose();
-            }
+            _taskbarIcon?.Dispose();
             System.Windows.Application.Current.Shutdown();
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
             SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
-            if (_notifyIcon != null)
-            {
-                _notifyIcon.Visible = false;
-                _notifyIcon.Dispose();
-            }
+            _taskbarIcon?.Dispose();
             base.OnExit(e);
         }
 
@@ -234,7 +253,7 @@ namespace Gamix.UI
 
         private void UpdateTrayIcon()
         {
-            if (_notifyIcon == null) return;
+            if (_taskbarIcon == null) return;
 
             bool isLightMode = false;
             try
@@ -251,41 +270,23 @@ namespace Gamix.UI
             }
             catch
             {
-                // レジストリ読み込み失敗時はデフォルト（ダークモード想定の白）にする
+                // レジストリ読み込み失敗時はデフォルト（ダークモード想定の白）
             }
 
             // ライトモードなら黒、ダークモードなら白
             var color = isLightMode ? Color.Black : Color.White;
-            
-            // 古いアイコンがあれば破棄
-            var oldIcon = _notifyIcon.Icon;
-            
-            // 新しいアイコンを設定
-            // 注意: Icon.FromHandleで作ったアイコンは元のハンドルを所有しないため
-            // 呼び出し元が責任を持ってDestroyIconする必要がある。
-            // しかし、Iconクラスの仕様としてFromHandleで作成したIconをDisposeしても元のハンドルは消えないため
-            // 自分で管理する必要がある。
             
             using var tempBitmap = CreateBitmapFromText("🎵", color);
             IntPtr hIcon = tempBitmap.GetHicon();
             
             try 
             {
-                // FromHandleで作成したIconは、内部でハンドルをコピーするわけではなくラップするだけ。
-                // ただし、System.Drawing.IconのコンストラクタやCloneを使うことで所有権を移動またはコピーできる。
-                // ここでは安全のため、FromHandleで一時的に作成し、それをCloneしてNotifyIconに渡し、
-                // 元のハンドルは即座に破棄するパターンを採用する。
                 using var tempIcon = Icon.FromHandle(hIcon);
-                _notifyIcon.Icon = (Icon)tempIcon.Clone();
+                _taskbarIcon.Icon = (Icon)tempIcon.Clone();
             }
             finally
             {
                 DestroyIcon(hIcon);
-            }
-            
-            if (oldIcon != null && oldIcon != SystemIcons.Application)
-            {
-                oldIcon.Dispose();
             }
         }
 
@@ -298,25 +299,18 @@ namespace Gamix.UI
         /// </summary>
         private static Bitmap CreateBitmapFromText(string text, Color color)
         {
-            // トレイアイコン用に 32x32 で描画
             int size = 32;
             var bitmap = new Bitmap(size, size);
             
             using var g = Graphics.FromImage(bitmap);
 
-            // 高品質な描画設定
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-            // 背景は透過
             g.Clear(Color.Transparent);
 
-            // フォントとブラシの設定
-            // "Segoe UI Emoji" があれば絵文字が綺麗に出るが、なければデフォルトでフォールバック
             using var font = new Font("Segoe UI Emoji", 24, System.Drawing.FontStyle.Regular, GraphicsUnit.Pixel);
             using var brush = new SolidBrush(color);
 
-            // 中央揃えで描画
             var textSize = g.MeasureString(text, font);
             float x = (size - textSize.Width) / 2;
             float y = (size - textSize.Height) / 2;
