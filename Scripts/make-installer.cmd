@@ -42,4 +42,3 @@ echo.
 echo ========================================
 echo Done! Installer is in: %~dp0..\Output
 echo ========================================
-pause
