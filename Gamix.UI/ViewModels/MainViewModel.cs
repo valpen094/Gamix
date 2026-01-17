@@ -256,6 +256,7 @@ namespace Gamix.UI.ViewModels
                 _ = LoadSessionsAsync();
                 _ = LoadMasterVolumeAsync();
                 LoadPresets(); // デバイス変更時にプリセット一覧も更新
+                NewPresetName = string.Empty; // プリセット名入力欄をクリア
             }
         }
 
