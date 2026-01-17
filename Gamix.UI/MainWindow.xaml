@@ -19,44 +19,6 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <local:BoolToHeartConverter x:Key="BoolToHeartConverter"/>
-
-        <!-- Custom ScrollBar Style -->
-        <Style TargetType="{x:Type ScrollBar}">
-            <Setter Property="Stylus.IsFlicksEnabled" Value="false" />
-            <Setter Property="Foreground" Value="{DynamicResource Brush_AccentSecondary}" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Width" Value="8" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ScrollBar}">
-                        <Grid x:Name="GridRoot" Width="8" Background="{TemplateBinding Background}">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="0.00001*" />
-                            </Grid.RowDefinitions>
-                            <Track x:Name="PART_Track" Grid.Row="0" IsDirectionReversed="true" Focusable="false">
-                                <Track.Thumb>
-                                    <Thumb x:Name="Thumb">
-                                        <Thumb.Template>
-                                            <ControlTemplate TargetType="{x:Type Thumb}">
-                                                <Border x:Name="border" CornerRadius="4" Background="{TemplateBinding Foreground}" Margin="1,0" />
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="true">
-                                                        <Setter TargetName="border" Property="Background" Value="{DynamicResource Brush_AccentPrimary}" />
-                                                    </Trigger>
-                                                    <Trigger Property="IsDragging" Value="true">
-                                                        <Setter TargetName="border" Property="Background" Value="{DynamicResource Brush_AccentPrimary}" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Thumb.Template>
-                                    </Thumb>
-                                </Track.Thumb>
-                            </Track>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
     
     <!-- Outer Border for rounded corners and shadow -->
