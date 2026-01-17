@@ -27,9 +27,9 @@
     <SolidColorBrush x:Key="Brush_AccentTertiary" Color="{StaticResource Color_AccentTertiary}"/>
 
     <!-- Gaming Effects -->
-    <DropShadowEffect x:Key="Effect_Glow" BlurRadius="15" ShadowDepth="0" Color="{StaticResource Color_AccentPrimaryStart}" Opacity="0.9"/>
-    <DropShadowEffect x:Key="Effect_GlowMagenta" BlurRadius="15" ShadowDepth="0" Color="{StaticResource Color_AccentSecondary}" Opacity="0.9"/>
-    <DropShadowEffect x:Key="Effect_SidebarGlow" Color="{StaticResource Color_AccentPrimaryStart}" BlurRadius="30" ShadowDepth="0" Opacity="0.6"/>
+    <DropShadowEffect x:Key="Effect_Glow" BlurRadius="10" ShadowDepth="0" Color="{StaticResource Color_AccentPrimaryStart}" Opacity="0.9"/>
+    <DropShadowEffect x:Key="Effect_GlowMagenta" BlurRadius="10" ShadowDepth="0" Color="{StaticResource Color_AccentSecondary}" Opacity="0.9"/>
+    <DropShadowEffect x:Key="Effect_SidebarGlow" Color="{StaticResource Color_AccentPrimaryStart}" BlurRadius="20" ShadowDepth="0" Opacity="0.6"/>
 
     <!-- Global Styles for this theme -->
     <Style TargetType="Window">

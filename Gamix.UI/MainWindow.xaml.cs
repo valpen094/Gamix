@@ -37,7 +37,12 @@ namespace Gamix.UI
         /// </summary>
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 1)
+            // 子要素（ボタン等）で既に処理されていたらスキップ
+            if (e.Handled) return;
+
+            // Border 自体がクリックされた場合のみドラッグを許可
+            // これにより、ボタンやスライダー上でのクリックではドラッグが発動しない
+            if (e.ClickCount == 1 && e.LeftButton == MouseButtonState.Pressed)
             {
                 DragMove();
             }

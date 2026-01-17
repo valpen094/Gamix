@@ -34,6 +34,9 @@
                     <Grid>
                         <!-- Rainbow Circle (Rotating Background) -->
                         <Ellipse x:Name="RainbowPulse" Width="40" Height="40" Opacity="0.8" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
+                            <Ellipse.CacheMode>
+                                <BitmapCache EnableClearType="False" RenderAtScale="1" SnapsToDevicePixels="False"/>
+                            </Ellipse.CacheMode>
                             <Ellipse.Fill>
                                 <LinearGradientBrush x:Name="RainbowBrush" StartPoint="0,0" EndPoint="1,1">
                                     <LinearGradientBrush.Transform>
@@ -53,6 +56,9 @@
                         <ContentPresenter x:Name="IconPresenter" Content="🎵" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-1,-2,0,0"
                                           RenderTransformOrigin="0.5,0.5"
                                           Effect="{DynamicResource Effect_Glow}">
+                            <ContentPresenter.CacheMode>
+                                <BitmapCache EnableClearType="False" RenderAtScale="1" SnapsToDevicePixels="False"/>
+                            </ContentPresenter.CacheMode>
                             <ContentPresenter.RenderTransform>
                                 <ScaleTransform x:Name="IconTransform" ScaleX="1" ScaleY="1"/>
                             </ContentPresenter.RenderTransform>

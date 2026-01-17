@@ -47,6 +47,9 @@
                 BorderBrush="{DynamicResource Brush_AccentPrimary}" BorderThickness="0,0,2,0"
                 CornerRadius="20,0,0,20" Panel.ZIndex="20"
                 RenderTransformOrigin="0,0" Margin="0">
+            <Border.CacheMode>
+                <BitmapCache EnableClearType="False" RenderAtScale="1" SnapsToDevicePixels="False"/>
+            </Border.CacheMode>
             <Border.RenderTransform>
                 <TranslateTransform X="-300"/>
             </Border.RenderTransform>

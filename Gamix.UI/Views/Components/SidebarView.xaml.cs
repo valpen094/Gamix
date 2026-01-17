@@ -14,14 +14,22 @@ namespace Gamix.UI.Views.Components
             InitializeComponent();
         }
 
+        private bool _isVisible = false;
+
         public void Show()
         {
+            if (_isVisible) return;
+            _isVisible = true;
+
             (FindResource("ShowSidebar") as Storyboard)?.Begin();
             DimOverlay.IsHitTestVisible = true;
         }
 
         public void Hide()
         {
+            if (!_isVisible) return;
+            _isVisible = false;
+
             (FindResource("HideSidebar") as Storyboard)?.Begin();
             DimOverlay.IsHitTestVisible = false;
         }
