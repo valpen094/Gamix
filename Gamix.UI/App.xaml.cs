@@ -63,17 +63,11 @@ namespace Gamix.UI
         {
             _notifyIcon = new Forms.NotifyIcon { Text = "Gamix" };
 
-            // アイコンの設定（PNG から Icon に変換）
-            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Icons", "tray_icon.png");
-            if (File.Exists(iconPath))
-            {
-                using var bitmap = new Bitmap(iconPath);
-                _notifyIcon.Icon = Icon.FromHandle(bitmap.GetHicon());
-            }
-            else
-            {
-                _notifyIcon.Icon = SystemIcons.Application;
-            }
+            // アイコンの初期設定（テーマに合わせて動的生成）
+            UpdateTrayIcon();
+
+            // システムのテーマ変更等を監視
+            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
 
             // アイコン設定後に表示
             _notifyIcon.Visible = true;
@@ -149,12 +143,91 @@ namespace Gamix.UI
 
         protected override void OnExit(ExitEventArgs e)
         {
+            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
             if (_notifyIcon != null)
             {
                 _notifyIcon.Visible = false;
                 _notifyIcon.Dispose();
             }
             base.OnExit(e);
+        }
+
+        private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        {
+            if (e.Category == UserPreferenceCategory.General)
+            {
+                UpdateTrayIcon();
+            }
+        }
+
+        private void UpdateTrayIcon()
+        {
+            if (_notifyIcon == null) return;
+
+            bool isLightMode = false;
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                if (key != null)
+                {
+                    object? val = key.GetValue("AppsUseLightTheme");
+                    if (val is int i)
+                    {
+                        isLightMode = (i == 1);
+                    }
+                }
+            }
+            catch
+            {
+                // レジストリ読み込み失敗時はデフォルト（ダークモード想定の白）にする
+            }
+
+            // ライトモードなら黒、ダークモードなら白
+            var color = isLightMode ? Color.Black : Color.White;
+            
+            // 古いアイコンがあれば破棄
+            var oldIcon = _notifyIcon.Icon;
+            
+            _notifyIcon.Icon = CreateIconFromText("🎵", color);
+            
+            if (oldIcon != null && oldIcon != SystemIcons.Application)
+            {
+                // DestroyIcon APIを直接叩かない場合、完壁な破棄は難しいがDisposeは呼ぶ
+                oldIcon.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// テキストのみからアイコン画像を生成する（フォントに依存）
+        /// </summary>
+        private Icon CreateIconFromText(string text, Color color)
+        {
+            // トレイアイコン用に 32x32 で描画
+            int size = 32;
+            using var bitmap = new Bitmap(size, size);
+            using var g = Graphics.FromImage(bitmap);
+
+            // 高品質な描画設定
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+            // 背景は透過
+            g.Clear(Color.Transparent);
+
+            // フォントとブラシの設定
+            // "Segoe UI Emoji" があれば絵文字が綺麗に出るが、なければデフォルトでフォールバック
+            using var font = new Font("Segoe UI Emoji", 24, System.Drawing.FontStyle.Regular, GraphicsUnit.Pixel);
+            using var brush = new SolidBrush(color);
+
+            // 中央揃えで描画
+            var textSize = g.MeasureString(text, font);
+            float x = (size - textSize.Width) / 2;
+            float y = (size - textSize.Height) / 2;
+
+            g.DrawString(text, font, brush, x, y);
+
+            // そのままハンドルを取得してアイコン化
+            return Icon.FromHandle(bitmap.GetHicon());
         }
     }
 }
