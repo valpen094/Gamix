@@ -93,12 +93,7 @@ namespace Gamix.UI
         /// </summary>
         private ContextMenu CreateTrayContextMenu()
         {
-            var contextMenu = new ContextMenu
-            {
-                // タスクバーと重ならないように上に配置
-                Placement = System.Windows.Controls.Primitives.PlacementMode.Top,
-                VerticalOffset = -8  // タスクバーとの隙間
-            };
+            var contextMenu = new ContextMenu();
             
             // App.xaml で定義したスタイルを適用
             if (TryFindResource("TrayMenuStyle") is Style menuStyle)
@@ -125,8 +120,23 @@ namespace Gamix.UI
             if (menuItemStyle != null) presetsItem.Style = menuItemStyle;
             contextMenu.Items.Add(presetsItem);
 
-            // メニューが開かれる直前に動的にプリセット一覧を生成
-            contextMenu.Opened += (s, e) => PopulatePresetsMenu(presetsItem, menuItemStyle);
+            // 出力デバイス (サブメニュー)
+            var outputDevicesItem = new MenuItem { Header = "出力デバイス", Tag = "🔊" };
+            if (menuItemStyle != null) outputDevicesItem.Style = menuItemStyle;
+            contextMenu.Items.Add(outputDevicesItem);
+
+            // 入力デバイス (サブメニュー)
+            var inputDevicesItem = new MenuItem { Header = "入力デバイス", Tag = "🎤" };
+            if (menuItemStyle != null) inputDevicesItem.Style = menuItemStyle;
+            contextMenu.Items.Add(inputDevicesItem);
+
+            // メニューが開かれる直前に動的に一覧を生成
+            contextMenu.Opened += (s, e) =>
+            {
+                PopulatePresetsMenu(presetsItem, menuItemStyle);
+                PopulateOutputDevicesMenu(outputDevicesItem, menuItemStyle);
+                PopulateInputDevicesMenu(inputDevicesItem, menuItemStyle);
+            };
 
             // セパレーター
             var separator = new Separator();
@@ -187,6 +197,92 @@ namespace Gamix.UI
             catch
             {
                 presetsItem.IsEnabled = false;
+            }
+        }
+
+        /// <summary>
+        /// 出力デバイスサブメニューを動的に生成
+        /// </summary>
+        private void PopulateOutputDevicesMenu(MenuItem devicesItem, Style? menuItemStyle)
+        {
+            try
+            {
+                devicesItem.Items.Clear();
+
+                var viewModel = Services.GetRequiredService<MainViewModel>();
+                var devices = viewModel.OutputDevices.ToList();
+                var selectedDevice = viewModel.SelectedOutputDevice;
+
+                if (devices.Count != 0)
+                {
+                    foreach (var device in devices)
+                    {
+                        var item = new MenuItem
+                        {
+                            Header = device.Name,
+                            Tag = device.Id == selectedDevice?.Id ? "✓" : ""
+                        };
+                        if (menuItemStyle != null) item.Style = menuItemStyle;
+
+                        item.Click += (sender, args) =>
+                        {
+                            viewModel.SelectedOutputDevice = device;
+                        };
+                        devicesItem.Items.Add(item);
+                    }
+                    devicesItem.IsEnabled = true;
+                }
+                else
+                {
+                    devicesItem.IsEnabled = false;
+                }
+            }
+            catch
+            {
+                devicesItem.IsEnabled = false;
+            }
+        }
+
+        /// <summary>
+        /// 入力デバイスサブメニューを動的に生成
+        /// </summary>
+        private void PopulateInputDevicesMenu(MenuItem devicesItem, Style? menuItemStyle)
+        {
+            try
+            {
+                devicesItem.Items.Clear();
+
+                var viewModel = Services.GetRequiredService<MainViewModel>();
+                var devices = viewModel.InputDevices.ToList();
+                var selectedDevice = viewModel.SelectedInputDevice;
+
+                if (devices.Count != 0)
+                {
+                    foreach (var device in devices)
+                    {
+                        var item = new MenuItem
+                        {
+                            Header = device.Name,
+                            Tag = device.Id == selectedDevice?.Id ? "✓" : ""
+                        };
+                        if (menuItemStyle != null) item.Style = menuItemStyle;
+
+                        item.Click += (sender, args) =>
+                        {
+                            viewModel.SelectedInputDevice = device;
+                        };
+                        devicesItem.Items.Add(item);
+                    }
+                    devicesItem.IsEnabled = true;
+                }
+                else
+                {
+                    devicesItem.IsEnabled = false;
+                }
+            }
+            catch
+            {
+                devicesItem.IsEnabled = false;
             }
         }
 
