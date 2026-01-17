@@ -50,15 +50,14 @@ namespace Gamix.UI
             mainWindow.Show();
         }
 
+        /// <summary>
+        /// システムトレイにアイコンを設定する
+        /// </summary>
         private void SetupTrayIcon()
         {
-            _notifyIcon = new Forms.NotifyIcon
-            {
-                Text = "Gamix",
-                Visible = true
-            };
+            _notifyIcon = new Forms.NotifyIcon { Text = "Gamix" };
 
-            // アイコンの設定
+            // アイコンの設定（PNG から Icon に変換）
             string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Icons", "tray_icon.png");
             if (File.Exists(iconPath))
             {
@@ -67,58 +66,57 @@ namespace Gamix.UI
             }
             else
             {
-                // フォールバック（システム標準のアイコンなど）
                 _notifyIcon.Icon = SystemIcons.Application;
             }
 
+            // アイコン設定後に表示
+            _notifyIcon.Visible = true;
+
+            // 左クリックでウィンドウを表示
             _notifyIcon.MouseClick += (s, e) =>
             {
                 if (e.Button == Forms.MouseButtons.Left)
-                {
                     ShowMainWindow();
-                }
             };
 
-            // コンテキストメニュー（終了ボタン）
+            // 右クリックメニュー
             var contextMenu = new Forms.ContextMenuStrip();
             contextMenu.Items.Add("開く", null, (s, e) => ShowMainWindow());
             contextMenu.Items.Add(new Forms.ToolStripSeparator());
             contextMenu.Items.Add("終了", null, (s, e) => ShutdownApp());
             _notifyIcon.ContextMenuStrip = contextMenu;
 
-            // アイコン登録後に少し待ってから「常に表示」設定を試みる
-            Task.Delay(2000).ContinueWith(_ => EnsureIconPromoted());
+            // 通知領域の「常に表示」設定を試みる（Windows のレジストリに依存）
+            Task.Delay(3000).ContinueWith(_ => TryPromoteIcon(), TaskScheduler.FromCurrentSynchronizationContext());
         }
 
-        private void EnsureIconPromoted()
+        /// <summary>
+        /// 通知領域でアイコンを「常に表示」に設定することを試みる
+        /// Windows がレジストリにエントリを作成している場合のみ有効
+        /// </summary>
+        private void TryPromoteIcon()
         {
             try
             {
-                string currentPath = Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty;
-                if (string.IsNullOrEmpty(currentPath)) return;
+                string exeName = Path.GetFileName(Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty);
+                if (string.IsNullOrEmpty(exeName)) return;
 
-                // Windows 11 / Modern Windows 10 Registry Path for Notify Icons
-                string keyPath = @"Control Panel\NotifyIconSettings";
-                using var key = Registry.CurrentUser.OpenSubKey(keyPath, true);
+                using var key = Registry.CurrentUser.OpenSubKey(@"Control Panel\NotifyIconSettings", true);
                 if (key == null) return;
 
                 foreach (string subKeyName in key.GetSubKeyNames())
                 {
                     using var subKey = key.OpenSubKey(subKeyName, true);
-                    if (subKey == null) continue;
-
-                    object? exePathObj = subKey.GetValue("ExecutablePath");
-                    if (exePathObj is string exePath && exePath.Contains(currentPath, StringComparison.OrdinalIgnoreCase))
+                    if (subKey?.GetValue("ExecutablePath") is string exePath &&
+                        exePath.EndsWith(exeName, StringComparison.OrdinalIgnoreCase))
                     {
-                        // Found our entry, set IsPromoted to 1 (Always Show)
                         subKey.SetValue("IsPromoted", 1, RegistryValueKind.DWord);
-                        break;
                     }
                 }
             }
             catch
             {
-                // Silently fail if permissions prevent this or key structure differs
+                // レジストリ操作に失敗しても、アイコン自体は表示されるので無視
             }
         }
 
