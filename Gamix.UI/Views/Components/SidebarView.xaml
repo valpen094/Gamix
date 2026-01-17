@@ -4,11 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Gamix.UI"
+             xmlns:converters="clr-namespace:Gamix.UI.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="650" d:DesignWidth="420">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <local:BoolToHeartConverter x:Key="BoolToHeartConverter"/>
+        <converters:BoolToHeartConverter x:Key="BoolToHeartConverter"/>
 
         <Storyboard x:Key="ShowSidebar">
             <DoubleAnimation Storyboard.TargetName="PresetSidebar" 

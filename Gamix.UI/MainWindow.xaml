@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Gamix.UI"
         xmlns:components="clr-namespace:Gamix.UI.Views.Components"
+        xmlns:converters="clr-namespace:Gamix.UI.Converters"
         mc:Ignorable="d"
         Title="Gamix!" Height="650" Width="500"
         WindowStyle="None"
@@ -18,7 +19,7 @@
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <local:BoolToHeartConverter x:Key="BoolToHeartConverter"/>
+        <converters:BoolToHeartConverter x:Key="BoolToHeartConverter"/>
     </Window.Resources>
     
     <!-- Outer Border for rounded corners and shadow -->

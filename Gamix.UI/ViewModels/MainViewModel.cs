@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gamix.Core.Models;
 using Gamix.Core.Services;
-using Gamix.UI.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,24 +11,21 @@ namespace Gamix.UI.ViewModels
 {
     /// <summary>
     /// メインウィンドウ用の ViewModel。
-    /// オーディオセッション一覧とプリセット管理を提供します。
+    /// 各機能の ViewModel (Device, Session, Theme) を統括し、プリセット管理を提供します。
     /// </summary>
     public partial class MainViewModel : ObservableObject
     {
         private readonly Gamix.Core.Audio.IAudioService _audioService;
-        private readonly Gamix.Core.Services.IPresetService _presetService;
-        private readonly ISettingsService _settingsService;
-        private bool _isInitialized;
-        private readonly IThemeService _themeService;
+        private readonly IPresetService _presetService;
+
+        public DeviceViewModel Devices { get; }
+        public SessionListViewModel Sessions { get; }
+        public ThemeViewModel Themes { get; }
 
         /// <summary>
         /// プリセットが適用されたときに発火するイベント。
         /// </summary>
         public event Action? PresetApplied;
-        /// <summary>
-        /// アクティブなオーディオセッションのコレクション。
-        /// </summary>
-        public ObservableCollection<AudioSessionViewModel> Sessions { get; } = [];
 
         /// <summary>
         /// 保存されたプリセットのコレクション。
@@ -37,156 +33,57 @@ namespace Gamix.UI.ViewModels
         public ObservableCollection<Preset> Presets { get; } = [];
 
         /// <summary>
-        /// 利用可能なテーマ名のコレクション。
-        /// </summary>
-        public ObservableCollection<string> AvailableThemes { get; } = [];
-
-        /// <summary>
-        /// 利用可能な出力デバイス（スピーカー）のコレクション。
-        /// </summary>
-        public ObservableCollection<AudioDevice> OutputDevices { get; } = [];
-
-        /// <summary>
-        /// 利用可能な入力デバイス（マイク）のコレクション。
-        /// </summary>
-        public ObservableCollection<AudioDevice> InputDevices { get; } = [];
-
-        /// <summary>
-        /// 現在選択されているテーマ名。
-        /// </summary>
-        public string CurrentTheme => _themeService.CurrentTheme;
-
-        /// <summary>
         /// 新規プリセット名の入力値。
         /// </summary>
         [ObservableProperty]
         private string _newPresetName = string.Empty;
 
-        /// <summary>
-        /// 選択された出力デバイス。
-        /// </summary>
-        [ObservableProperty]
-        private AudioDevice? _selectedOutputDevice;
-
-        /// <summary>
-        /// 選択された入力デバイス。
-        /// </summary>
-        [ObservableProperty]
-        private AudioDevice? _selectedInputDevice;
-
-        /// <summary>
-        /// 出力デバイスのマスター音量（0-100）。
-        /// </summary>
-        [ObservableProperty]
-        private float _masterVolume;
-        
-        /// <summary>
-        /// 出力デバイスがミュート状態かどうか。
-        /// </summary>
-        [ObservableProperty]
-        private bool _isOutputMuted;
-
-        /// <summary>
-        /// 入力デバイスのマスター音量。
-        /// </summary>
-        [ObservableProperty]
-        private float _inputMasterVolume;
-
-        /// <summary>
-        /// 入力デバイスがミュート状態かどうか。
-        /// </summary>
-        [ObservableProperty]
-        private bool _isInputMuted;
-
-        /// <summary>
-        /// MainViewModel のコンストラクタ。
-        /// </summary>
-        /// <param name="audioService">オーディオセッション取得用のサービス。</param>
-        /// <param name="presetService">プリセット管理用のサービス。</param>
-        /// <param name="settingsService">設定保存用のサービス。</param>
-        /// <param name="themeService">テーマ管理用のサービス。</param>
-        public MainViewModel(Gamix.Core.Audio.IAudioService audioService, Gamix.Core.Services.IPresetService presetService, ISettingsService settingsService, IThemeService themeService)
+        public MainViewModel(
+            Gamix.Core.Audio.IAudioService audioService, 
+            IPresetService presetService,
+            DeviceViewModel deviceViewModel,
+            SessionListViewModel sessionListViewModel,
+            ThemeViewModel themeViewModel)
         {
             _audioService = audioService;
             _presetService = presetService;
-            _settingsService = settingsService;
-            _themeService = themeService;
-            _audioService.DevicesChanged += OnDevicesChanged;
-            _audioService.SessionsChanged += OnSessionsChanged;
+            Devices = deviceViewModel;
+            Sessions = sessionListViewModel;
+            Themes = themeViewModel;
+
+            Devices.PropertyChanged += Devices_PropertyChanged;
             InitializeAsync();
         }
 
-        private System.Threading.CancellationTokenSource? _devicesChangedCts;
-        private System.Threading.CancellationTokenSource? _sessionsChangedCts;
-
-        private void OnSessionsChanged()
-        {
-            // セッション変更イベントのデバウンス
-            _sessionsChangedCts?.Cancel();
-            _sessionsChangedCts = new System.Threading.CancellationTokenSource();
-            var token = _sessionsChangedCts.Token;
-
-            Task.Delay(300, token).ContinueWith(async _ =>
-            {
-                if (token.IsCancellationRequested) return;
-
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
-                {
-                    await LoadSessionsAsync();
-                });
-            }, TaskScheduler.Default);
-        }
-
-        private void OnDevicesChanged()
-        {
-            // デバウンス: 連続したイベントを300msまとめる
-            _devicesChangedCts?.Cancel();
-            _devicesChangedCts = new System.Threading.CancellationTokenSource();
-            var token = _devicesChangedCts.Token;
-
-            Task.Delay(300, token).ContinueWith(async _ =>
-            {
-                if (token.IsCancellationRequested) return;
-
-                // UIスレッドで実行
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
-                {
-                    await LoadDevicesAsync();
-                    
-                    // セッション一覧も更新（デバイス変更に伴いセッションも変わる可能性があるため）
-                    await LoadSessionsAsync();
-                });
-            }, TaskScheduler.Default);
-        }
-
-        /// <summary>
-        /// 非同期で初期化を行います。
-        /// </summary>
         private async void InitializeAsync()
         {
-            await LoadDevicesAsync();
-            await LoadMasterVolumeAsync();
-            await LoadSessionsAsync();
-            LoadPresets();
+            await Devices.InitializeAsync();
             
             // 起動時に Favorite プリセットを自動適用
             await ApplyFavoritePresetAsync();
 
-            LoadThemes();
+            LoadPresets();
             
-            // 初期化完了後にセッション監視を明示的に開始
-            if (SelectedOutputDevice != null)
+            if (Devices.SelectedOutputDevice != null)
             {
-                _audioService.StartSessionMonitoring(SelectedOutputDevice.Id);
+                await Sessions.LoadSessionsAsync(Devices.SelectedOutputDevice.Id);
+                Sessions.SetCurrentDeviceId(Devices.SelectedOutputDevice.Id);
             }
         }
 
-        private void LoadThemes()
+        private void Devices_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            AvailableThemes.Clear();
-            foreach (var theme in _themeService.GetAvailableThemes())
+            if (e.PropertyName == nameof(DeviceViewModel.SelectedOutputDevice))
             {
-                AvailableThemes.Add(theme);
+                var deviceId = Devices.SelectedOutputDevice?.Id;
+                
+                // セッションリスト更新
+                _ = Sessions.LoadSessionsAsync(deviceId);
+                Sessions.SetCurrentDeviceId(deviceId);
+
+                // プリセットリスト更新
+                LoadPresets();
+                NewPresetName = string.Empty;
             }
         }
 
@@ -195,183 +92,12 @@ namespace Gamix.UI.ViewModels
         /// </summary>
         private async Task ApplyFavoritePresetAsync()
         {
-            if (SelectedOutputDevice == null) return;
+            if (Devices.SelectedOutputDevice == null) return;
             
-            var favorite = await _presetService.GetFavoritePresetAsync(SelectedOutputDevice.Id);
+            var favorite = await _presetService.GetFavoritePresetAsync(Devices.SelectedOutputDevice.Id);
             if (favorite != null)
             {
                 await ApplyPreset(favorite);
-            }
-        }
-
-        private bool _shouldSaveSettings = true;
-
-        /// <summary>
-        /// デバイス一覧を読み込みます。
-        /// </summary>
-        private async Task LoadDevicesAsync()
-        {
-            // 1. デバイスリストの差分更新
-            var outputDevices = await _audioService.GetAudioDevicesAsync(true);
-            UpdateDeviceList(OutputDevices, outputDevices);
-
-            var inputDevices = await _audioService.GetAudioDevicesAsync(false);
-            UpdateDeviceList(InputDevices, inputDevices);
-
-            // 2. 選択状態の復元（またはデフォルトへのフォールバック）
-            // 保存された設定を取得
-            var savedOutputId = await _settingsService.GetSelectedOutputDeviceIdAsync();
-            var savedInputId = await _settingsService.GetSelectedInputDeviceIdAsync();
-
-            // 優先度: 保存されたID -> デフォルトデバイス -> リストの先頭
-            var targetOutput = OutputDevices.FirstOrDefault(d => d.Id == savedOutputId) 
-                             ?? OutputDevices.FirstOrDefault(d => d.IsDefault)
-                             ?? OutputDevices.FirstOrDefault();
-            
-            var targetInput = InputDevices.FirstOrDefault(d => d.Id == savedInputId) 
-                            ?? InputDevices.FirstOrDefault(d => d.IsDefault)
-                            ?? InputDevices.FirstOrDefault();
-
-            // 自動選択中は設定保存を抑制する
-            _shouldSaveSettings = false;
-            try
-            {
-                // 現在の選択と異なる場合のみ更新（カスケード更新防止）
-                if (SelectedOutputDevice?.Id != targetOutput?.Id)
-                {
-                    SelectedOutputDevice = targetOutput;
-                }
-                if (SelectedInputDevice?.Id != targetInput?.Id)
-                {
-                    SelectedInputDevice = targetInput;
-                }
-            }
-            finally
-            {
-                _shouldSaveSettings = true;
-            }
-
-            _isInitialized = true;
-        }
-
-        /// <summary>
-        /// 出力デバイスが変更されたときの処理。
-        /// </summary>
-        partial void OnSelectedOutputDeviceChanged(AudioDevice? value)
-        {
-            if (value != null)
-            {
-                // 初期化完了後（ユーザーによる手動変更）の場合のみシステム設定を書き換える
-                // これにより起動時のノイズを防止する
-                if (_isInitialized)
-                {
-                    Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
-                    
-                    // 内部状態（IsDefault）を更新
-                    foreach (var d in OutputDevices) d.IsDefault = (d.Id == value.Id);
-                }
-                
-                // 自動フォールバック等の場合は設定を上書きしない
-                if (_shouldSaveSettings)
-                {
-                    _ = _settingsService.SetSelectedOutputDeviceIdAsync(value.Id);
-                }
-
-                _ = LoadSessionsAsync();
-                _ = LoadMasterVolumeAsync();
-                LoadPresets(); // デバイス変更時にプリセット一覧も更新
-                NewPresetName = string.Empty; // プリセット名入力欄をクリア
-
-                // セッションの動的監視を開始
-                _audioService.StartSessionMonitoring(value.Id);
-            }
-        }
-
-        /// <summary>
-        /// 入力デバイスが変更されたときの処理。
-        /// </summary>
-        partial void OnSelectedInputDeviceChanged(AudioDevice? value)
-        {
-            if (value != null)
-            {
-                if (_isInitialized)
-                {
-                    Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
-                    
-                    // 内部状態（IsDefault）を更新
-                    foreach (var d in InputDevices) d.IsDefault = (d.Id == value.Id);
-                }
-
-                if (_shouldSaveSettings)
-                {
-                    _ = _settingsService.SetSelectedInputDeviceIdAsync(value.Id);
-                }
-
-                _ = LoadInputMasterVolumeAsync();
-            }
-        }
-
-        /// <summary>
-        /// マスター音量が変更されたときの処理（0-100 スケール）。
-        /// </summary>
-        partial void OnMasterVolumeChanged(float value)
-        {
-            if (SelectedOutputDevice != null)
-            {
-                _audioService.SetDeviceMasterVolume(SelectedOutputDevice.Id, value / 100f);
-            }
-        }
-
-        /// <summary>
-        /// 入力デバイスのマスター音量が変更されたときの処理。
-        /// </summary>
-        partial void OnInputMasterVolumeChanged(float value)
-        {
-            if (SelectedInputDevice != null)
-            {
-                _audioService.SetDeviceMasterVolume(SelectedInputDevice.Id, value);
-            }
-        }
-
-        /// <summary>
-        /// 出力デバイスのマスター音量を読み込みます。
-        /// </summary>
-        private async Task LoadMasterVolumeAsync()
-        {
-            if (SelectedOutputDevice != null)
-            {
-                var (vol, isMuted) = await _audioService.GetDeviceMasterVolumeAsync(SelectedOutputDevice.Id);
-                MasterVolume = vol * 100f;
-                IsOutputMuted = isMuted;
-            }
-        }
-
-        /// <summary>
-        /// 入力デバイスのマスター音量を読み込みます。
-        /// </summary>
-        private async Task LoadInputMasterVolumeAsync()
-        {
-            if (SelectedInputDevice != null)
-            {
-                var (vol, isMuted) = await _audioService.GetDeviceMasterVolumeAsync(SelectedInputDevice.Id);
-                InputMasterVolume = vol;
-                IsInputMuted = isMuted;
-            }
-        }
-
-        /// <summary>
-        /// オーディオセッションを読み込みます。
-        /// </summary>
-        private async Task LoadSessionsAsync()
-        {
-            var deviceId = SelectedOutputDevice?.Id;
-            var sessions = await _audioService.GetActiveSessionsAsync(deviceId);
-            Sessions.Clear();
-            foreach (var s in sessions)
-            {
-                // マスターボリュームは上部に専用UIがあるため、セッションリストからは除外
-                if (s.IsMaster) continue;
-                Sessions.Add(new AudioSessionViewModel(s, _audioService));
             }
         }
 
@@ -382,12 +108,11 @@ namespace Gamix.UI.ViewModels
         private async void LoadPresets()
         {
             var allPresets = await _presetService.LoadPresetsAsync();
-            var deviceId = SelectedOutputDevice?.Id;
+            var deviceId = Devices.SelectedOutputDevice?.Id;
             
             Presets.Clear();
             foreach (var p in allPresets)
             {
-                // 現在のデバイス用のプリセットのみ表示
                 if (p.DeviceId == deviceId)
                 {
                     Presets.Add(p);
@@ -401,8 +126,9 @@ namespace Gamix.UI.ViewModels
         [RelayCommand]
         private async Task SavePreset()
         {
-            if (string.IsNullOrWhiteSpace(NewPresetName) || SelectedOutputDevice == null) return;
-            var currentModels = Sessions.Select(s => new AudioSession 
+            if (string.IsNullOrWhiteSpace(NewPresetName) || Devices.SelectedOutputDevice == null) return;
+            
+            var currentModels = Sessions.Sessions.Select(s => new AudioSession 
             { 
                 Id = s.Id, 
                 ProcessName = s.ProcessName, 
@@ -412,9 +138,9 @@ namespace Gamix.UI.ViewModels
             
             await _presetService.SavePresetAsync(
                 NewPresetName, 
-                SelectedOutputDevice.Id, 
-                MasterVolume / 100f, // 0-1 を 0-100 に変換
-                false, // 現在はミュート状態は未サポート
+                Devices.SelectedOutputDevice.Id, 
+                Devices.MasterVolume / 100f, 
+                false, 
                 currentModels);
 
             LoadPresets();
@@ -423,33 +149,29 @@ namespace Gamix.UI.ViewModels
         /// <summary>
         /// 指定したプリセットを適用します。
         /// </summary>
-        /// <param name="preset">適用するプリセット。</param>
         [RelayCommand]
         private async Task ApplyPreset(Preset preset)
         {
             if (preset == null) return;
             
-            var currentSessions = await _audioService.GetActiveSessionsAsync(SelectedOutputDevice?.Id);
+            var currentSessions = await _audioService.GetActiveSessionsAsync(Devices.SelectedOutputDevice?.Id);
             await _presetService.ApplyPresetAsync(preset, currentSessions);
             
-            // UIのマスター音量も更新
             if (preset.MasterVolume.HasValue)
             {
-                MasterVolume = preset.MasterVolume.Value * 100f; // 0-1 を 0-100 に変換
+                Devices.MasterVolume = preset.MasterVolume.Value * 100f;
             }
             
             NewPresetName = preset.Name;
 
-            await LoadSessionsAsync();
+            await Sessions.LoadSessionsAsync(Devices.SelectedOutputDevice?.Id);
 
-            // サイドバーを閉じるためにイベントを発火
             PresetApplied?.Invoke();
         }
 
         /// <summary>
         /// 指定したプリセットを削除します。
         /// </summary>
-        /// <param name="preset">削除するプリセット。</param>
         [RelayCommand]
         private async Task DeletePreset(Preset preset)
         {
@@ -462,7 +184,6 @@ namespace Gamix.UI.ViewModels
         /// <summary>
         /// プリセットの名前を変更します。
         /// </summary>
-        /// <param name="args">タプル (Preset, NewName)。</param>
         [RelayCommand]
         private async Task RenamePreset((Preset Preset, string NewName) args)
         {
@@ -478,85 +199,10 @@ namespace Gamix.UI.ViewModels
         [RelayCommand]
         private async Task TogglePresetFavoriteAsync(Preset preset)
         {
-            if (preset != null && SelectedOutputDevice != null)
+            if (preset != null && Devices.SelectedOutputDevice != null)
             {
                 preset.IsFavorite = !preset.IsFavorite;
-                await _presetService.SetFavoriteAsync(preset.Name, SelectedOutputDevice.Id, preset.IsFavorite);
-            }
-        }
-
-        /// <summary>
-        /// 出力デバイスのミュートを切り替えます。
-        /// </summary>
-        [RelayCommand]
-        private void ToggleOutputMute()
-        {
-            if (SelectedOutputDevice != null)
-            {
-                IsOutputMuted = !IsOutputMuted;
-                _audioService.SetDeviceMasterMute(SelectedOutputDevice.Id, IsOutputMuted);
-            }
-        }
-
-        /// <summary>
-        /// 入力デバイスのミュートを切り替えます。
-        /// </summary>
-        [RelayCommand]
-        private void ToggleInputMute()
-        {
-            if (SelectedInputDevice != null)
-            {
-                IsInputMuted = !IsInputMuted;
-                _audioService.SetDeviceMasterMute(SelectedInputDevice.Id, IsInputMuted);
-            }
-        }
-
-        /// <summary>
-        /// テーマを変更します。
-        /// </summary>
-        /// <param name="themeName">変更するテーマ名。</param>
-        [RelayCommand]
-        private void ChangeTheme(string themeName)
-        {
-            if (!string.IsNullOrEmpty(themeName))
-            {
-                _themeService.SetTheme(themeName);
-                OnPropertyChanged(nameof(CurrentTheme));
-            }
-        }
-
-        /// <summary>
-        /// デバイスリストを差分更新します（既存のインスタンスを保持し、選択状態が変化しないようにする）。
-        /// </summary>
-        private static void UpdateDeviceList(ObservableCollection<AudioDevice> currentList, List<AudioDevice> newList)
-        {
-            // 削除されたデバイスをリストから除去
-            for (int i = currentList.Count - 1; i >= 0; i--)
-            {
-                var current = currentList[i];
-                if (!newList.Any(d => d.Id == current.Id))
-                {
-                    currentList.RemoveAt(i);
-                }
-            }
-
-            // 新しいデバイスを追加、既存デバイスはプロパティ更新
-            foreach (var newDevice in newList)
-            {
-                var existing = currentList.FirstOrDefault(d => d.Id == newDevice.Id);
-                if (existing == null)
-                {
-                    currentList.Add(newDevice);
-                }
-                else
-                {
-                    // 必要であれば名前などのプロパティを更新（今回は参照維持が目的なのでIdが同じなら既存を使う）
-                    if (existing.Name != newDevice.Name)
-                    {
-                        existing.Name = newDevice.Name;
-                    }
-                    existing.IsDefault = newDevice.IsDefault;
-                }
+                await _presetService.SetFavoriteAsync(preset.Name, Devices.SelectedOutputDevice.Id, preset.IsFavorite);
             }
         }
     }

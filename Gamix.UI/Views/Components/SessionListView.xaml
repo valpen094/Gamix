@@ -7,7 +7,7 @@
              d:DesignHeight="300" d:DesignWidth="400">
 
     <ScrollViewer Margin="15,0,15,15" VerticalScrollBarVisibility="Auto">
-        <ItemsControl ItemsSource="{Binding Sessions}">
+        <ItemsControl ItemsSource="{Binding Sessions.Sessions}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Border Background="{DynamicResource Brush_CardBackground}" 

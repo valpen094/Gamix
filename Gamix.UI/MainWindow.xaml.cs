@@ -59,20 +59,4 @@ namespace Gamix.UI
             Sidebar.Show();
         }
     }
-
-    /// <summary>
-    /// bool を ❤️ / 🤍 に変換するコンバーター。
-    /// </summary>
-    public class BoolToHeartConverter : System.Windows.Data.IValueConverter
-    {
-        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
-        {
-            return (value is bool b && b) ? "❤️" : "🤍";
-        }
-
-        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new System.NotImplementedException();
-        }
-    }
 }

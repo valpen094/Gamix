@@ -27,10 +27,12 @@ namespace Gamix.UI.Views.Components
             if (DataContext is ViewModels.MainViewModel viewModel)
             {
                 // Pass a callback to apply the theme immediately without closing the dialog
-                var dialog = new ThemeSelectionDialog(viewModel.AvailableThemes, viewModel.CurrentTheme, (theme) => 
+                var selectionViewModel = new Gamix.UI.ViewModels.ThemeSelectionViewModel(viewModel.Themes.AvailableThemes, viewModel.Themes.CurrentTheme, (theme) => 
                 {
-                    viewModel.ChangeThemeCommand.Execute(theme);
+                    viewModel.Themes.ChangeThemeCommand.Execute(theme);
                 });
+                
+                var dialog = new ThemeSelectionDialog(selectionViewModel);
                 dialog.Owner = Window.GetWindow(this);
                 dialog.ShowDialog();
             }

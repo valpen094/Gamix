@@ -71,7 +71,7 @@
                            Margin="0,0,0,20"/>
                 
                 <!-- Theme List -->
-                <ItemsControl Grid.Row="1" ItemsSource="{Binding ThemeOptions, RelativeSource={RelativeSource AncestorType=Window}}">
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding ThemeOptions}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="2" VerticalAlignment="Top"/>
@@ -123,7 +123,7 @@
                     
                     <!-- Apply Button -->
                     <Button Content="Apply" 
-                            Click="ApplyButton_Click"
+                            Command="{Binding ApplyThemeCommand}"
                             Width="120" Height="40"
                             FontSize="14" FontWeight="Bold"
                             Background="{DynamicResource Brush_AccentPrimary}"
