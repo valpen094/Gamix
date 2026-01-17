@@ -54,6 +54,10 @@ japanese.MaintenanceUninstall=アンインストール - アプリケーショ�
 japanese.MaintenanceConfirmUninstall=本当にアンインストールしますか?
 
 [Code]
+// Windows API: プロセスを即座に終了
+procedure ExitProcess(uExitCode: UINT);
+  external 'ExitProcess@kernel32.dll stdcall';
+
 var
   MaintenancePage: TInputOptionWizardPage;
   IsUpgrade: Boolean;
@@ -106,12 +110,16 @@ var
   ResultCode: Integer;
 begin
   Result := False;
+  
+  // 実行中のアプリケーションを強制終了
+  Exec('taskkill.exe', '/F /IM {#MyAppExeName}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  
   UninstallString := GetUninstallString();
   if UninstallString <> '' then
   begin
-    // /SILENT オプションを追加してサイレント実行
+    // /SILENT オプションを追加してサイレント実行（待機せず即座にセットアップを終了）
     UninstallString := RemoveQuotes(UninstallString);
-    Result := Exec(UninstallString, '/SILENT', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+    Result := Exec(UninstallString, '/SILENT', '', SW_HIDE, ewNoWait, ResultCode);
   end;
 end;
 
@@ -151,8 +159,8 @@ begin
       if MsgBox(CustomMessage('MaintenanceConfirmUninstall'), mbConfirmation, MB_YESNO) = IDYES then
       begin
         DoUninstall();
-        Result := False; // セットアップを終了
-        WizardForm.Close();
+        // 確認ダイアログをスキップして即座にプロセス終了
+        ExitProcess(0);
       end
       else
       begin
