@@ -39,6 +39,54 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <!-- Pagination Button Style -->
+        <Style x:Key="PaginationButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush_AccentPrimary}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource Brush_AccentPrimary}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource Brush_AccentPrimary}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Brush_ButtonForeground}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- Page Dot Indicator Style -->
+        <Style x:Key="PageDotStyle" TargetType="Ellipse">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Stroke" Value="{DynamicResource Brush_AccentPrimary}"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="Fill" Value="Transparent"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                    <Setter Property="Fill" Value="{DynamicResource Brush_AccentPrimary}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <!-- Outer Glow -->
@@ -59,6 +107,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Title -->
                     <RowDefinition Height="*"/>    <!-- Theme List -->
+                    <RowDefinition Height="Auto"/> <!-- Pagination -->
                     <RowDefinition Height="Auto"/> <!-- Buttons -->
                 </Grid.RowDefinitions>
                 
@@ -71,7 +120,7 @@
                            Margin="0,0,0,20"/>
                 
                 <!-- Theme List -->
-                <ItemsControl Grid.Row="1" ItemsSource="{Binding ThemeOptions}">
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding PagedThemeOptions}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="2" VerticalAlignment="Top"/>
@@ -86,9 +135,13 @@
                                                   CommandParameter="{Binding}"/>
                                 </StackPanel.InputBindings>
                                 
-                                <Border CornerRadius="12" ClipToBounds="True" BorderBrush="{DynamicResource Brush_CardBackground}" BorderThickness="1">
-                                    <Image Source="{Binding ImagePath}" Stretch="Uniform" Height="250"
-                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <Border CornerRadius="12" ClipToBounds="True" 
+                                        BorderBrush="{DynamicResource Brush_CardBackground}" BorderThickness="2"
+                                        Padding="4">
+                                    <Border CornerRadius="8" ClipToBounds="True">
+                                        <Image Source="{Binding ImagePath}" Stretch="Uniform" Height="210"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
                                 </Border>
                                 <RadioButton Content="{Binding Name}" GroupName="Themes" 
                                              IsChecked="{Binding IsSelected}"
@@ -100,8 +153,34 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 
+                <!-- Pagination Controls -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <Button Content="◀" 
+                            Command="{Binding PreviousPageCommand}" 
+                            Style="{StaticResource PaginationButtonStyle}"
+                            Margin="0,0,15,0"/>
+                    
+                    <ItemsControl ItemsSource="{Binding PageDots}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Ellipse Style="{StaticResource PageDotStyle}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Button Content="▶" 
+                            Command="{Binding NextPageCommand}" 
+                            Style="{StaticResource PaginationButtonStyle}"
+                            Margin="15,0,0,0"/>
+                </StackPanel>
+
                 <!-- Footer Buttons -->
-                <StackPanel Grid.Row="2" 
+                <StackPanel Grid.Row="3" 
                             Orientation="Horizontal" 
                             HorizontalAlignment="Center" 
                             Margin="0,25,0,0">
