@@ -56,7 +56,8 @@ namespace Gamix.UI.Views
                 {
                     try
                     {
-                        var uri = new System.Uri($"/Gamix.UI;component/Resources/Images/{theme.ToLower()}_theme_preview.png", System.UriKind.Relative);
+                        // 絶対パック URI を使用してリソースを正しく解決する
+                        var uri = new System.Uri($"pack://application:,,,/Gamix.UI;component/Resources/Images/{theme.ToLower()}_theme_preview.png", System.UriKind.Absolute);
                         // UIスレッドで実行する必要があるため、Application.Current.Dispatcher を使用
                         System.Windows.Application.Current.Dispatcher.Invoke(() =>
                         {

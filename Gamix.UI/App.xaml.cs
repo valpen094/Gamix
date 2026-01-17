@@ -49,7 +49,7 @@ namespace Gamix.UI
             
             // テーマ画像のプリロード（初回表示時の遅延解消）
             // 利用可能なテーマ一覧を取得して非同期で読み込む
-            var themes = new[] { "Default", "Gaming", "Pastel" };
+            var themes = new[] { "Gaming", "Pastel" };
             _ = Views.ThemeSelectionDialog.PreloadImagesAsync(themes);
 
             var mainWindow = Services.GetRequiredService<MainWindow>();
