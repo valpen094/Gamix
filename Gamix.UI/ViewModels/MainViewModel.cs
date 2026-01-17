@@ -19,6 +19,7 @@ namespace Gamix.UI.ViewModels
         private readonly Gamix.Core.Audio.IAudioService _audioService;
         private readonly Gamix.Core.Services.IPresetService _presetService;
         private readonly ISettingsService _settingsService;
+        private bool _isInitialized;
         private readonly IThemeService _themeService;
 
         /// <summary>
@@ -177,6 +178,8 @@ namespace Gamix.UI.ViewModels
                 ?? OutputDevices.FirstOrDefault(d => d.IsDefault);
             SelectedInputDevice = InputDevices.FirstOrDefault(d => d.Id == savedInputId) 
                 ?? InputDevices.FirstOrDefault(d => d.IsDefault);
+
+            _isInitialized = true;
         }
 
         /// <summary>
@@ -186,10 +189,14 @@ namespace Gamix.UI.ViewModels
         {
             if (value != null)
             {
-                // すでにデフォルトなら、システム側の切り替えをスキップしてノイズを防止
-                if (!value.IsDefault)
+                // 初期化完了後（ユーザーによる手動変更）の場合のみシステム設定を書き換える
+                // これにより起動時のノイズを防止する
+                if (_isInitialized)
                 {
                     Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
+                    
+                    // 内部状態（IsDefault）を更新
+                    foreach (var d in OutputDevices) d.IsDefault = (d.Id == value.Id);
                 }
                 
                 _ = _settingsService.SetSelectedOutputDeviceIdAsync(value.Id);
@@ -206,10 +213,12 @@ namespace Gamix.UI.ViewModels
         {
             if (value != null)
             {
-                // すでにデフォルトならスキップ
-                if (!value.IsDefault)
+                if (_isInitialized)
                 {
                     Gamix.Core.Audio.DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
+                    
+                    // 内部状態（IsDefault）を更新
+                    foreach (var d in InputDevices) d.IsDefault = (d.Id == value.Id);
                 }
 
                 _ = _settingsService.SetSelectedInputDeviceIdAsync(value.Id);
