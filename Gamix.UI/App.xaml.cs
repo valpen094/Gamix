@@ -82,6 +82,78 @@ namespace Gamix.UI
             // 右クリックメニュー
             var contextMenu = new Forms.ContextMenuStrip();
             contextMenu.Items.Add("開く", null, (s, e) => ShowMainWindow());
+
+            // プリセットメニューの追加
+            var presetsMenuItem = new Forms.ToolStripMenuItem("プリセット");
+            contextMenu.Items.Add(presetsMenuItem);
+
+            // メニューが開かれる直前に動的にプリセット一覧を生成
+            contextMenu.Opening += (s, e) =>
+            {
+                try
+                {
+                    // GDIリソースリークを防ぐため、Clear()前に既存項目をDisposeする
+                    // foreachでコレクションを変更しないよう、先に配列にコピー
+                    var itemsToDispose = presetsMenuItem.DropDownItems.Cast<Forms.ToolStripItem>().ToArray();
+                    presetsMenuItem.DropDownItems.Clear();
+                    foreach (var item in itemsToDispose)
+                    {
+                        item.Dispose();
+                    }
+                    
+                    // ViewModel から現在のプリセット一覧を取得
+                    // WPF Dispatcher経由でスレッドセーフにアクセス
+                    var viewModel = Services.GetRequiredService<MainViewModel>();
+                    List<Gamix.Core.Models.Preset> currentPresets = [];
+                    
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        currentPresets = viewModel.Presets.ToList();
+                    });
+
+                    if (currentPresets.Count != 0)
+                    {
+                        // 現在適用中のプリセット名を取得
+                        string currentPresetName = "";
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            currentPresetName = viewModel.NewPresetName ?? "";
+                        });
+                        
+                        foreach (var preset in currentPresets)
+                        {
+                            var item = new Forms.ToolStripMenuItem(preset.Name);
+                            
+                            // 現在適用中のプリセットにチェックマークを表示
+                            item.Checked = preset.Name == currentPresetName;
+                            
+                            item.Click += (sender, args) =>
+                            {
+                                // プリセット適用コマンドを実行 (WPF Dispatcher経由)
+                                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    if (viewModel.ApplyPresetCommand.CanExecute(preset))
+                                    {
+                                        viewModel.ApplyPresetCommand.Execute(preset);
+                                    }
+                                });
+                            };
+                            presetsMenuItem.DropDownItems.Add(item);
+                        }
+                        presetsMenuItem.Enabled = true;
+                    }
+                    else
+                    {
+                        presetsMenuItem.Enabled = false;
+                    }
+                }
+                catch (Exception)
+                {
+                    // エラーが発生してもメニュー表示は継続（空の状態で表示）
+                    presetsMenuItem.Enabled = false;
+                }
+            };
+
             contextMenu.Items.Add(new Forms.ToolStripSeparator());
             contextMenu.Items.Add("終了", null, (s, e) => ShutdownApp());
             _notifyIcon.ContextMenuStrip = contextMenu;
