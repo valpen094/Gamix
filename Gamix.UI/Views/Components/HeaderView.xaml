@@ -69,50 +69,55 @@
                         </ContentPresenter>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <EventTrigger RoutedEvent="Loaded">
-                            <BeginStoryboard>
-                                <Storyboard RepeatBehavior="Forever">
-                                    <!-- Gentle Bounce (Scale) -->
-                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconTransform"
-                                                                   Storyboard.TargetProperty="ScaleX"
-                                                                   RepeatBehavior="Forever">
-                                        <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.1">
-                                             <EasingDoubleKeyFrame.EasingFunction>
-                                                <SineEase EasingMode="EaseInOut"/>
-                                            </EasingDoubleKeyFrame.EasingFunction>
-                                        </EasingDoubleKeyFrame>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:1.0" Value="1.0">
-                                             <EasingDoubleKeyFrame.EasingFunction>
-                                                <SineEase EasingMode="EaseInOut"/>
-                                            </EasingDoubleKeyFrame.EasingFunction>
-                                        </EasingDoubleKeyFrame>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:2.0" Value="1.0"/> <!-- Pause -->
-                                    </DoubleAnimationUsingKeyFrames>
-                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconTransform"
-                                                                   Storyboard.TargetProperty="ScaleY"
-                                                                   RepeatBehavior="Forever">
-                                        <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.1">
-                                             <EasingDoubleKeyFrame.EasingFunction>
-                                                <SineEase EasingMode="EaseInOut"/>
-                                            </EasingDoubleKeyFrame.EasingFunction>
-                                        </EasingDoubleKeyFrame>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:1.0" Value="1.0">
-                                             <EasingDoubleKeyFrame.EasingFunction>
-                                                <SineEase EasingMode="EaseInOut"/>
-                                            </EasingDoubleKeyFrame.EasingFunction>
-                                        </EasingDoubleKeyFrame>
-                                        <EasingDoubleKeyFrame KeyTime="0:0:2.0" Value="1.0"/> <!-- Pause -->
-                                    </DoubleAnimationUsingKeyFrames>
-                        
-                                    <!-- Rainbow Rotate (Continuous) -->
-                                    <DoubleAnimation Storyboard.TargetName="RainbowBrush"
-                                                     Storyboard.TargetProperty="(LinearGradientBrush.Transform).(RotateTransform.Angle)"
-                                                     From="0" To="360" Duration="0:0:3" RepeatBehavior="Forever"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
+                        <Trigger Property="IsVisible" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="AppIconAnimation">
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <!-- Gentle Bounce (Scale) -->
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconTransform"
+                                                                       Storyboard.TargetProperty="ScaleX"
+                                                                       RepeatBehavior="Forever">
+                                            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.1">
+                                                 <EasingDoubleKeyFrame.EasingFunction>
+                                                    <SineEase EasingMode="EaseInOut"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:1.0" Value="1.0">
+                                                 <EasingDoubleKeyFrame.EasingFunction>
+                                                    <SineEase EasingMode="EaseInOut"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:2.0" Value="1.0"/> <!-- Pause -->
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconTransform"
+                                                                       Storyboard.TargetProperty="ScaleY"
+                                                                       RepeatBehavior="Forever">
+                                            <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1.0"/>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1.1">
+                                                 <EasingDoubleKeyFrame.EasingFunction>
+                                                    <SineEase EasingMode="EaseInOut"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:1.0" Value="1.0">
+                                                 <EasingDoubleKeyFrame.EasingFunction>
+                                                    <SineEase EasingMode="EaseInOut"/>
+                                                </EasingDoubleKeyFrame.EasingFunction>
+                                            </EasingDoubleKeyFrame>
+                                            <EasingDoubleKeyFrame KeyTime="0:0:2.0" Value="1.0"/> <!-- Pause -->
+                                        </DoubleAnimationUsingKeyFrames>
+                            
+                                        <!-- Rainbow Rotate (Continuous) -->
+                                        <DoubleAnimation Storyboard.TargetName="RainbowBrush"
+                                                         Storyboard.TargetProperty="(LinearGradientBrush.Transform).(RotateTransform.Angle)"
+                                                         From="0" To="360" Duration="0:0:3" RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="AppIconAnimation"/>
+                            </Trigger.ExitActions>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Button.Template>
@@ -175,29 +180,6 @@
                 ToolTip="テーマを変更"
                 Click="PaletteButton_Click"
                 Padding="0,0,0,2">
-            <Button.Resources>
-            <ContextMenu x:Key="ThemeMenu" ItemsSource="{Binding AvailableThemes}" Placement="Bottom">
-                <ContextMenu.Resources>
-                    <local_conv:EqualityConverter x:Key="EqualityConverter" xmlns:local_conv="clr-namespace:Gamix.UI.Converters"/>
-                </ContextMenu.Resources>
-                <ContextMenu.ItemContainerStyle>
-                    <Style TargetType="MenuItem">
-                        <Setter Property="Header" Value="{Binding}"/>
-                        <Setter Property="Command" Value="{Binding DataContext.ChangeThemeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                        <Setter Property="CommandParameter" Value="{Binding}"/>
-                        <Setter Property="IsCheckable" Value="True"/>
-                        <Setter Property="IsChecked">
-                            <Setter.Value>
-                                <MultiBinding Converter="{StaticResource EqualityConverter}" Mode="OneWay">
-                                    <Binding Path="."/>
-                                    <Binding Path="DataContext.CurrentTheme" RelativeSource="{RelativeSource AncestorType=ContextMenu}"/>
-                                </MultiBinding>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ContextMenu.ItemContainerStyle>
-            </ContextMenu>
-            </Button.Resources>
             <Button.Style>
                 <Style TargetType="Button">
                     <Setter Property="Background" Value="{DynamicResource Brush_AccentPrimary}"/>

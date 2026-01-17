@@ -24,12 +24,15 @@ namespace Gamix.UI.Views.Components
 
         private void PaletteButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is System.Windows.Controls.Button button && button.Resources["ThemeMenu"] is System.Windows.Controls.ContextMenu menu)
+            if (DataContext is ViewModels.MainViewModel viewModel)
             {
-                // Ensure DataContext is passed down since it's not in the visual tree
-                menu.DataContext = button.DataContext;
-                menu.PlacementTarget = button;
-                menu.IsOpen = true;
+                // Pass a callback to apply the theme immediately without closing the dialog
+                var dialog = new ThemeSelectionDialog(viewModel.AvailableThemes, viewModel.CurrentTheme, (theme) => 
+                {
+                    viewModel.ChangeThemeCommand.Execute(theme);
+                });
+                dialog.Owner = Window.GetWindow(this);
+                dialog.ShowDialog();
             }
         }
     }
