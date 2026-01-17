@@ -28,7 +28,7 @@
                                     <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{x:Null}">
                                         <RepeatButton.Template>
                                             <ControlTemplate TargetType="{x:Type RepeatButton}">
-                                                <Border Background="{DynamicResource Brush_AccentPrimary}" CornerRadius="10,0,0,10" Height="20">
+                                                <Border Background="{DynamicResource Brush_SliderBar}" CornerRadius="10,0,0,10" Height="20">
                                                     <Border.Effect>
                                                         <DynamicResource ResourceKey="Effect_Glow"/>
                                                     </Border.Effect>
@@ -51,7 +51,7 @@
                                         <Thumb.Template>
                                             <ControlTemplate TargetType="{x:Type Thumb}">
                                                 <Grid>
-                                                    <Ellipse Fill="{DynamicResource Brush_AccentPrimary}" Stroke="White" StrokeThickness="3"
+                                                    <Ellipse Fill="{DynamicResource Brush_SliderThumb}" Stroke="White" StrokeThickness="3"
                                                              Effect="{DynamicResource Effect_Glow}">
                                                     </Ellipse>
                                                 </Grid>
