@@ -15,7 +15,7 @@
     <SolidColorBrush x:Key="Brush_Background" Color="{StaticResource Color_Background}"/>
     <SolidColorBrush x:Key="Brush_Foreground" Color="{StaticResource Color_Foreground}"/>
     <SolidColorBrush x:Key="Brush_CardBackground" Color="{StaticResource Color_CardBackground}"/>
-    <SolidColorBrush x:Key="Brush_ButtonForeground" Color="{StaticResource Color_ButtonForeground}"/>
+    <SolidColorBrush x:Key="Brush_ButtonForeground" Color="{StaticResource Color_Foreground}"/>
     
     <!-- 3. Accent Brushes -->
     <SolidColorBrush x:Key="Brush_AccentPrimary" Color="{StaticResource Color_AccentPrimary}"/>

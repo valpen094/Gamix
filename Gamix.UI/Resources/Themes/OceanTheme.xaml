@@ -10,13 +10,13 @@
     <Color x:Key="Color_AccentPrimaryStart">#29B6F6</Color> <!-- Light Blue 400 -->
     <Color x:Key="Color_AccentPrimaryEnd">#039BE5</Color> <!-- Light Blue 600 -->
     <Color x:Key="Color_AccentSecondary">#4DD0E1</Color> <!-- Cyan Accent -->
-    <Color x:Key="Color_AccentTertiary">#E1F5FE</Color> <!-- Lightest Blue -->
+    <Color x:Key="Color_AccentTertiary">#FFFFFF</Color> <!-- Utility buttons remain white for contrast -->
 
     <!-- 2. Base Brushes -->
     <SolidColorBrush x:Key="Brush_Background" Color="{StaticResource Color_Background}"/>
     <SolidColorBrush x:Key="Brush_Foreground" Color="{StaticResource Color_Foreground}"/>
     <SolidColorBrush x:Key="Brush_CardBackground" Color="{StaticResource Color_CardBackground}"/>
-    <SolidColorBrush x:Key="Brush_ButtonForeground" Color="{StaticResource Color_ButtonForeground}"/>
+    <SolidColorBrush x:Key="Brush_ButtonForeground" Color="{StaticResource Color_Foreground}"/>
     
     <!-- 3. Accent Brushes -->
     <LinearGradientBrush x:Key="Brush_AccentPrimary" StartPoint="0,0.5" EndPoint="1,0.5">
@@ -24,7 +24,11 @@
         <GradientStop Color="{StaticResource Color_AccentPrimaryEnd}" Offset="1.0"/>
     </LinearGradientBrush>
     <SolidColorBrush x:Key="Brush_AccentSecondary" Color="{StaticResource Color_AccentSecondary}"/>
-    <SolidColorBrush x:Key="Brush_AccentTertiary" Color="{StaticResource Color_AccentTertiary}"/>
+    <LinearGradientBrush x:Key="Brush_AccentTertiary" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FFF2DA" Offset="0.0"/>
+        <GradientStop Color="#FFE4B5" Offset="0.5"/>
+        <GradientStop Color="#FFF2DA" Offset="1.0"/>
+    </LinearGradientBrush>
 
     <!-- 4. Slider Brushes -->
     <LinearGradientBrush x:Key="Brush_SliderBar" StartPoint="0,0.5" EndPoint="1,0.5">
