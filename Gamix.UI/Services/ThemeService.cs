@@ -64,8 +64,6 @@ namespace Gamix.UI.Services
             return new List<string>
             {
                 "Pastel",
-                "Dark",
-                "Light",
                 "Gaming"
             };
         }
