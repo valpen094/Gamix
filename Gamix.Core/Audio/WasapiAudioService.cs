@@ -251,8 +251,119 @@ namespace Gamix.Core.Audio
             }
         }
 
+        private AudioSessionManager? _currentSessionManager;
+        private string? _monitoringDeviceId;
+        private readonly List<(AudioSessionControl Session, SessionEventsListener Listener)> _monitoredWrapperSessions = new();
+        private readonly object _lock = new object();
+
+        /// <inheritdoc/>
+        public void StartSessionMonitoring(string deviceId)
+        {
+            if (_monitoringDeviceId == deviceId && _currentSessionManager != null) return;
+
+            StopSessionMonitoring();
+
+            try
+            {
+                var device = _enumerator.GetDevice(deviceId);
+                _currentSessionManager = device.AudioSessionManager;
+                _currentSessionManager.OnSessionCreated += OnSessionCreated;
+                
+                // 既存セッションも監視
+                var sessions = _currentSessionManager.Sessions;
+                for (int i = 0; i < sessions.Count; i++)
+                {
+                    var session = sessions[i];
+                    RegisterSessionEvents(session);
+                }
+
+                _monitoringDeviceId = deviceId;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error starting session monitoring: {ex.Message}");
+            }
+        }
+
+        private void StopSessionMonitoring()
+        {
+            if (_currentSessionManager != null)
+            {
+                _currentSessionManager.OnSessionCreated -= OnSessionCreated;
+                _currentSessionManager = null;
+            }
+            
+            lock (_lock)
+            {
+                foreach (var (session, listener) in _monitoredWrapperSessions)
+                {
+                    try 
+                    {
+                        session.UnRegisterEventClient(listener);
+                        session.Dispose();
+                    }
+                    catch { /* 無視 */ }
+                }
+                _monitoredWrapperSessions.Clear();
+            }
+            
+            _monitoringDeviceId = null;
+        }
+
+        private void OnSessionCreated(object? sender, IAudioSessionControl e)
+        {
+            try
+            {
+                // NAudio の AudioSessionControl ラッパーを作成
+                var wrapper = new AudioSessionControl(e);
+                RegisterSessionEvents(wrapper);
+                OnSessionsChanged();
+            }
+            catch { /* 無視 */ }
+        }
+
+        private void RegisterSessionEvents(AudioSessionControl session)
+        {
+            if (session.State == AudioSessionState.AudioSessionStateExpired) return;
+
+            var listener = new SessionEventsListener(this);
+            session.RegisterEventClient(listener);
+
+            lock (_lock)
+            {
+                _monitoredWrapperSessions.Add((session, listener));
+            }
+        }
+
+        public void HandleSessionEvent()
+        {
+            OnSessionsChanged();
+        }
+        
+        // IAudioSessionEventsHandler implementation
+        private class SessionEventsListener : IAudioSessionEventsHandler
+        {
+            private readonly WasapiAudioService _service;
+            public SessionEventsListener(WasapiAudioService service) { _service = service; }
+            
+            public void OnDisplayNameChanged(string displayName) { }
+            public void OnIconPathChanged(string iconPath) { }
+            public void OnVolumeChanged(float volume, bool isMuted) { }
+            public void OnChannelVolumeChanged(uint channelCount, IntPtr newChannelVolumeArray, uint changedChannel) { }
+            public void OnGroupingParamChanged(ref Guid groupingId) { }
+            public void OnStateChanged(AudioSessionState state) 
+            { 
+                _service.HandleSessionEvent();
+            }
+            public void OnSessionDisconnected(AudioSessionDisconnectReason disconnectReason) 
+            {
+                 _service.HandleSessionEvent();
+            }
+        }
+        
         public void Dispose()
         {
+            StopSessionMonitoring();
             UnregisterNotificationClient();
             _enumerator?.Dispose();
         }

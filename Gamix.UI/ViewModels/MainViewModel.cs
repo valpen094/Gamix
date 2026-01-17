@@ -114,10 +114,30 @@ namespace Gamix.UI.ViewModels
             _settingsService = settingsService;
             _themeService = themeService;
             _audioService.DevicesChanged += OnDevicesChanged;
+            _audioService.SessionsChanged += OnSessionsChanged;
             InitializeAsync();
         }
 
         private System.Threading.CancellationTokenSource? _devicesChangedCts;
+        private System.Threading.CancellationTokenSource? _sessionsChangedCts;
+
+        private void OnSessionsChanged()
+        {
+            // セッション変更イベントのデバウンス
+            _sessionsChangedCts?.Cancel();
+            _sessionsChangedCts = new System.Threading.CancellationTokenSource();
+            var token = _sessionsChangedCts.Token;
+
+            Task.Delay(300, token).ContinueWith(async _ =>
+            {
+                if (token.IsCancellationRequested) return;
+
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    await LoadSessionsAsync();
+                });
+            }, TaskScheduler.Default);
+        }
 
         private void OnDevicesChanged()
         {
@@ -257,6 +277,9 @@ namespace Gamix.UI.ViewModels
                 _ = LoadMasterVolumeAsync();
                 LoadPresets(); // デバイス変更時にプリセット一覧も更新
                 NewPresetName = string.Empty; // プリセット名入力欄をクリア
+
+                // セッションの動的監視を開始
+                _audioService.StartSessionMonitoring(value.Id);
             }
         }
 

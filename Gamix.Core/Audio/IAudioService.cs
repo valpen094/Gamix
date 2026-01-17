@@ -74,5 +74,11 @@ namespace Gamix.Core.Audio
         /// オーディオデバイスの構成（追加・削除・デフォルト変更）が変更されたときに発火するイベント。
         /// </summary>
         event Action? DevicesChanged;
+
+        /// <summary>
+        /// 指定したデバイスのセッション変更（作成・終了）の監視を開始します。
+        /// </summary>
+        /// <param name="deviceId">監視対象のデバイスID。</param>
+        void StartSessionMonitoring(string deviceId);
     }
 }
