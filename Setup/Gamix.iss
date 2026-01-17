@@ -21,6 +21,8 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 DisableProgramGroupPage=yes
+ShowLanguageDialog=auto
+UsePreviousLanguage=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -35,6 +37,21 @@ Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Flags: nowait
+
+[CustomMessages]
+english.MaintenanceTitle={#MyAppName} is already installed.
+english.MaintenanceSubTitle=Select the operation you want to perform.
+english.MaintenanceInstruction=Select one of the following options and click Next.
+english.MaintenanceRepair=Repair - Reinstall the application
+english.MaintenanceUninstall=Uninstall - Remove the application
+english.MaintenanceConfirmUninstall=Are you sure you want to uninstall?
+
+japanese.MaintenanceTitle={#MyAppName} は既にインストールされています
+japanese.MaintenanceSubTitle=実行する操作を選択してください
+japanese.MaintenanceInstruction=以下のオプションから選択し、「次へ」をクリックしてください。
+japanese.MaintenanceRepair=修復 - アプリケーションを再インストールします
+japanese.MaintenanceUninstall=アンインストール - アプリケーションを削除します
+japanese.MaintenanceConfirmUninstall=本当にアンインストールしますか?
 
 [Code]
 var
@@ -106,13 +123,13 @@ begin
     IsUpgrade := True;
     
     MaintenancePage := CreateInputOptionPage(wpWelcome,
-      '{#MyAppName} は既にインストールされています',
-      '実行する操作を選択してください',
-      '以下のオプションから選択し、「次へ」をクリックしてください。',
+      CustomMessage('MaintenanceTitle'),
+      CustomMessage('MaintenanceSubTitle'),
+      CustomMessage('MaintenanceInstruction'),
       True, False);
     
-    MaintenancePage.Add('修復 - アプリケーションを再インストールします');
-    MaintenancePage.Add('アンインストール - アプリケーションを削除します');
+    MaintenancePage.Add(CustomMessage('MaintenanceRepair'));
+    MaintenancePage.Add(CustomMessage('MaintenanceUninstall'));
     MaintenancePage.Values[0] := True; // デフォルトは修復
   end
   else
@@ -131,7 +148,7 @@ begin
     // アンインストールが選択された場合
     if MaintenancePage.Values[1] then
     begin
-      if MsgBox('本当にアンインストールしますか?', mbConfirmation, MB_YESNO) = IDYES then
+      if MsgBox(CustomMessage('MaintenanceConfirmUninstall'), mbConfirmation, MB_YESNO) = IDYES then
       begin
         DoUninstall();
         Result := False; // セットアップを終了
