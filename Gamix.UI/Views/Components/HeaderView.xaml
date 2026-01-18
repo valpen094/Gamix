@@ -203,19 +203,34 @@
         <!-- Palette Button -->
         <Button Grid.Column="4" Content="🎨"
                 Width="28" Height="28" Margin="0,0,8,0"
-                BorderThickness="0" FontSize="16"
+                BorderThickness="0" FontSize="18"
                 ToolTip="テーマを変更"
                 Click="PaletteButton_Click"
                 Padding="0,0,0,2">
             <Button.Style>
                 <Style TargetType="Button">
-                    <Setter Property="Background" Value="{DynamicResource Brush_AccentTertiary}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource Brush_ButtonForeground}"/>
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#FF0080" Offset="0.0"/>
+                                <GradientStop Color="#FF8C00" Offset="0.2"/>
+                                <GradientStop Color="#FFFF00" Offset="0.4"/>
+                                <GradientStop Color="#00FF00" Offset="0.6"/>
+                                <GradientStop Color="#00FFFF" Offset="0.8"/>
+                                <GradientStop Color="#8000FF" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Foreground" Value="White"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}">
+                                        <ContentPresenter.Effect>
+                                            <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="0" Opacity="1"/>
+                                        </ContentPresenter.Effect>
+                                    </ContentPresenter>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
