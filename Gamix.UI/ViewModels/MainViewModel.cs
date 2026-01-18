@@ -54,10 +54,12 @@ namespace Gamix.UI.ViewModels
             Themes = themeViewModel;
 
             Devices.PropertyChanged += Devices_PropertyChanged;
-            InitializeAsync();
         }
 
-        private async void InitializeAsync()
+        /// <summary>
+        /// ViewModel を初期化します。App 側で await してからウィンドウを表示してください。
+        /// </summary>
+        public async Task InitializeAsync()
         {
             await Devices.InitializeAsync();
             

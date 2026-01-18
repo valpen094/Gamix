@@ -47,7 +47,7 @@ namespace Gamix.UI
             return services.BuildServiceProvider();
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
             
@@ -58,6 +58,10 @@ namespace Gamix.UI
             // テーマ画像のプリロード（初回表示時の遅延解消）
             var themes = new[] { Gamix.Core.Constants.Themes.Gaming, Gamix.Core.Constants.Themes.Pastel };
             _ = ViewModels.ThemeSelectionViewModel.PreloadImagesAsync(themes);
+
+            // ViewModel の初期化完了を待ってからウィンドウを表示
+            var mainViewModel = Services.GetRequiredService<MainViewModel>();
+            await mainViewModel.InitializeAsync();
 
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.Show();
