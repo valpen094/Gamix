@@ -1,7 +1,7 @@
 ; Gamix Installer Script for Inno Setup
 
 #define MyAppName "Gamix"
-#define MyAppVersion "0.0.1"
+#define MyAppVersion "0.0.2"
 #define MyAppPublisher "Gamix Team"
 #define MyAppExeName "Gamix.exe"
 #define MyAppId "{7B2F6E1C-6A5D-4E92-B7A1-4F9E82C3D04C}"
