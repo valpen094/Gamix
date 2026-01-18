@@ -43,9 +43,118 @@
     <DropShadowEffect x:Key="Effect_SidebarGlow" Color="{StaticResource Color_AccentPrimaryStart}" BlurRadius="20" ShadowDepth="0" Opacity="0.6"/>
 
     <!-- 6. Global Styles -->
-    <Style TargetType="Window">
-        <Setter Property="Background" Value="{StaticResource Brush_Background}"/>
-        <Setter Property="FontFamily" Value="Segoe UI Semibold"/>
+    <!-- Gaming Sidebar Toggle Button Style (Electric Flash) -->
+    <Style x:Key="Style_SidebarToggleButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid>
+                        <!-- Electric Core (Pulsing Background) -->
+                        <Ellipse x:Name="ElectricPulse" Width="40" Height="40" Opacity="0.8" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
+                            <Ellipse.Fill>
+                                <LinearGradientBrush x:Name="ElectricBrush" StartPoint="0,0" EndPoint="1,1">
+                                    <LinearGradientBrush.Transform>
+                                        <RotateTransform Angle="0" CenterX="0.5" CenterY="0.5"/>
+                                    </LinearGradientBrush.Transform>
+                                    <!-- Dark Magenta base with bright Cyan spark -->
+                                    <GradientStop Color="#400040" Offset="0.0"/>   <!-- Dark Purple -->
+                                    <GradientStop x:Name="SparkStop" Color="#00FFFF" Offset="0.3"/>   <!-- Cyan Spark -->
+                                    <GradientStop Color="#FF00C7" Offset="0.5"/>   <!-- Magenta -->
+                                    <GradientStop Color="#400040" Offset="1.0"/>   <!-- Dark Purple -->
+                                </LinearGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                        
+                        <!-- Lightning Arcs (Simulated with rotating border or strokes - simplified to just Flash for now) -->
+                        <Ellipse Width="36" Height="36" Stroke="#FFFFFF" StrokeThickness="1" Opacity="0.3" IsHitTestVisible="False">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="2"/>
+                            </Ellipse.Effect>
+                        </Ellipse>
+
+                        <!-- Icon Content -->
+                        <ContentPresenter x:Name="IconPresenter" Content="🎵" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-1,-2,0,0"
+                                          RenderTransformOrigin="0.5,0.5"
+                                          Effect="{DynamicResource Effect_Glow}">
+                             <!-- Restored icon to Note -->
+                            <ContentPresenter.RenderTransform>
+                                <ScaleTransform x:Name="IconTransform" ScaleX="1" ScaleY="1"/>
+                            </ContentPresenter.RenderTransform>
+                            <ContentPresenter.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsVisible" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="ElectricAnimation">
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <!-- Neon Flicker (Rapid irregular opacity changes) -->
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ElectricPulse"
+                                                                       Storyboard.TargetProperty="Opacity"
+                                                                       RepeatBehavior="Forever">
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.00" Value="0.9"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.03" Value="0.7"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.06" Value="0.95"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.08" Value="0.75"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.12" Value="1.0"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.15" Value="0.85"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.20" Value="0.9"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.25" Value="0.6"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.28" Value="1.0"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.35" Value="0.9"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.40" Value="0.8"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.50" Value="0.95"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                        
+                                        <!-- Subtle Scale Jitter (Vibration) -->
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconTransform"
+                                                                       Storyboard.TargetProperty="ScaleX"
+                                                                       RepeatBehavior="Forever">
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.00" Value="1.0"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.05" Value="1.02"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.10" Value="0.98"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.15" Value="1.01"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.20" Value="1.0"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.25" Value="0.99"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.30" Value="1.02"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.35" Value="1.0"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.40" Value="1.01"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.45" Value="0.99"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.50" Value="1.0"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconTransform"
+                                                                       Storyboard.TargetProperty="ScaleY"
+                                                                       RepeatBehavior="Forever">
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.00" Value="1.0"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.05" Value="0.99"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.10" Value="1.02"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.15" Value="0.98"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.20" Value="1.0"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.25" Value="1.01"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.30" Value="0.99"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.35" Value="1.0"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.40" Value="0.98"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.45" Value="1.01"/>
+                                            <DiscreteDoubleKeyFrame KeyTime="0:0:0.50" Value="1.0"/>
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="ElectricAnimation"/>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>
