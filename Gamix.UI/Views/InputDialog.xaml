@@ -41,6 +41,7 @@
                 <TextBox x:Name="InputTextBox" 
                          Grid.Row="1" 
                          FontSize="14"
+                         MaxLength="30"
                          Padding="12,0"
                          Height="40"
                          VerticalContentAlignment="Center"
@@ -56,10 +57,25 @@
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="10">
-                                <ScrollViewer x:Name="PART_ContentHost" 
-                                              VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"/>
+                                <Grid>
+                                    <ScrollViewer x:Name="PART_ContentHost" 
+                                                  VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"/>
+                                    <TextBlock x:Name="PlaceholderText" 
+                                               Text="Max 5 chars" 
+                                               Foreground="{DynamicResource Brush_Foreground}"
+                                               Opacity="0.4"
+                                               VerticalAlignment="Center"
+                                               Margin="14,0,0,0"
+                                               IsHitTestVisible="False"
+                                               Visibility="Collapsed"/>
+                                </Grid>
                             </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </TextBox.Template>
                 </TextBox>

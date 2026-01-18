@@ -132,9 +132,11 @@
         
         <!-- Preset Input -->
         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
-            <TextBox Width="100" Height="28" Margin="0,0,8,0" 
-                     Text="{Binding NewPresetName, UpdateSourceTrigger=PropertyChanged}" 
-                     VerticalContentAlignment="Center" Padding="8,0"
+            <TextBox x:Name="PresetNameTextBox" Width="150" Height="28" Margin="0,0,8,0" 
+                     Text="{Binding NewPresetName, UpdateSourceTrigger=PropertyChanged}"
+                     TextChanged="PresetNameTextBox_TextChanged" 
+                      MaxLength="30"
+                      VerticalContentAlignment="Center" Padding="8,0"
                      BorderThickness="1" BorderBrush="{DynamicResource Brush_AccentSecondary}"
                      Background="{DynamicResource Brush_CardBackground}"
                      Foreground="{DynamicResource Brush_Foreground}"
@@ -145,10 +147,25 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="14">
-                            <ScrollViewer x:Name="PART_ContentHost" 
-                                          VerticalAlignment="Center"
-                                          Margin="{TemplateBinding Padding}"/>
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost" 
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                                <TextBlock x:Name="PlaceholderText" 
+                                           Text="Max 5 chars" 
+                                           Foreground="{DynamicResource Brush_Foreground}"
+                                           Opacity="0.4"
+                                           VerticalAlignment="Center"
+                                           Margin="10,0,0,0"
+                                           IsHitTestVisible="False"
+                                           Visibility="Collapsed"/>
+                            </Grid>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </TextBox.Template>
             </TextBox>

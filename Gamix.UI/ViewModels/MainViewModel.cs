@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gamix.Core.Models;
 using Gamix.Core.Services;
+using Gamix.Core.Utils;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -128,6 +129,9 @@ namespace Gamix.UI.ViewModels
         {
             if (string.IsNullOrWhiteSpace(NewPresetName) || Devices.SelectedOutputDevice == null) return;
             
+            // 文字数制限 (見た目の5文字)
+            var name = NewPresetName.TruncateVisual(5);
+            
             var currentModels = Sessions.Sessions.Select(s => new AudioSession 
             { 
                 Id = s.Id, 
@@ -137,7 +141,7 @@ namespace Gamix.UI.ViewModels
             }).ToList();
             
             await _presetService.SavePresetAsync(
-                NewPresetName, 
+                name, 
                 Devices.SelectedOutputDevice.Id, 
                 Devices.MasterVolume / 100f, 
                 false, 
@@ -187,9 +191,11 @@ namespace Gamix.UI.ViewModels
         [RelayCommand]
         private async Task RenamePreset((Preset Preset, string NewName) args)
         {
-            if (args.Preset == null || string.IsNullOrEmpty(args.NewName) || string.IsNullOrEmpty(args.Preset.DeviceId)) return;
+            if (args.Preset == null || string.IsNullOrWhiteSpace(args.NewName) || string.IsNullOrEmpty(args.Preset.DeviceId)) return;
             
-            await _presetService.RenamePresetAsync(args.Preset.Name, args.Preset.DeviceId, args.NewName);
+            var newName = args.NewName.TruncateVisual(5);
+            
+            await _presetService.RenamePresetAsync(args.Preset.Name, args.Preset.DeviceId, newName);
             LoadPresets();
         }
 
