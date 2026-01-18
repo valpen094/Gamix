@@ -86,5 +86,11 @@ namespace Gamix.Core.Audio
         /// 引数: (sessionId, volume, isMuted)
         /// </summary>
         event Action<string, float, bool>? SessionVolumeChanged;
+
+        /// <summary>
+        /// デバイスのマスター音量が変更されたときに発火するイベント。
+        /// 引数: (deviceId, volume, isMuted)
+        /// </summary>
+        event Action<string, float, bool>? DeviceMasterVolumeChanged;
     }
 }

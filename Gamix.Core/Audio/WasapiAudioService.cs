@@ -351,6 +351,13 @@ namespace Gamix.Core.Audio
             SessionVolumeChanged?.Invoke(sessionId, volume, isMuted);
         }
 
+        public event Action<string, float, bool>? DeviceMasterVolumeChanged;
+
+        protected virtual void OnDeviceMasterVolumeChanged(string deviceId, float volume, bool isMuted)
+        {
+            DeviceMasterVolumeChanged?.Invoke(deviceId, volume, isMuted);
+        }
+
         private NotificationClient? _notificationClient;
 
         private void RegisterNotificationClient()
@@ -408,6 +415,9 @@ namespace Gamix.Core.Audio
                     RegisterSessionEvents(session);
                 }
 
+                // デバイスのマスター音量変更を監視
+                device.AudioEndpointVolume.OnVolumeNotification += OnDeviceVolumeNotification;
+
                 _monitoringDeviceId = deviceId;
             }
             catch (Exception)
@@ -418,6 +428,15 @@ namespace Gamix.Core.Audio
 
         private void StopSessionMonitoring()
         {
+            if (_monitoringDevice != null)
+            {
+                try
+                {
+                    _monitoringDevice.AudioEndpointVolume.OnVolumeNotification -= OnDeviceVolumeNotification;
+                }
+                catch { }
+            }
+
             if (_currentSessionManager != null)
             {
                 _currentSessionManager.OnSessionCreated -= OnSessionCreated;
@@ -487,6 +506,14 @@ namespace Gamix.Core.Audio
         public void HandleSessionVolumeEvent(string sessionId, float volume, bool isMuted)
         {
             OnSessionVolumeChanged(sessionId, volume, isMuted);
+        }
+
+        private void OnDeviceVolumeNotification(AudioVolumeNotificationData data)
+        {
+            if (_monitoringDeviceId != null)
+            {
+                OnDeviceMasterVolumeChanged(_monitoringDeviceId, data.MasterVolume, data.Muted);
+            }
         }
         
         // IAudioSessionEventsHandler implementation

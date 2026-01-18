@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Gamix.Core.Audio;
 using Gamix.Core.Models;
 using Gamix.Core.Services;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Gamix.UI.ViewModels
 {
-    public partial class DeviceViewModel : ObservableObject
+    public partial class DeviceViewModel : ObservableObject, IDisposable
     {
         private readonly IAudioService _audioService;
         private readonly ISettingsService _settingsService;
@@ -45,6 +46,7 @@ namespace Gamix.UI.ViewModels
             _audioService = audioService;
             _settingsService = settingsService;
             _audioService.DevicesChanged += OnDevicesChanged;
+            _audioService.DeviceMasterVolumeChanged += OnDeviceMasterVolumeChanged;
         }
 
         public async Task InitializeAsync()
@@ -245,6 +247,57 @@ namespace Gamix.UI.ViewModels
                     existing.IsDefault = newDevice.IsDefault;
                 }
             }
+        }
+
+        private void OnDeviceMasterVolumeChanged(string deviceId, float volume, bool isMuted)
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (SelectedOutputDevice?.Id == deviceId)
+                {
+                    UpdateMasterVolume(volume * 100f, isMuted);
+                }
+                else if (SelectedInputDevice?.Id == deviceId)
+                {
+                    UpdateInputMasterVolume(volume * 100f, isMuted);
+                }
+            });
+        }
+
+        public void UpdateMasterVolume(float volume, bool isMuted)
+        {
+            if (_masterVolume != volume)
+            {
+                _masterVolume = volume;
+                OnPropertyChanged(nameof(MasterVolume));
+            }
+            if (_isOutputMuted != isMuted)
+            {
+                _isOutputMuted = isMuted;
+                OnPropertyChanged(nameof(IsOutputMuted));
+            }
+        }
+
+        public void UpdateInputMasterVolume(float volume, bool isMuted)
+        {
+            if (_inputMasterVolume != volume)
+            {
+                _inputMasterVolume = volume;
+                OnPropertyChanged(nameof(InputMasterVolume));
+            }
+            if (_isInputMuted != isMuted)
+            {
+                _isInputMuted = isMuted;
+                OnPropertyChanged(nameof(IsInputMuted));
+            }
+        }
+
+        public void Dispose()
+        {
+            _audioService.DevicesChanged -= OnDevicesChanged;
+            _audioService.DeviceMasterVolumeChanged -= OnDeviceMasterVolumeChanged;
+            _devicesChangedCts?.Cancel();
+            _devicesChangedCts?.Dispose();
         }
     }
 }

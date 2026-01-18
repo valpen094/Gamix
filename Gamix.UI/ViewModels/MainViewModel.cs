@@ -69,7 +69,7 @@ namespace Gamix.UI.ViewModels
             if (Devices.SelectedOutputDevice != null)
             {
                 await Sessions.LoadSessionsAsync(Devices.SelectedOutputDevice.Id);
-                Sessions.SetCurrentDeviceId(Devices.SelectedOutputDevice.Id);
+                Sessions.CurrentDeviceId = Devices.SelectedOutputDevice.Id;
                 _audioService.StartSessionMonitoring(Devices.SelectedOutputDevice.Id);
             }
         }
@@ -82,7 +82,7 @@ namespace Gamix.UI.ViewModels
                 
                 // セッションリスト更新
                 _ = Sessions.LoadSessionsAsync(deviceId);
-                Sessions.SetCurrentDeviceId(deviceId);
+                Sessions.CurrentDeviceId = deviceId;
                 if (deviceId != null) _audioService.StartSessionMonitoring(deviceId);
 
                 // プリセットリスト更新

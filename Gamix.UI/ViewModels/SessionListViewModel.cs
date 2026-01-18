@@ -1,17 +1,25 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Gamix.Core.Audio;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Gamix.UI.ViewModels
 {
-    public partial class SessionListViewModel : ObservableObject
+    public partial class SessionListViewModel : ObservableObject, IDisposable
     {
         private readonly IAudioService _audioService;
-        private System.Threading.CancellationTokenSource? _sessionsChangedCts;
+        private readonly Dictionary<string, AudioSessionViewModel> _sessionMap = new();
+        private readonly object _lock = new();
+        private CancellationTokenSource? _sessionsChangedCts;
 
         public ObservableCollection<AudioSessionViewModel> Sessions { get; } = [];
+
+        [ObservableProperty]
+        private string? _currentDeviceId;
 
         public SessionListViewModel(IAudioService audioService)
         {
@@ -23,56 +31,68 @@ namespace Gamix.UI.ViewModels
         public async Task LoadSessionsAsync(string? deviceId)
         {
             var sessions = await _audioService.GetActiveSessionsAsync(deviceId);
-            Sessions.Clear();
-            foreach (var s in sessions)
+            
+            lock (_lock)
             {
-                // マスターボリュームは上部に専用UIがあるため、セッションリストからは除外
-                if (s.IsMaster) continue;
-                Sessions.Add(new AudioSessionViewModel(s, _audioService));
+                Sessions.Clear();
+                _sessionMap.Clear();
+
+                foreach (var s in sessions)
+                {
+                    if (s.IsMaster) continue;
+
+                    var viewModel = new AudioSessionViewModel(s, _audioService);
+                    Sessions.Add(viewModel);
+                    _sessionMap[s.Id] = viewModel;
+                }
             }
         }
 
         private void OnSessionsChanged()
         {
-            // セッション変更イベントのデバウンス
-            _sessionsChangedCts?.Cancel();
-            _sessionsChangedCts = new System.Threading.CancellationTokenSource();
-            var token = _sessionsChangedCts.Token;
-
-            Task.Delay(300, token).ContinueWith(async _ =>
-            {
-                if (token.IsCancellationRequested) return;
-
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
-                {
-                    // Note: MainViewModel needs to tell us WHICH device ID to load.
-                    // Ideally, we store currentDeviceId here or expose an Event/Command to request refresh.
-                    // For now, let's expose an event "RefreshRequested" or similar, or just let MainViewModel handle the orchestration if it owns this VM.
-                    // But if MainViewModel owns this VM, MainViewModel should subscribe to this VM's need to refresh?
-                    // Actually, OnSessionsChanged comes from AudioService.
-                    // We need the current Device ID to reload.
-                    // Let's store CurrentDeviceId property here.
-                    if (_currentDeviceId != null)
-                    {
-                        await LoadSessionsAsync(_currentDeviceId);
-                    }
-                });
-            }, TaskScheduler.Default);
+            DebounceAndReload(300);
         }
 
         private void OnSessionVolumeChanged(string sessionId, float volume, bool isMuted)
         {
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                var sessionVm = Sessions.FirstOrDefault(vm => vm.Id == sessionId);
-                sessionVm?.UpdateVolume(volume, isMuted);
+                lock (_lock)
+                {
+                    if (_sessionMap.TryGetValue(sessionId, out var sessionVm))
+                    {
+                        sessionVm.UpdateVolume(volume, isMuted);
+                    }
+                }
             });
         }
 
-        private string? _currentDeviceId;
-        public void SetCurrentDeviceId(string? deviceId)
+        private void DebounceAndReload(int delayMs)
         {
-            _currentDeviceId = deviceId;
+            _sessionsChangedCts?.Cancel();
+            _sessionsChangedCts = new CancellationTokenSource();
+            var token = _sessionsChangedCts.Token;
+
+            Task.Delay(delayMs, token).ContinueWith(async _ =>
+            {
+                if (token.IsCancellationRequested) return;
+
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    if (CurrentDeviceId != null)
+                    {
+                        await LoadSessionsAsync(CurrentDeviceId);
+                    }
+                });
+            }, TaskScheduler.Default);
+        }
+
+        public void Dispose()
+        {
+            _audioService.SessionsChanged -= OnSessionsChanged;
+            _audioService.SessionVolumeChanged -= OnSessionVolumeChanged;
+            _sessionsChangedCts?.Cancel();
+            _sessionsChangedCts?.Dispose();
         }
     }
 }
