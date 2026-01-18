@@ -36,12 +36,13 @@ Source: "..\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs cr
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Flags: nowait
+Filename: "{app}\{#MyAppExeName}"; Flags: nowait postinstall skipifsilent; Check: ShouldShowLaunchCheckbox
 
 [CustomMessages]
 english.MaintenanceTitle={#MyAppName} is already installed.
 english.MaintenanceSubTitle=Select the operation you want to perform.
 english.MaintenanceInstruction=Select one of the following options and click Next.
+english.MaintenanceUpgrade=Upgrade - Upgrade to version {#MyAppVersion}
 english.MaintenanceRepair=Repair - Reinstall the application
 english.MaintenanceUninstall=Uninstall - Remove the application
 english.MaintenanceConfirmUninstall=Are you sure you want to uninstall?
@@ -49,6 +50,7 @@ english.MaintenanceConfirmUninstall=Are you sure you want to uninstall?
 japanese.MaintenanceTitle={#MyAppName} は既にインストールされています
 japanese.MaintenanceSubTitle=実行する操作を選択してください
 japanese.MaintenanceInstruction=以下のオプションから選択し、「次へ」をクリックしてください。
+japanese.MaintenanceUpgrade=アップグレード - バージョン {#MyAppVersion} へ更新します
 japanese.MaintenanceRepair=修復 - アプリケーションを再インストールします
 japanese.MaintenanceUninstall=アンインストール - アプリケーションを削除します
 japanese.MaintenanceConfirmUninstall=本当にアンインストールしますか?
@@ -61,6 +63,42 @@ procedure ExitProcess(uExitCode: UINT);
 var
   MaintenancePage: TInputOptionWizardPage;
   IsUpgrade: Boolean;
+  IsVersionUp: Boolean;
+
+// [Run]セクションのチェックボックス表示制御
+function ShouldShowLaunchCheckbox: Boolean;
+begin
+  // バージョンアップ時は自動起動するため、チェックボックスは表示しない
+  Result := not IsVersionUp;
+end;
+
+// インストールプロセスのステップ変更イベント
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ErrorCode: Integer;
+begin
+  // インストール完了直後（完了画面の前）かつアップグレードの場合
+  if (CurStep = ssPostInstall) and IsVersionUp then
+  begin
+    // アプリケーションを自動起動
+    Exec(ExpandConstant('{app}\{#MyAppExeName}'), '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+  end;
+end;
+
+// インストール済みバージョンを取得
+function GetInstalledVersion(): String;
+var
+  UninstallKey: String;
+  DisplayVersion: String;
+begin
+  Result := '';
+  UninstallKey := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppId}_is1';
+  
+  if RegQueryStringValue(HKEY_LOCAL_MACHINE, UninstallKey, 'DisplayVersion', DisplayVersion) then
+    Result := DisplayVersion
+  else if RegQueryStringValue(HKEY_CURRENT_USER, UninstallKey, 'DisplayVersion', DisplayVersion) then
+    Result := DisplayVersion;
+end;
 
 // 既存インストールを検出
 function IsAppInstalled(): Boolean;
@@ -125,24 +163,41 @@ end;
 
 // メンテナンスページの作成
 procedure InitializeWizard();
+var
+  InstalledVersion: String;
 begin
   if IsAppInstalled() then
   begin
     IsUpgrade := True;
+    InstalledVersion := GetInstalledVersion();
     
+    // バージョンが異なる場合はアップグレードモード
+    IsVersionUp := (InstalledVersion <> '') and (InstalledVersion <> '{#MyAppVersion}');
+
     MaintenancePage := CreateInputOptionPage(wpWelcome,
       CustomMessage('MaintenanceTitle'),
       CustomMessage('MaintenanceSubTitle'),
       CustomMessage('MaintenanceInstruction'),
       True, False);
     
-    MaintenancePage.Add(CustomMessage('MaintenanceRepair'));
+    if IsVersionUp then
+    begin
+        // バージョンが違うならアップグレードを表示（修復の代わり）
+        MaintenancePage.Add(CustomMessage('MaintenanceUpgrade'));
+    end
+    else
+    begin
+        // バージョンが同じなら修復を表示
+        MaintenancePage.Add(CustomMessage('MaintenanceRepair'));
+    end;
+
     MaintenancePage.Add(CustomMessage('MaintenanceUninstall'));
-    MaintenancePage.Values[0] := True; // デフォルトは修復
+    MaintenancePage.Values[0] := True; // デフォルトはアップグレード/修復
   end
   else
   begin
     IsUpgrade := False;
+    IsVersionUp := False;
   end;
 end;
 
