@@ -37,6 +37,7 @@ namespace Gamix.UI.ViewModels
         /// 新規プリセット名の入力値。
         /// </summary>
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SavePresetCommand))]
         private string _newPresetName = string.Empty;
 
         public MainViewModel(
@@ -121,10 +122,12 @@ namespace Gamix.UI.ViewModels
             }
         }
 
+        private bool CanSavePreset => !string.IsNullOrWhiteSpace(NewPresetName);
+
         /// <summary>
         /// 現在の音量状態をプリセットとして保存します。
         /// </summary>
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanSavePreset))]
         private async Task SavePreset()
         {
             if (string.IsNullOrWhiteSpace(NewPresetName) || Devices.SelectedOutputDevice == null) return;
