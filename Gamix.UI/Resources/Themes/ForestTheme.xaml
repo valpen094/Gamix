@@ -1,0 +1,448 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 1. Color Palette Definitions -->
+    <Color x:Key="Color_Background">#1B3A2C</Color> <!-- Dark Emerald -->
+    <Color x:Key="Color_Foreground">#E8F5E9</Color> <!-- Mint White -->
+    <Color x:Key="Color_CardBackground">#2E5641</Color> <!-- Medium Emerald -->
+    <Color x:Key="Color_ButtonForeground">#1B3A2C</Color> <!-- Dark Text -->
+    
+    <Color x:Key="Color_AccentPrimaryStart">#2ECC71</Color> <!-- Emerald Green -->
+    <Color x:Key="Color_AccentPrimaryEnd">#F1C40F</Color> <!-- Sun Yellow -->
+    <Color x:Key="Color_AccentSecondary">#58D68D</Color> <!-- Light Emerald -->
+    <Color x:Key="Color_AccentTertiary">#27AE60</Color> <!-- Nephrite Green -->
+
+    <!-- Grass Palette -->
+    <Color x:Key="Color_GrassDark">#2E5641</Color>
+    <Color x:Key="Color_GrassMedium">#27AE60</Color>
+    <Color x:Key="Color_GrassLight">#2ECC71</Color>
+    <Color x:Key="Color_GrassBright">#58D68D</Color>
+    <Color x:Key="Color_IconMint">#F0FFF4</Color>
+
+    <!-- 2. Base Brushes -->
+    <SolidColorBrush x:Key="Brush_Background" Color="{StaticResource Color_Background}"/>
+    <SolidColorBrush x:Key="Brush_Foreground" Color="{StaticResource Color_Foreground}"/>
+    <SolidColorBrush x:Key="Brush_CardBackground" Color="{StaticResource Color_CardBackground}"/>
+    <SolidColorBrush x:Key="Brush_ButtonForeground" Color="{StaticResource Color_ButtonForeground}"/>
+    
+    <!-- 3. Accent Brushes -->
+    <LinearGradientBrush x:Key="Brush_AccentPrimary" StartPoint="0,0.5" EndPoint="1,0.5">
+        <GradientStop Color="{StaticResource Color_AccentPrimaryStart}" Offset="0.0"/>
+        <GradientStop Color="{StaticResource Color_AccentPrimaryEnd}" Offset="1.0"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush_AccentSecondary" Color="{StaticResource Color_AccentSecondary}"/>
+    <SolidColorBrush x:Key="Brush_AccentTertiary" Color="{StaticResource Color_AccentTertiary}"/>
+
+    <!-- Grass Brushes -->
+    <SolidColorBrush x:Key="Brush_GrassDark" Color="{StaticResource Color_GrassDark}"/>
+    <SolidColorBrush x:Key="Brush_GrassMedium" Color="{StaticResource Color_GrassMedium}"/>
+    <SolidColorBrush x:Key="Brush_GrassLight" Color="{StaticResource Color_GrassLight}"/>
+    <SolidColorBrush x:Key="Brush_GrassBright" Color="{StaticResource Color_GrassBright}"/>
+    <SolidColorBrush x:Key="Brush_IconMint" Color="{StaticResource Color_IconMint}"/>
+
+    <!-- 4. Slider Brushes -->
+    <LinearGradientBrush x:Key="Brush_SliderBar" StartPoint="0,0.5" EndPoint="1,0.5">
+        <GradientStop Color="{StaticResource Color_AccentPrimaryStart}" Offset="0.0"/>
+        <GradientStop Color="{StaticResource Color_AccentSecondary}" Offset="1.0"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush_SliderThumb" Color="{StaticResource Color_AccentPrimaryStart}"/>
+    <SolidColorBrush x:Key="Brush_SliderTrackBg" Color="#3E4F44"/>
+
+    <!-- 5. Effects -->
+    <DropShadowEffect x:Key="Effect_Glow" BlurRadius="8" ShadowDepth="1" Color="{StaticResource Color_AccentPrimaryStart}" Opacity="0.5"/>
+    <DropShadowEffect x:Key="Effect_GlowMagenta" BlurRadius="8" ShadowDepth="1" Color="{StaticResource Color_AccentSecondary}" Opacity="0.5"/>
+    <DropShadowEffect x:Key="Effect_SidebarGlow" Color="#000000" BlurRadius="15" ShadowDepth="0" Opacity="0.3"/> <!-- Subtle shadow instead of glow -->
+
+    <!-- 6. Global Styles -->
+    <Style TargetType="Window">
+        <Setter Property="Background" Value="{StaticResource Brush_Background}"/>
+        <Setter Property="FontFamily" Value="Segoe UI, Palatino Linotype"/>
+    </Style>
+
+    <!-- Grass Blade Style -->
+    <Style x:Key="Style_GrassBlade" TargetType="Path">
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="RenderTransformOrigin" Value="0.5,1"/>
+    </Style>
+    <!-- Forest Sidebar Toggle Button Style (Growing Trees) -->
+    <Style x:Key="Style_SidebarToggleButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid Width="40" Height="40">
+                        <!-- Forest Background (Dark Green) -->
+                        <Ellipse Fill="#1B3A2C" Width="40" Height="40"/>
+                        
+                        <Grid>
+                            <Grid.Clip>
+                                <EllipseGeometry Center="20,20" RadiusX="20" RadiusY="20"/>
+                            </Grid.Clip>
+                            
+                            <!-- Sun Rays (Light Yellow/Green) -->
+                            <Path Data="M 20,0 L 0,40 L 40,40 Z" Fill="#F1C40F" Opacity="0.1" Margin="0,-10,0,0">
+                                <Path.RenderTransform>
+                                    <RotateTransform Angle="180" CenterX="20" CenterY="20"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Grass Blades (Thin, Dense) -->
+                            <!-- Blade 1 -->
+                            <Path x:Name="Tree1" Data="M 1,40 L 3,40 L 2,18 Z" Fill="{StaticResource Brush_GrassDark}" Opacity="0.8" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree1Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree1Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 2 -->
+                            <Path x:Name="Tree2" Data="M 5,40 L 7,40 L 6,15 Z" Fill="{StaticResource Brush_GrassMedium}" Opacity="0.85" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree2Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree2Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 3 -->
+                            <Path x:Name="Tree3" Data="M 9,40 L 11,40 L 10,12 Z" Fill="{StaticResource Brush_GrassLight}" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree3Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree3Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 4 -->
+                            <Path x:Name="Tree4" Data="M 13,40 L 15,40 L 14,16 Z" Fill="{StaticResource Brush_GrassBright}" Opacity="0.9" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree4Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree4Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                             
+                            <!-- Blade 5 -->
+                            <Path x:Name="Tree5" Data="M 17,40 L 19,40 L 18,14 Z" Fill="{StaticResource Brush_GrassLight}" Opacity="0.9" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree5Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree5Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 6 -->
+                            <Path x:Name="Tree6" Data="M 21,40 L 23,40 L 22,17 Z" Fill="{StaticResource Brush_GrassMedium}" Opacity="0.85" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree6Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree6Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 7 -->
+                            <Path x:Name="Tree7" Data="M 25,40 L 27,40 L 26,13 Z" Fill="{StaticResource Brush_GrassBright}" Opacity="0.85" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree7Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree7Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 8 -->
+                            <Path x:Name="Tree8" Data="M 29,40 L 31,40 L 30,15 Z" Fill="{StaticResource Brush_GrassLight}" Opacity="0.75" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree8Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree8Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 9 -->
+                            <Path x:Name="Tree9" Data="M 33,40 L 35,40 L 34,18 Z" Fill="{StaticResource Brush_GrassMedium}" Opacity="0.8" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree9Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree9Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 10 -->
+                            <Path x:Name="Tree10" Data="M 37,40 L 39,40 L 38,14 Z" Fill="{StaticResource Brush_GrassLight}" Opacity="0.75" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform x:Name="Tree10Rotate" Angle="0"/>
+                                        <ScaleTransform x:Name="Tree10Scale" ScaleY="1" ScaleX="1"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Additional blades for density -->
+                            <!-- Blade 11 -->
+                            <Path x:Name="Tree11" Data="M 3,40 L 5,40 L 4,19 Z" Fill="{StaticResource Brush_GrassBright}" Opacity="0.7" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="Tree11Rotate" Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 12 -->
+                            <Path x:Name="Tree12" Data="M 11,40 L 13,40 L 12,16 Z" Fill="{StaticResource Brush_GrassDark}" Opacity="0.75" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="Tree12Rotate" Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 13 -->
+                            <Path x:Name="Tree13" Data="M 19,40 L 21,40 L 20,20 Z" Fill="{StaticResource Brush_GrassMedium}" Opacity="0.8" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="Tree13Rotate" Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 14 -->
+                            <Path x:Name="Tree14" Data="M 27,40 L 29,40 L 28,17 Z" Fill="{StaticResource Brush_GrassLight}" Opacity="0.7" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="Tree14Rotate" Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 15 -->
+                            <Path x:Name="Tree15" Data="M 35,40 L 37,40 L 36,15 Z" Fill="{StaticResource Brush_GrassBright}" Opacity="0.75" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="Tree15Rotate" Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 16 (Edge left) -->
+                            <Path x:Name="Tree16" Data="M -1,40 L 1,40 L 0,22 Z" Fill="{StaticResource Brush_GrassDark}" Opacity="0.6" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="Tree16Rotate" Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 17 (Edge right) -->
+                            <Path x:Name="Tree17" Data="M 39,40 L 41,40 L 40,21 Z" Fill="{StaticResource Brush_GrassMedium}" Opacity="0.65" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="Tree17Rotate" Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            
+                            <!-- Blade 18 (Far right) -->
+                            <Path x:Name="Tree18" Data="M 41,40 L 43,40 L 42,19 Z" Fill="{StaticResource Brush_GrassLight}" Opacity="0.6" Style="{StaticResource Style_GrassBlade}">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="Tree18Rotate" Angle="0"/>
+                                </Path.RenderTransform>
+                            </Path>
+
+                        </Grid>
+                        
+                        <!-- Icon Content -->
+                        <ContentPresenter x:Name="IconPresenter" Content="🎵" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"
+                                          Panel.ZIndex="100"
+                                          RenderTransformOrigin="0.5,0.9">
+                            <ContentPresenter.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform x:Name="IconTransform" ScaleX="1" ScaleY="1"/>
+                                    <RotateTransform x:Name="IconRotate" Angle="0"/>
+                                </TransformGroup>
+                            </ContentPresenter.RenderTransform>
+                            <ContentPresenter.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource Brush_IconMint}"/>
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsVisible" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="ForestAnimation">
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <!-- Fast Swaying Grass Effect (Strong Wind) -->
+                                        
+                                        <!-- Tree 3 (Center) - Fast sway -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree3Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-10" To="10" Duration="0:0:0.75" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Tree3Scale" Storyboard.TargetProperty="ScaleY"
+                                                         From="0.96" To="1.04" Duration="0:0:0.75" AutoReverse="True" RepeatBehavior="Forever"/>
+
+                                        <!-- Tree 4 (Left) - Different rhythm -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree4Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-12" To="8" Duration="0:0:0.95" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Tree4Scale" Storyboard.TargetProperty="ScaleY"
+                                                         From="0.95" To="1.05" Duration="0:0:0.95" AutoReverse="True" RepeatBehavior="Forever"/>
+
+                                        <!-- Tree 5 (Right) - Asymmetric sway -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree5Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-8" To="12" Duration="0:0:0.85" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Tree5Scale" Storyboard.TargetProperty="ScaleY"
+                                                         From="0.96" To="1.04" Duration="0:0:0.85" AutoReverse="True" RepeatBehavior="Forever"/>
+                                        
+                                        <!-- Tree 1 (Background Left) -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree1Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-7" To="7" Duration="0:0:1.3" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+
+                                        <!-- Tree 2 (Background Right) -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree2Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-6" To="8" Duration="0:0:1.4" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        
+                                        <!-- Tree 6 (Mid Left) -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree6Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-9" To="9" Duration="0:0:0.7" AutoReverse="True" RepeatBehavior="Forever">
+                                             <DoubleAnimation.EasingFunction>
+                                                 <SineEase EasingMode="EaseInOut"/>
+                                             </DoubleAnimation.EasingFunction>
+                                         </DoubleAnimation>
+                                         
+                                         <!-- Tree 7 (Mid Right) -->
+                                         <DoubleAnimation Storyboard.TargetName="Tree7Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-11" To="7" Duration="0:0:0.8" AutoReverse="True" RepeatBehavior="Forever">
+                                             <DoubleAnimation.EasingFunction>
+                                                 <SineEase EasingMode="EaseInOut"/>
+                                             </DoubleAnimation.EasingFunction>
+                                         </DoubleAnimation>
+                                         
+                                         <!-- Tree 8 (Small Left) -->
+                                         <DoubleAnimation Storyboard.TargetName="Tree8Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-13" To="6" Duration="0:0:0.6" AutoReverse="True" RepeatBehavior="Forever">
+                                             <DoubleAnimation.EasingFunction>
+                                                 <SineEase EasingMode="EaseInOut"/>
+                                             </DoubleAnimation.EasingFunction>
+                                         </DoubleAnimation>
+                                         
+                                         <!-- Tree 9 (Small Center) -->
+                                         <DoubleAnimation Storyboard.TargetName="Tree9Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-7" To="11" Duration="0:0:0.9" AutoReverse="True" RepeatBehavior="Forever">
+                                             <DoubleAnimation.EasingFunction>
+                                                 <SineEase EasingMode="EaseInOut"/>
+                                             </DoubleAnimation.EasingFunction>
+                                         </DoubleAnimation>
+                                         
+                                         <!-- Tree 10 (Small Right) -->
+                                         <DoubleAnimation Storyboard.TargetName="Tree10Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-10" To="10" Duration="0:0:0.95" AutoReverse="True" RepeatBehavior="Forever">
+                                             <DoubleAnimation.EasingFunction>
+                                                 <SineEase EasingMode="EaseInOut"/>
+                                             </DoubleAnimation.EasingFunction>
+                                         </DoubleAnimation>
+                                         
+                                         <!-- Tree 11 -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree11Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-11" To="9" Duration="0:0:0.65" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        
+                                        <!-- Tree 12 -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree12Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-9" To="11" Duration="0:0:1.0" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        
+                                        <!-- Tree 13 -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree13Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-12" To="8" Duration="0:0:0.77" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        
+                                        <!-- Tree 14 -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree14Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-8" To="10" Duration="0:0:0.87" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        
+                                        <!-- Tree 15 -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree15Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-10" To="12" Duration="0:0:0.62" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        
+                                        <!-- Tree 16 -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree16Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-13" To="7" Duration="0:0:1.1" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        
+                                        <!-- Tree 17 -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree17Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-7" To="11" Duration="0:0:0.72" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        
+                                        <!-- Tree 18 -->
+                                        <DoubleAnimation Storyboard.TargetName="Tree18Rotate" Storyboard.TargetProperty="Angle"
+                                                         From="-9" To="13" Duration="0:0:0.82" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+
+                                        <!-- Icon Gentle Float & Sway -->
+                                        <DoubleAnimation Storyboard.TargetName="IconRotate" Storyboard.TargetProperty="Angle"
+                                                         From="-5" To="5" Duration="0:0:0.85" AutoReverse="True" RepeatBehavior="Forever">
+                                            <DoubleAnimation.EasingFunction>
+                                                <SineEase EasingMode="EaseInOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconTransform" Storyboard.TargetProperty="ScaleX"
+                                                         From="1.0" To="1.08" Duration="0:0:0.75" AutoReverse="True" RepeatBehavior="Forever"/>
+                                        <DoubleAnimation Storyboard.TargetName="IconTransform" Storyboard.TargetProperty="ScaleY"
+                                                         From="1.0" To="1.08" Duration="0:0:0.75" AutoReverse="True" RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="ForestAnimation"/>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

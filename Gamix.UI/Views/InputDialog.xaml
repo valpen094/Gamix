@@ -1,0 +1,133 @@
+<Window x:Class="Gamix.UI.Views.InputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="名前変更" 
+        Width="380" Height="210"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+    
+    <!-- 外側: 影のみ (透明背景) -->
+    <Border Margin="15">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.25" Color="Black"/>
+        </Border.Effect>
+        
+        <!-- 内側: 角丸コンテンツ -->
+        <Border Background="{DynamicResource Brush_Background}" 
+                CornerRadius="16" 
+                BorderBrush="{DynamicResource Brush_AccentPrimary}" 
+                BorderThickness="2"
+                Padding="20">
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Title -->
+                <TextBlock Grid.Row="0" 
+                           Text="Enter New Name" 
+                           FontSize="18" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Brush_AccentPrimary}"
+                           Margin="0,0,0,15"/>
+                
+                <!-- Input TextBox -->
+                <TextBox x:Name="InputTextBox" 
+                         Grid.Row="1" 
+                         FontSize="14"
+                         MaxLength="30"
+                         Padding="12,0"
+                         Height="40"
+                         VerticalContentAlignment="Center"
+                         Background="{DynamicResource Brush_CardBackground}"
+                         Foreground="{DynamicResource Brush_Foreground}"
+                         CaretBrush="{DynamicResource Brush_Foreground}"
+                         BorderBrush="{DynamicResource Brush_AccentSecondary}"
+                         BorderThickness="2"
+                         TextChanged="InputTextBox_TextChanged">
+                    <TextBox.Template>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                <Grid>
+                                    <ScrollViewer x:Name="PART_ContentHost" 
+                                                  VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"/>
+                                    <TextBlock x:Name="PlaceholderText" 
+                                               Text="Max 5 chars" 
+                                               Foreground="{DynamicResource Brush_Foreground}"
+                                               Opacity="0.4"
+                                               VerticalAlignment="Center"
+                                               Margin="14,0,0,0"
+                                               IsHitTestVisible="False"
+                                               Visibility="Collapsed"/>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </TextBox.Template>
+                </TextBox>
+                
+                <!-- Buttons -->
+                <StackPanel Grid.Row="2" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Right" 
+                            Margin="0,15,0,0">
+                    
+                    <!-- Cancel Button -->
+                    <Button Content="Cancel" 
+                            Click="CancelButton_Click"
+                            Width="90" Height="36" Margin="0,0,10,0"
+                            FontSize="13"
+                            Background="{DynamicResource Brush_CardBackground}"
+                            Foreground="{DynamicResource Brush_Foreground}"
+                            BorderBrush="{DynamicResource Brush_AccentSecondary}"
+                            BorderThickness="2">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    
+                    <!-- OK Button -->
+                    <Button x:Name="OkBtn"
+                            Content="OK" 
+                            Click="OkButton_Click"
+                            Width="90" Height="36"
+                            FontSize="13" FontWeight="SemiBold"
+                            Background="{DynamicResource Brush_AccentPrimary}"
+                            Foreground="{DynamicResource Brush_ButtonForeground}"
+                            BorderThickness="0">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Opacity" Value="0.5"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Border>
+</Window>

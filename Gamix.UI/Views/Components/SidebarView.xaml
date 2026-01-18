@@ -1,0 +1,184 @@
+<UserControl x:Class="Gamix.UI.Views.Components.SidebarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Gamix.UI"
+             xmlns:converters="clr-namespace:Gamix.UI.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="650" d:DesignWidth="420">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:BoolToHeartConverter x:Key="BoolToHeartConverter"/>
+
+        <Storyboard x:Key="ShowSidebar">
+            <DoubleAnimation Storyboard.TargetName="PresetSidebar" 
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                             To="0" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="DimOverlay"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0.5" Duration="0:0:0.3"/>
+        </Storyboard>
+        <Storyboard x:Key="HideSidebar">
+            <DoubleAnimation Storyboard.TargetName="PresetSidebar" 
+                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                             To="-300" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="DimOverlay"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0" Duration="0:0:0.3"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Dimming Overlay (Click to Close Sidebar) -->
+        <Border x:Name="DimOverlay" Background="Black" Opacity="0" IsHitTestVisible="False" Panel.ZIndex="15" CornerRadius="20"
+                MouseLeftButtonDown="HideSidebar_Click"/>
+
+        <!-- Sidebar Panel -->
+        <Border x:Name="PresetSidebar" HorizontalAlignment="Left" Width="280" 
+                Background="{DynamicResource Brush_Background}" 
+                BorderBrush="{DynamicResource Brush_AccentPrimary}" BorderThickness="0,0,2,0"
+                CornerRadius="0,20,20,0" Panel.ZIndex="20"
+                RenderTransformOrigin="0,0" Margin="0">
+
+            <Border.RenderTransform>
+                <TranslateTransform X="-300"/>
+            </Border.RenderTransform>
+            <Border.Effect>
+                <DynamicResource ResourceKey="Effect_SidebarGlow"/>
+            </Border.Effect>
+
+            <Grid Margin="15,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Presets" FontSize="28" FontWeight="Bold" 
+                           Foreground="{DynamicResource Brush_AccentPrimary}" Margin="0,0,0,15"
+                           Effect="{DynamicResource Effect_Glow}"/>
+                
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Presets}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource Brush_CardBackground}" CornerRadius="12" Margin="0,0,0,12" Padding="8">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1" Color="Black"/>
+                                    </Border.Effect>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>    <!-- Name / Apply Area -->
+                                            <ColumnDefinition Width="Auto"/> <!-- Actions -->
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Apply Button (Name) -->
+                                        <Button Grid.Column="0" Content="{Binding Name}" 
+                                                Command="{Binding DataContext.ApplyPresetCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                CommandParameter="{Binding}"
+                                                HorizontalContentAlignment="Left"
+                                                VerticalAlignment="Stretch"
+                                                Padding="10,0"
+                                                BorderThickness="0" FontSize="15" FontWeight="SemiBold"
+                                                Cursor="Hand"
+                                                ToolTip="このプリセットを適用">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource Brush_Foreground}"/>
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}">
+                                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Opacity" Value="0.7"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        
+                                        <!-- Action Buttons -->
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <!-- Rename Button -->
+                                            <Button Content="✏️" 
+                                                    Click="RenamePreset_Click"
+                                                    Tag="{Binding}"
+                                                    Width="36" Height="36" Margin="0,0,6,0"
+                                                    BorderThickness="0" FontSize="16"
+                                                    ToolTip="名前変更">
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Background" Value="{DynamicResource Brush_AccentTertiary}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource Brush_ButtonForeground}"/>
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border Background="{TemplateBinding Background}" CornerRadius="10">
+                                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Opacity" Value="0.8"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            
+                                            <!-- Delete Button -->
+                                            <Button Content="🗑️" 
+                                                    Command="{Binding DataContext.DeletePresetCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                    CommandParameter="{Binding}"
+                                                    Width="36" Height="36"
+                                                    BorderThickness="0" FontSize="16"
+                                                    ToolTip="削除">
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Background" Value="#FF6B6B"/> <!-- Soft Red -->
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border Background="{TemplateBinding Background}" CornerRadius="10">
+                                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Opacity" Value="0.8"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

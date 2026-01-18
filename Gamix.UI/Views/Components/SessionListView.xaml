@@ -1,0 +1,87 @@
+<UserControl x:Class="Gamix.UI.Views.Components.SessionListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="400">
+
+    <ScrollViewer Margin="15,0,15,15" VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding Sessions.Sessions}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{DynamicResource Brush_CardBackground}" 
+                            CornerRadius="15" Margin="0,0,0,10" Padding="15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/> <!-- Icon -->
+                                <ColumnDefinition Width="*"/>    <!-- Content -->
+                                <ColumnDefinition Width="Auto"/> <!-- Mute -->
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- App Icon -->
+                            <Border Grid.Column="0" Width="36" Height="36" Margin="0,0,12,0" 
+                                    CornerRadius="8" Background="{DynamicResource Brush_Background}"
+                                    VerticalAlignment="Center">
+                                <Image Source="{Binding Icon}" Width="24" Height="24" 
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                            </Border>
+                            
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{Binding DisplayName}" 
+                                           FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush_Foreground}"
+                                           Margin="0,0,0,5"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="50"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Slider Grid.Column="0" Minimum="0" Maximum="1" 
+                                            Value="{Binding Volume}" 
+                                            Style="{StaticResource PastelSlider}"
+                                            VerticalAlignment="Center"/>
+                                    
+                                    <TextBlock Grid.Column="1" 
+                                               Text="{Binding Volume, StringFormat={}{0:P0}}" 
+                                               FontSize="14" FontWeight="Bold"
+                                               Foreground="{DynamicResource Brush_AccentPrimary}"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <Button Grid.Column="2" Command="{Binding ToggleMuteCommand}" 
+                                    Background="Transparent" BorderThickness="0" Margin="10,0,0,0" Padding="0" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Content" Value="🔊"/>
+                                        <Setter Property="FontSize" Value="18"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource Brush_AccentPrimary}"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsMuted}" Value="True">
+                                                <Setter Property="Content" Value="🔇"/>
+                                                <Setter Property="Foreground" Value="#A0A0A0"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
+</UserControl>

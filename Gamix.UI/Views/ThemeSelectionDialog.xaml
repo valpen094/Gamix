@@ -1,0 +1,207 @@
+<Window x:Class="Gamix.UI.Views.ThemeSelectionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select Theme" 
+        Width="600" Height="550"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        UseLayoutRounding="True">
+    
+    <Window.Resources>
+        <!-- RadioButton Style -->
+        <Style TargetType="RadioButton">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource Brush_Foreground}"/>
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <StackPanel Orientation="Horizontal" Cursor="Hand">
+                            <Border Width="20" Height="20" CornerRadius="10" 
+                                    BorderBrush="{DynamicResource Brush_AccentPrimary}" BorderThickness="2" 
+                                    Background="Transparent" Margin="0,0,10,0">
+                                <Ellipse x:Name="CheckMark" Width="10" Height="10" Fill="{DynamicResource Brush_AccentPrimary}" Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- Pagination Button Style -->
+        <Style x:Key="PaginationButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush_AccentPrimary}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource Brush_AccentPrimary}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource Brush_AccentPrimary}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Brush_ButtonForeground}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- Page Dot Indicator Style -->
+        <Style x:Key="PageDotStyle" TargetType="Ellipse">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Stroke" Value="{DynamicResource Brush_AccentPrimary}"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+            <Setter Property="Fill" Value="Transparent"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                    <Setter Property="Fill" Value="{DynamicResource Brush_AccentPrimary}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <!-- Outer Glow -->
+    <Border Margin="20">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.4" Color="Black"/>
+        </Border.Effect>
+        
+        <!-- Main Content (Nested Borders for clean edges) -->
+        <Border Background="{DynamicResource Brush_AccentPrimary}" CornerRadius="20">
+            <Border Background="{DynamicResource Brush_Background}" 
+                    CornerRadius="18"
+                    Margin="2"
+                    Padding="25"
+                    ClipToBounds="True">
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Title -->
+                    <RowDefinition Height="*"/>    <!-- Theme List -->
+                    <RowDefinition Height="Auto"/> <!-- Pagination -->
+                    <RowDefinition Height="Auto"/> <!-- Buttons -->
+                </Grid.RowDefinitions>
+                
+                <!-- Title -->
+                <TextBlock Grid.Row="0" 
+                           Text="Select Theme" 
+                           FontSize="24" FontWeight="Bold"
+                           Foreground="{DynamicResource Brush_AccentPrimary}"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,20"/>
+                
+                <!-- Theme List -->
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding PagedThemeOptions}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="2" VerticalAlignment="Top"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="10" Cursor="Hand">
+                                <StackPanel.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" 
+                                                  Command="{Binding DataContext.SelectThemeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  CommandParameter="{Binding}"/>
+                                </StackPanel.InputBindings>
+                                
+                                <Border CornerRadius="12" ClipToBounds="True" 
+                                        BorderBrush="{DynamicResource Brush_CardBackground}" BorderThickness="2"
+                                        Padding="4">
+                                    <Border CornerRadius="8" ClipToBounds="True">
+                                        <Image Source="{Binding ImagePath}" Stretch="Uniform" Height="210"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                </Border>
+                                <RadioButton Content="{Binding Name}" GroupName="Themes" 
+                                             IsChecked="{Binding IsSelected}"
+                                             Command="{Binding DataContext.SelectThemeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                             CommandParameter="{Binding}"
+                                             HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                
+                <!-- Pagination Controls -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <Button Content="◀" 
+                            Command="{Binding PreviousPageCommand}" 
+                            Style="{StaticResource PaginationButtonStyle}"
+                            Margin="0,0,15,0"/>
+                    
+                    <ItemsControl ItemsSource="{Binding PageDots}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Ellipse Style="{StaticResource PageDotStyle}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Button Content="▶" 
+                            Command="{Binding NextPageCommand}" 
+                            Style="{StaticResource PaginationButtonStyle}"
+                            Margin="15,0,0,0"/>
+                </StackPanel>
+
+                <!-- Footer Buttons -->
+                <StackPanel Grid.Row="3" 
+                            HorizontalAlignment="Center" 
+                            Margin="0,25,0,0">
+                    
+                    <!-- Close Button -->
+                    <Button Content="Close" 
+                            Click="CancelButton_Click"
+                            Width="200" Height="45"
+                            FontSize="16" FontWeight="SemiBold"
+                            Background="{DynamicResource Brush_CardBackground}"
+                            Foreground="{DynamicResource Brush_Foreground}"
+                            BorderThickness="0"
+                            Cursor="Hand">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="12"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Grid>
+            </Border>
+        </Border>
+    </Border>
+</Window>
