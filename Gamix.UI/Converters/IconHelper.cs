@@ -20,15 +20,30 @@ namespace Gamix.UI.Converters
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool DestroyIcon(IntPtr hIcon);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", EntryPoint = "GetClassLongPtr")]
+        private static extern IntPtr GetClassLongPtr64(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "GetClassLong")]
+        private static extern IntPtr GetClassLongPtr32(IntPtr hWnd, int nIndex);
+
+        private static IntPtr GetClassLongPtr(IntPtr hWnd, int nIndex)
+        {
+            return IntPtr.Size == 8 ? GetClassLongPtr64(hWnd, nIndex) : GetClassLongPtr32(hWnd, nIndex);
+        }
+
+        private const uint WM_GETICON = 0x007F;
+        private const int ICON_SMALL = 0;
+        private const int ICON_BIG = 1;
+        private const int GCLP_HICON = -14;
+        private const int GCLP_HICONSM = -34;
+
         /// <summary>
-        /// 指定されたパスからアイコンを取得します。
-        /// Master Volume や System Sounds の場合はシェルアイコンを返します。
+        /// 指定されたパスまたはウィンドウハンドルからアイコンを取得します。
         /// </summary>
-        /// <param name="path">実行ファイルのパス。</param>
-        /// <param name="isMaster">マスター音量かどうか。</param>
-        /// <param name="processName">プロセス名。</param>
-        /// <returns>アイコンの ImageSource、取得できない場合は null。</returns>
-        public static ImageSource? GetIconFromPath(string? path, bool isMaster = false, string? processName = null)
+        public static ImageSource? GetIconFromPath(string? path, bool isMaster = false, string? processName = null, IntPtr? windowHandle = null)
         {
             // Master Volume はスピーカーアイコン (shell32.dll index 168)
             if (isMaster)
@@ -40,6 +55,13 @@ namespace Gamix.UI.Converters
             if (string.IsNullOrEmpty(path) && processName == "System Sounds")
             {
                 return GetShellIcon(156);
+            }
+
+            // Try getting icon from window handle first if available
+            if (windowHandle.HasValue && windowHandle.Value != IntPtr.Zero)
+            {
+                var iconSource = GetIconFromWindow(windowHandle.Value);
+                if (iconSource != null) return iconSource;
             }
 
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
@@ -59,6 +81,33 @@ namespace Gamix.UI.Converters
             {
                 return null;
             }
+        }
+
+        private static ImageSource? GetIconFromWindow(IntPtr hWnd)
+        {
+            try
+            {
+                IntPtr hIcon = SendMessage(hWnd, WM_GETICON, new IntPtr(ICON_BIG), IntPtr.Zero);
+                if (hIcon == IntPtr.Zero)
+                    hIcon = SendMessage(hWnd, WM_GETICON, new IntPtr(ICON_SMALL), IntPtr.Zero);
+                if (hIcon == IntPtr.Zero)
+                    hIcon = GetClassLongPtr(hWnd, GCLP_HICON);
+                if (hIcon == IntPtr.Zero)
+                    hIcon = GetClassLongPtr(hWnd, GCLP_HICONSM);
+
+                if (hIcon != IntPtr.Zero)
+                {
+                    var bitmap = Imaging.CreateBitmapSourceFromHIcon(
+                        hIcon,
+                        System.Windows.Int32Rect.Empty,
+                        BitmapSizeOptions.FromEmptyOptions());
+                    // Freeze for cross-thread access if needed, though usually created on UI thread
+                    if (bitmap.CanFreeze) bitmap.Freeze();
+                    return bitmap;
+                }
+            }
+            catch { }
+            return null;
         }
 
         /// <summary>

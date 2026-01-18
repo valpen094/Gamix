@@ -74,17 +74,40 @@ namespace Gamix.Core.Audio
                             try 
                             {
                                 var proc = Process.GetProcessById((int)pid);
-                                session.ProcessName = proc.ProcessName;
-                                session.IconPath = proc.MainModule?.FileName ?? "";
+                                var processName = proc.ProcessName;
+                                
+                                // Map system host processes to friendly name
+                                session.ProcessName = IsSystemSoundProcess(processName) 
+                                    ? "System Sounds" 
+                                    : processName;
+                                
+                                // Try to get executable path
+                                string path = "";
+                                try 
+                                { 
+                                    path = proc.MainModule?.FileName ?? ""; 
+                                    session.IconPath = path;
+                                } 
+                                catch 
+                                { 
+                                    session.IconPath = "";
+                                }
+
+                                // Determine DisplayName
+                                session.DisplayName = GetSessionDisplayName(proc, path, session.ProcessName);
+
+                                try { session.MainWindowHandle = proc.MainWindowHandle; } catch { }
                             }
                             catch 
                             {
                                 session.ProcessName = $"PID: {pid}";
+                                session.DisplayName = session.ProcessName;
                             }
                         }
                         else
                         {
                             session.ProcessName = "System Sounds";
+                            session.DisplayName = "System Sounds";
                         }
                         
                         sessions.Add(session);
@@ -95,6 +118,7 @@ namespace Gamix.Core.Audio
                     { 
                         Id = "Master", 
                         ProcessName = "Master Volume", 
+                        DisplayName = "Master Volume",
                         IsMaster = true,
                         Volume = device.AudioEndpointVolume.MasterVolumeLevelScalar,
                         IsMuted = device.AudioEndpointVolume.Mute
@@ -107,6 +131,95 @@ namespace Gamix.Core.Audio
 
                 return sessions;
             });
+        }
+
+        /// <summary>
+        /// Determines the best user-friendly display name for a session.
+        /// Prioritizes Window Title > FileDescription > ProductName > ProcessName.
+        /// </summary>
+        private static string GetSessionDisplayName(Process proc, string? filePath, string fallbackProcessName)
+        {
+            string? displayName = null;
+
+            // 1. Try WindowTitle (Most specific, e.g. "Game Title")
+            try 
+            {
+                var title = proc.MainWindowTitle;
+                if (!string.IsNullOrWhiteSpace(title))
+                {
+                    displayName = title;
+                }
+            } 
+            catch { }
+
+            // 2. Fallback to FileDescription / ProductName from file
+            if (string.IsNullOrWhiteSpace(displayName) && !string.IsNullOrEmpty(filePath))
+            {
+                try 
+                {
+                    var info = FileVersionInfo.GetVersionInfo(filePath);
+                    
+                    // Try FileDescription
+                    var fileDesc = info.FileDescription;
+                    if (IsValidDisplayName(fileDesc))
+                    {
+                        displayName = fileDesc;
+                    }
+                    
+                    // Fallback to ProductName
+                    if (string.IsNullOrWhiteSpace(displayName))
+                    {
+                        var prodName = info.ProductName;
+                        if (IsValidDisplayName(prodName))
+                        {
+                            displayName = prodName;
+                        }
+                    }
+                } 
+                catch { }
+            }
+
+            // 3. Last resort: Fallback to ProcessName
+            return string.IsNullOrWhiteSpace(displayName) 
+                ? fallbackProcessName 
+                : displayName;
+        }
+
+        /// <summary>
+        /// Checks if the display name is valid and user-friendly.
+        /// Rejects names that look like log files, temp files, or generic system/engine names.
+        /// </summary>
+        private static bool IsValidDisplayName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+
+            // Reject if looks like a file extension
+            if (name.EndsWith(".log", StringComparison.OrdinalIgnoreCase) ||
+                name.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase) ||
+                name.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
+                name.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // Reject generic engine/client names
+            if (name.Contains("Engine", StringComparison.OrdinalIgnoreCase) ||
+                name.Contains("Game Client", StringComparison.OrdinalIgnoreCase) ||
+                name.Contains("Bootstrap", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if the given process name is a known Windows system sound host process.
+        /// </summary>
+        private static bool IsSystemSoundProcess(string processName)
+        {
+            // Only map taskhostw explicitly requested by user
+            return string.Equals(processName, "taskhostw", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <inheritdoc/>

@@ -16,6 +16,11 @@ namespace Gamix.Core.Models
         /// プロセス名（例: "chrome", "Spotify"）。
         /// </summary>
         public string ProcessName { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// UI表示用の名前（ウィンドウタイトルや製品名など）。
+        /// </summary>
+        public string DisplayName { get; set; } = string.Empty;
 
         /// <summary>
         /// プロセスID。
@@ -41,5 +46,10 @@ namespace Gamix.Core.Models
         /// システムマスター音量を表すかどうか。
         /// </summary>
         public bool IsMaster { get; set; }
+
+        /// <summary>
+        /// メインウィンドウのハンドル。
+        /// </summary>
+        public IntPtr MainWindowHandle { get; set; }
     }
 }

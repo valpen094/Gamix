@@ -33,6 +33,11 @@ namespace Gamix.UI.ViewModels
         public string ProcessName => _model.ProcessName;
 
         /// <summary>
+        /// UI表示用の名前。
+        /// </summary>
+        public string DisplayName => _model.DisplayName;
+
+        /// <summary>
         /// セッションID。
         /// </summary>
         public string Id => _model.Id;
@@ -60,7 +65,7 @@ namespace Gamix.UI.ViewModels
         /// <summary>
         /// アプリケーションアイコン。
         /// </summary>
-        public ImageSource? Icon => IconHelper.GetIconFromPath(_model.IconPath, _model.IsMaster, _model.ProcessName);
+        public ImageSource? Icon => IconHelper.GetIconFromPath(_model.IconPath, _model.IsMaster, _model.ProcessName, _model.MainWindowHandle);
 
         /// <summary>
         /// マスター音量かどうか。
