@@ -70,7 +70,6 @@ namespace Gamix.UI.ViewModels
             {
                 await Sessions.LoadSessionsAsync(Devices.SelectedOutputDevice.Id);
                 Sessions.CurrentDeviceId = Devices.SelectedOutputDevice.Id;
-                _audioService.StartSessionMonitoring(Devices.SelectedOutputDevice.Id);
             }
         }
 
@@ -83,7 +82,6 @@ namespace Gamix.UI.ViewModels
                 // セッションリスト更新
                 _ = Sessions.LoadSessionsAsync(deviceId);
                 Sessions.CurrentDeviceId = deviceId;
-                if (deviceId != null) _audioService.StartSessionMonitoring(deviceId);
 
                 // プリセットリスト更新
                 LoadPresets();

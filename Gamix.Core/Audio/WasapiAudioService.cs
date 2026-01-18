@@ -76,10 +76,10 @@ namespace Gamix.Core.Audio
                                 var proc = Process.GetProcessById((int)pid);
                                 var processName = proc.ProcessName;
                                 
+                                bool isSystem = IsSystemSoundProcess(processName);
+                                
                                 // Map system host processes to friendly name
-                                session.ProcessName = IsSystemSoundProcess(processName) 
-                                    ? "System Sounds" 
-                                    : processName;
+                                session.ProcessName = isSystem ? "System Sounds" : processName;
                                 
                                 // Try to get executable path
                                 string path = "";
@@ -93,8 +93,10 @@ namespace Gamix.Core.Audio
                                     session.IconPath = "";
                                 }
 
-                                // Determine DisplayName
-                                session.DisplayName = GetSessionDisplayName(proc, path, session.ProcessName);
+                                // Determine DisplayName - Force "System Sounds" if it's a system process
+                                session.DisplayName = isSystem 
+                                    ? "System Sounds" 
+                                    : GetSessionDisplayName(proc, path, session.ProcessName);
 
                                 try { session.MainWindowHandle = proc.MainWindowHandle; } catch { }
                             }
@@ -218,7 +220,7 @@ namespace Gamix.Core.Audio
         /// </summary>
         private static bool IsSystemSoundProcess(string processName)
         {
-            // Only map taskhostw explicitly requested by user
+            if (string.IsNullOrEmpty(processName)) return false;
             return string.Equals(processName, "taskhostw", StringComparison.OrdinalIgnoreCase);
         }
 
