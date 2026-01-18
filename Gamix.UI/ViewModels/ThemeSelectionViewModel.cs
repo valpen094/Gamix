@@ -18,8 +18,8 @@ namespace Gamix.UI.ViewModels
         #region Constants
 
         private const int ItemsPerPage = 2;
-        private const string ImagePathFormat = "/Gamix.UI;component/Resources/Images/{0}_theme_preview.png";
-        private const string PackUriFormat = "pack://application:,,,/Gamix.UI;component/Resources/Images/{0}_theme_preview.png";
+        private const string ImagePathFormat = "/Gamix;component/Resources/Images/{0}_theme_preview.png";
+        private const string PackUriFormat = "pack://application:,,,/Gamix;component/Resources/Images/{0}_theme_preview.png";
 
         #endregion
 
