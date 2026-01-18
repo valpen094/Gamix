@@ -90,12 +90,13 @@ namespace Gamix.UI.ViewModels
             var savedOutputId = await _settingsService.GetSelectedOutputDeviceIdAsync();
             var savedInputId = await _settingsService.GetSelectedInputDeviceIdAsync();
 
-            var targetOutput = OutputDevices.FirstOrDefault(d => d.Id == savedOutputId) 
-                             ?? OutputDevices.FirstOrDefault(d => d.IsDefault)
+            // システムのデフォルト設定を最優先、次に保存された設定、最後にリストの先頭を使用
+            var targetOutput = OutputDevices.FirstOrDefault(d => d.IsDefault)
+                             ?? OutputDevices.FirstOrDefault(d => d.Id == savedOutputId)
                              ?? OutputDevices.FirstOrDefault();
             
-            var targetInput = InputDevices.FirstOrDefault(d => d.Id == savedInputId) 
-                            ?? InputDevices.FirstOrDefault(d => d.IsDefault)
+            var targetInput = InputDevices.FirstOrDefault(d => d.IsDefault)
+                            ?? InputDevices.FirstOrDefault(d => d.Id == savedInputId)
                             ?? InputDevices.FirstOrDefault();
 
             _shouldSaveSettings = false;
