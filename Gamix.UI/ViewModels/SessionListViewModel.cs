@@ -55,7 +55,7 @@ namespace Gamix.UI.ViewModels
 
         private void OnSessionVolumeChanged(string sessionId, float volume, bool isMuted)
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 lock (_lock)
                 {

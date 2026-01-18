@@ -251,7 +251,7 @@ namespace Gamix.UI.ViewModels
 
         private void OnDeviceMasterVolumeChanged(string deviceId, float volume, bool isMuted)
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 if (SelectedOutputDevice?.Id == deviceId)
                 {
