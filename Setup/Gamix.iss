@@ -43,6 +43,7 @@ english.MaintenanceTitle={#MyAppName} is already installed.
 english.MaintenanceSubTitle=Select the operation you want to perform.
 english.MaintenanceInstruction=Select one of the following options and click Next.
 english.MaintenanceUpgrade=Upgrade - Upgrade to version {#MyAppVersion}
+english.MaintenanceDowngrade=Downgrade - Reinstall older version {#MyAppVersion}
 english.MaintenanceRepair=Repair - Reinstall the application
 english.MaintenanceUninstall=Uninstall - Remove the application
 english.MaintenanceConfirmUninstall=Are you sure you want to uninstall?
@@ -51,6 +52,7 @@ japanese.MaintenanceTitle={#MyAppName} は既にインストールされてい�
 japanese.MaintenanceSubTitle=実行する操作を選択してください
 japanese.MaintenanceInstruction=以下のオプションから選択し、「次へ」をクリックしてください。
 japanese.MaintenanceUpgrade=アップグレード - バージョン {#MyAppVersion} へ更新します
+japanese.MaintenanceDowngrade=ダウングレード - 古いバージョン {#MyAppVersion} をインストールします
 japanese.MaintenanceRepair=修復 - アプリケーションを再インストールします
 japanese.MaintenanceUninstall=アンインストール - アプリケーションを削除します
 japanese.MaintenanceConfirmUninstall=本当にアンインストールしますか?
@@ -63,13 +65,12 @@ procedure ExitProcess(uExitCode: UINT);
 var
   MaintenancePage: TInputOptionWizardPage;
   IsUpgrade: Boolean;
-  IsVersionUp: Boolean;
 
 // [Run]セクションのチェックボックス表示制御
 function ShouldShowLaunchCheckbox: Boolean;
 begin
-  // バージョンアップ時は自動起動するため、チェックボックスは表示しない
-  Result := not IsVersionUp;
+  // 常に自動起動するため、チェックボックスは表示しない（[Run]エントリをスキップ）
+  Result := False;
 end;
 
 // インストールプロセスのステップ変更イベント
@@ -77,8 +78,8 @@ procedure CurStepChanged(CurStep: TSetupStep);
 var
   ErrorCode: Integer;
 begin
-  // インストール完了直後（完了画面の前）かつアップグレードの場合
-  if (CurStep = ssPostInstall) and IsVersionUp then
+  // インストール完了直後（完了画面の前）
+  if CurStep = ssPostInstall then
   begin
     // アプリケーションを自動起動
     Exec(ExpandConstant('{app}\{#MyAppExeName}'), '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
@@ -98,6 +99,49 @@ begin
     Result := DisplayVersion
   else if RegQueryStringValue(HKEY_CURRENT_USER, UninstallKey, 'DisplayVersion', DisplayVersion) then
     Result := DisplayVersion;
+end;
+
+// バージョン比較関数
+// 戻り値: 1 (V1 > V2), 0 (V1 = V2), -1 (V1 < V2)
+function CompareVersion(V1, V2: String): Integer;
+var
+  P1, P2: Integer;
+  N1, N2: Integer;
+  S1, S2: String;
+begin
+  Result := 0;
+  S1 := V1;
+  S2 := V2;
+  
+  while (Result = 0) and ((S1 <> '') or (S2 <> '')) do
+  begin
+    P1 := Pos('.', S1);
+    if P1 > 0 then
+    begin
+      N1 := StrToIntDef(Copy(S1, 1, P1 - 1), 0);
+      Delete(S1, 1, P1);
+    end
+    else
+    begin
+      if S1 <> '' then N1 := StrToIntDef(S1, 0) else N1 := 0;
+      S1 := '';
+    end;
+    
+    P2 := Pos('.', S2);
+    if P2 > 0 then
+    begin
+      N2 := StrToIntDef(Copy(S2, 1, P2 - 1), 0);
+      Delete(S2, 1, P2);
+    end
+    else
+    begin
+      if S2 <> '' then N2 := StrToIntDef(S2, 0) else N2 := 0;
+      S2 := '';
+    end;
+    
+    if N1 > N2 then Result := 1
+    else if N1 < N2 then Result := -1;
+  end;
 end;
 
 // 既存インストールを検出
@@ -165,14 +209,18 @@ end;
 procedure InitializeWizard();
 var
   InstalledVersion: String;
+  CompareResult: Integer;
 begin
   if IsAppInstalled() then
   begin
     IsUpgrade := True;
     InstalledVersion := GetInstalledVersion();
     
-    // バージョンが異なる場合はアップグレードモード
-    IsVersionUp := (InstalledVersion <> '') and (InstalledVersion <> '{#MyAppVersion}');
+    // バージョン比較: 1(Newer), 0(Same), -1(Older)
+    if InstalledVersion <> '' then
+      CompareResult := CompareVersion('{#MyAppVersion}', InstalledVersion)
+    else
+      CompareResult := 1; // バージョン取得失敗時はとりあえずアップグレード扱い
 
     MaintenancePage := CreateInputOptionPage(wpWelcome,
       CustomMessage('MaintenanceTitle'),
@@ -180,24 +228,28 @@ begin
       CustomMessage('MaintenanceInstruction'),
       True, False);
     
-    if IsVersionUp then
+    if CompareResult > 0 then
     begin
-        // バージョンが違うならアップグレードを表示（修復の代わり）
+        // アップグレード
         MaintenancePage.Add(CustomMessage('MaintenanceUpgrade'));
+    end
+    else if CompareResult < 0 then
+    begin
+        // ダウングレード
+        MaintenancePage.Add(CustomMessage('MaintenanceDowngrade'));
     end
     else
     begin
-        // バージョンが同じなら修復を表示
+        // 修復 (バージョン同じ)
         MaintenancePage.Add(CustomMessage('MaintenanceRepair'));
     end;
 
     MaintenancePage.Add(CustomMessage('MaintenanceUninstall'));
-    MaintenancePage.Values[0] := True; // デフォルトはアップグレード/修復
+    MaintenancePage.Values[0] := True; // デフォルトはアップグレード/修復/ダウングレード
   end
   else
   begin
     IsUpgrade := False;
-    IsVersionUp := False;
   end;
 end;
 
