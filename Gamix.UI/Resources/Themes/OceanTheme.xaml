@@ -49,4 +49,136 @@
         <Setter Property="FontFamily" Value="Segoe UI, Rounded"/> <!-- Softer font for Ocean -->
     </Style>
 
+    <!-- Ocean Wave Palette -->
+    <Color x:Key="Color_WaveDeep">#0277BD</Color>
+    <Color x:Key="Color_WaveMid">#4FC3F7</Color>
+    <Color x:Key="Color_WaveCrest">#B3E5FC</Color>
+
+    <SolidColorBrush x:Key="Brush_WaveDeep" Color="{StaticResource Color_WaveDeep}"/>
+    <SolidColorBrush x:Key="Brush_WaveMid" Color="{StaticResource Color_WaveMid}"/>
+    <SolidColorBrush x:Key="Brush_WaveCrest" Color="{StaticResource Color_WaveCrest}"/>
+
+    <!-- Ocean Sidebar Toggle Button Style (Waving Ocean) -->
+    <Style x:Key="Style_SidebarToggleButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid Width="40" Height="40">
+                        <!-- Sky Background -->
+                        <Ellipse Fill="#E1F5FE" Width="40" Height="40"/>
+                        
+                        <Grid>
+                            <Grid.Clip>
+                                <EllipseGeometry Center="20,20" RadiusX="20" RadiusY="20"/>
+                            </Grid.Clip>
+
+                            <!-- Wave 1 (Back, Deep Blue) - Gentle Sway -->
+                            <Path x:Name="Wave1" Data="M -10,28 Q 0,24 10,28 T 30,28 T 50,28 L 50,50 L -10,50 Z" 
+                                  Fill="{StaticResource Brush_WaveDeep}" Opacity="0.7"
+                                  RenderTransformOrigin="0.5,0.5">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform x:Name="Wave1Y" Y="0"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+
+                            <!-- Wave 2 (Mid, Cyan) - Gentle Sway -->
+                            <Path x:Name="Wave2" Data="M -10,32 Q 5,28 20,32 T 50,32 L 50,50 L -10,50 Z" 
+                                  Fill="{StaticResource Brush_WaveMid}" Opacity="0.8"
+                                  RenderTransformOrigin="0.5,0.5">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform x:Name="Wave2Y" Y="0"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+
+                            <!-- Wave 3 (Front, Light Cyan) - Gentle Sway -->
+                            <Path x:Name="Wave3" Data="M -10,36 Q 10,32 25,36 T 50,36 L 50,50 L -10,50 Z" 
+                                  Fill="{StaticResource Brush_WaveCrest}" Opacity="0.9"
+                                  RenderTransformOrigin="0.5,0.5">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform x:Name="Wave3Y" Y="0"/>
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+
+                            <!-- Icon (Music Note) - Floating -->
+                            <ContentPresenter x:Name="IconPresenter" Content="🎵" 
+                                              HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                              Margin="0,-4,0,0"
+                                              RenderTransformOrigin="0.5,0.5">
+                                <ContentPresenter.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform x:Name="IconBob" Y="0"/>
+                                        <RotateTransform x:Name="IconSway" Angle="0"/>
+                                    </TransformGroup>
+                                </ContentPresenter.RenderTransform>
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#29B6F6"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                        </Grid>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsVisible" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="OceanAnimation">
+                                    <Storyboard RepeatBehavior="Forever">
+                                    <!-- Wave 1 Sway (Back) -->
+                                    <DoubleAnimation Storyboard.TargetName="Wave1Y" Storyboard.TargetProperty="Y"
+                                                     From="-4" To="4" Duration="0:0:1.0" AutoReverse="True">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase EasingMode="EaseInOut"/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    
+                                    <!-- Wave 2 Sway (Middle) -->
+                                    <DoubleAnimation Storyboard.TargetName="Wave2Y" Storyboard.TargetProperty="Y"
+                                                     From="5" To="-4" Duration="0:0:0.8" AutoReverse="True">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase EasingMode="EaseInOut"/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    
+                                    <!-- Wave 3 Sway (Front) -->
+                                    <DoubleAnimation Storyboard.TargetName="Wave3Y" Storyboard.TargetProperty="Y"
+                                                     From="-3" To="5" Duration="0:0:0.6" AutoReverse="True">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase EasingMode="EaseInOut"/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+
+                                    <!-- Icon Bobbing -->
+                                    <DoubleAnimation Storyboard.TargetName="IconBob" Storyboard.TargetProperty="Y"
+                                                     From="3" To="-3" Duration="0:0:0.7" AutoReverse="True">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase EasingMode="EaseInOut"/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    
+                                    <!-- Icon Swaying -->
+                                    <DoubleAnimation Storyboard.TargetName="IconSway" Storyboard.TargetProperty="Angle"
+                                                     From="-10" To="10" Duration="0:0:0.9" AutoReverse="True">
+                                        <DoubleAnimation.EasingFunction>
+                                            <SineEase EasingMode="EaseInOut"/>
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
