@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Gamix.Core.Audio;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Gamix.UI.ViewModels
 {
@@ -16,6 +17,7 @@ namespace Gamix.UI.ViewModels
         {
             _audioService = audioService;
             _audioService.SessionsChanged += OnSessionsChanged;
+            _audioService.SessionVolumeChanged += OnSessionVolumeChanged;
         }
 
         public async Task LoadSessionsAsync(string? deviceId)
@@ -56,6 +58,15 @@ namespace Gamix.UI.ViewModels
                     }
                 });
             }, TaskScheduler.Default);
+        }
+
+        private void OnSessionVolumeChanged(string sessionId, float volume, bool isMuted)
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                var sessionVm = Sessions.FirstOrDefault(vm => vm.Id == sessionId);
+                sessionVm?.UpdateVolume(volume, isMuted);
+            });
         }
 
         private string? _currentDeviceId;

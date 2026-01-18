@@ -94,6 +94,25 @@ namespace Gamix.UI.ViewModels
         {
             IsMuted = !IsMuted;
         }
+
+        /// <summary>
+        /// 外部からの変更通知を受け取り、ViewModelの状態を更新します。
+        /// 循環呼び出しを防ぐため、サービスへの通知は行いません。
+        /// </summary>
+        public void UpdateVolume(float volume, bool isMuted)
+        {
+            if (_model.Volume != volume)
+            {
+                _model.Volume = volume;
+                OnPropertyChanged(nameof(Volume));
+            }
+
+            if (_model.IsMuted != isMuted)
+            {
+                _model.IsMuted = isMuted;
+                OnPropertyChanged(nameof(IsMuted));
+            }
+        }
     }
 }
 

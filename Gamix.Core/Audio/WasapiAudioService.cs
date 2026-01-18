@@ -344,6 +344,13 @@ namespace Gamix.Core.Audio
             DevicesChanged?.Invoke();
         }
 
+        public event Action<string, float, bool>? SessionVolumeChanged;
+
+        protected virtual void OnSessionVolumeChanged(string sessionId, float volume, bool isMuted)
+        {
+            SessionVolumeChanged?.Invoke(sessionId, volume, isMuted);
+        }
+
         private NotificationClient? _notificationClient;
 
         private void RegisterNotificationClient()
@@ -458,7 +465,7 @@ namespace Gamix.Core.Audio
             {
                 if (session.State == AudioSessionState.AudioSessionStateExpired) return;
 
-                var listener = new SessionEventsListener(this);
+                var listener = new SessionEventsListener(this, session.GetSessionIdentifier);
                 session.RegisterEventClient(listener);
 
                 lock (_lock)
@@ -476,16 +483,30 @@ namespace Gamix.Core.Audio
         {
             OnSessionsChanged();
         }
+
+        public void HandleSessionVolumeEvent(string sessionId, float volume, bool isMuted)
+        {
+            OnSessionVolumeChanged(sessionId, volume, isMuted);
+        }
         
         // IAudioSessionEventsHandler implementation
         private class SessionEventsListener : IAudioSessionEventsHandler
         {
             private readonly WasapiAudioService _service;
-            public SessionEventsListener(WasapiAudioService service) { _service = service; }
+            private readonly string _sessionId;
+
+            public SessionEventsListener(WasapiAudioService service, string sessionId) 
+            { 
+                _service = service; 
+                _sessionId = sessionId;
+            }
             
             public void OnDisplayNameChanged(string displayName) { }
             public void OnIconPathChanged(string iconPath) { }
-            public void OnVolumeChanged(float volume, bool isMuted) { }
+            public void OnVolumeChanged(float volume, bool isMuted) 
+            {
+                _service.HandleSessionVolumeEvent(_sessionId, volume, isMuted);
+            }
             public void OnChannelVolumeChanged(uint channelCount, IntPtr newChannelVolumeArray, uint changedChannel) { }
             public void OnGroupingParamChanged(ref Guid groupingId) { }
             public void OnStateChanged(AudioSessionState state) 

@@ -80,5 +80,11 @@ namespace Gamix.Core.Audio
         /// </summary>
         /// <param name="deviceId">監視対象のデバイスID。</param>
         void StartSessionMonitoring(string deviceId);
+
+        /// <summary>
+        /// 特定のセッションの音量が変更されたときに発火するイベント。
+        /// 引数: (sessionId, volume, isMuted)
+        /// </summary>
+        event Action<string, float, bool>? SessionVolumeChanged;
     }
 }
