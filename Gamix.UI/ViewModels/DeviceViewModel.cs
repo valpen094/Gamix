@@ -266,30 +266,14 @@ namespace Gamix.UI.ViewModels
 
         public void UpdateMasterVolume(float volume, bool isMuted)
         {
-            if (_masterVolume != volume)
-            {
-                _masterVolume = volume;
-                OnPropertyChanged(nameof(MasterVolume));
-            }
-            if (_isOutputMuted != isMuted)
-            {
-                _isOutputMuted = isMuted;
-                OnPropertyChanged(nameof(IsOutputMuted));
-            }
+            SetProperty(ref _masterVolume, volume, nameof(MasterVolume));
+            SetProperty(ref _isOutputMuted, isMuted, nameof(IsOutputMuted));
         }
 
         public void UpdateInputMasterVolume(float volume, bool isMuted)
         {
-            if (_inputMasterVolume != volume)
-            {
-                _inputMasterVolume = volume;
-                OnPropertyChanged(nameof(InputMasterVolume));
-            }
-            if (_isInputMuted != isMuted)
-            {
-                _isInputMuted = isMuted;
-                OnPropertyChanged(nameof(IsInputMuted));
-            }
+            SetProperty(ref _inputMasterVolume, volume, nameof(InputMasterVolume));
+            SetProperty(ref _isInputMuted, isMuted, nameof(IsInputMuted));
         }
 
         public void Dispose()
