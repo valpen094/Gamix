@@ -43,7 +43,7 @@ namespace Gamix.UI.ViewModels
         [ObservableProperty]
         private bool _isInputMuted;
 
-        public ImageSource? MasterIcon => IconHelper.GetIconFromPath(null, isMaster: true);
+        public static ImageSource? MasterIcon => IconHelper.GetIconFromPath(null, isMaster: true);
 
         public DeviceViewModel(IAudioService audioService, ISettingsService settingsService)
         {

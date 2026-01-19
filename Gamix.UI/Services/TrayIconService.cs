@@ -115,6 +115,11 @@ namespace Gamix.UI.Services
             if (menuItemStyle != null) presetsItem.Style = menuItemStyle;
             contextMenu.Items.Add(presetsItem);
 
+            // 設定 (サブメニュー)
+            var settingsItem = new MenuItem { Header = "設定", Tag = "⚙" };
+            if (menuItemStyle != null) settingsItem.Style = menuItemStyle;
+            contextMenu.Items.Add(settingsItem);
+
             // セパレーター
             var separator = new Separator();
             if (separatorStyle != null) separator.Style = separatorStyle;
@@ -132,12 +137,35 @@ namespace Gamix.UI.Services
                 PopulatePresetsMenu(presetsItem, menuItemStyle);
                 PopulateOutputDevicesMenu(outputDevicesItem, menuItemStyle);
                 PopulateInputDevicesMenu(inputDevicesItem, menuItemStyle);
-                
+                PopulateSettingsMenu(settingsItem, menuItemStyle);
+
                 var volumeMenuParentStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuParentStyle") as Style;
                 PopulateVolumeMixerMenu(volumeMixerItem, volumeMenuParentStyle ?? menuItemStyle);
             };
 
             return contextMenu;
+        }
+
+        private void PopulateSettingsMenu(MenuItem settingsItem, Style? menuItemStyle)
+        {
+            settingsItem.Items.Clear();
+            var viewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+
+            var startupItem = new MenuItem
+            {
+                Header = "Windows起動時に実行",
+                IsCheckable = false, // カスタムチェックマークを使うのでfalse
+                Tag = viewModel.IsStartupEnabled ? Constants.TrayIcons.Checkmark : "",
+                StaysOpenOnClick = true
+            };
+            if (menuItemStyle != null) startupItem.Style = menuItemStyle;
+
+            startupItem.Click += (s, e) =>
+            {
+                viewModel.IsStartupEnabled = !viewModel.IsStartupEnabled;
+                startupItem.Tag = viewModel.IsStartupEnabled ? Constants.TrayIcons.Checkmark : "";
+            };
+            settingsItem.Items.Add(startupItem);
         }
 
         private void PopulatePresetsMenu(MenuItem presetsItem, Style? menuItemStyle)

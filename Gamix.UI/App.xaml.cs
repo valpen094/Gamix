@@ -33,6 +33,7 @@ namespace Gamix.UI
             services.AddSingleton<Gamix.Core.Audio.IAudioService, Gamix.Core.Audio.WasapiAudioService>();
             services.AddSingleton<Gamix.Core.Services.IPresetService, Gamix.Core.Services.PresetService>();
             services.AddSingleton<Gamix.Core.Services.ISettingsService, Gamix.Core.Services.SettingsService>();
+            services.AddSingleton<Gamix.Core.Services.IStartupService, Gamix.Core.Services.StartupService>();
             services.AddSingleton<ITrayIconService, TrayIconService>();
 
             // ViewModels

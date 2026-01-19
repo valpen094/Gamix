@@ -18,10 +18,24 @@ namespace Gamix.UI.ViewModels
     {
         private readonly Gamix.Core.Audio.IAudioService _audioService;
         private readonly IPresetService _presetService;
+        private readonly IStartupService _startupService;
 
         public DeviceViewModel Devices { get; }
         public SessionListViewModel Sessions { get; }
         public ThemeViewModel Themes { get; }
+
+        public bool IsStartupEnabled
+        {
+            get => _startupService.IsStartupEnabled();
+            set
+            {
+                if (_startupService.IsStartupEnabled() != value)
+                {
+                    _startupService.ToggleStartup(value);
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         /// <summary>
         /// プリセットが適用されたときに発火するイベント。
@@ -49,11 +63,14 @@ namespace Gamix.UI.ViewModels
         public MainViewModel(
             Gamix.Core.Audio.IAudioService audioService, 
             IPresetService presetService,
+            IStartupService startupService,
             DeviceViewModel deviceViewModel,
             SessionListViewModel sessionListViewModel,
             ThemeViewModel themeViewModel)
         {
             _audioService = audioService;
+            _presetService = presetService;
+            _startupService = startupService;
             _presetService = presetService;
             Devices = deviceViewModel;
             Sessions = sessionListViewModel;
