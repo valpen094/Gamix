@@ -41,7 +41,7 @@ namespace Gamix.UI.ViewModels
                 {
                     if (s.IsMaster) continue;
 
-                    var viewModel = new AudioSessionViewModel(s, _audioService);
+                    var viewModel = new AudioSessionViewModel(s, _audioService, deviceId);
                     Sessions.Add(viewModel);
                     _sessionMap[s.Id] = viewModel;
                 }
@@ -55,7 +55,7 @@ namespace Gamix.UI.ViewModels
 
         private void OnSessionVolumeChanged(string sessionId, float volume, bool isMuted)
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 lock (_lock)
                 {

@@ -18,10 +18,24 @@ namespace Gamix.UI.ViewModels
     {
         private readonly Gamix.Core.Audio.IAudioService _audioService;
         private readonly IPresetService _presetService;
+        private readonly IStartupService _startupService;
 
         public DeviceViewModel Devices { get; }
         public SessionListViewModel Sessions { get; }
         public ThemeViewModel Themes { get; }
+
+        public bool IsStartupEnabled
+        {
+            get => _startupService.IsStartupEnabled();
+            set
+            {
+                if (_startupService.IsStartupEnabled() != value)
+                {
+                    _startupService.ToggleStartup(value);
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         /// <summary>
         /// プリセットが適用されたときに発火するイベント。
@@ -40,24 +54,35 @@ namespace Gamix.UI.ViewModels
         [NotifyCanExecuteChangedFor(nameof(SavePresetCommand))]
         private string _newPresetName = string.Empty;
 
+        /// <summary>
+        /// 現在適用されているプリセット名。
+        /// </summary>
+        [ObservableProperty]
+        private string? _currentPresetName;
+
         public MainViewModel(
             Gamix.Core.Audio.IAudioService audioService, 
             IPresetService presetService,
+            IStartupService startupService,
             DeviceViewModel deviceViewModel,
             SessionListViewModel sessionListViewModel,
             ThemeViewModel themeViewModel)
         {
             _audioService = audioService;
             _presetService = presetService;
+            _startupService = startupService;
+            _presetService = presetService;
             Devices = deviceViewModel;
             Sessions = sessionListViewModel;
             Themes = themeViewModel;
 
             Devices.PropertyChanged += Devices_PropertyChanged;
-            InitializeAsync();
         }
 
-        private async void InitializeAsync()
+        /// <summary>
+        /// ViewModel を初期化します。App 側で await してからウィンドウを表示してください。
+        /// </summary>
+        public async Task InitializeAsync()
         {
             await Devices.InitializeAsync();
             
@@ -86,6 +111,7 @@ namespace Gamix.UI.ViewModels
                 // プリセットリスト更新
                 LoadPresets();
                 NewPresetName = string.Empty;
+                CurrentPresetName = null; // デバイス変更時はリセット
             }
         }
 
@@ -139,7 +165,7 @@ namespace Gamix.UI.ViewModels
             { 
                 Id = s.Id, 
                 ProcessName = s.ProcessName, 
-                Volume = s.Volume, 
+                Volume = s.Volume / 100f,  // 0-100 から 0.0-1.0 に正規化
                 IsMuted = s.IsMuted 
             }).ToList();
             
@@ -151,6 +177,7 @@ namespace Gamix.UI.ViewModels
                 currentModels);
 
             LoadPresets();
+            CurrentPresetName = name; // 保存後にカレントに設定
         }
 
         /// <summary>
@@ -169,7 +196,8 @@ namespace Gamix.UI.ViewModels
                 Devices.MasterVolume = preset.MasterVolume.Value * 100f;
             }
             
-            NewPresetName = preset.Name;
+            CurrentPresetName = preset.Name;
+            NewPresetName = preset.Name; // テキストボックスにも反映
 
             await Sessions.LoadSessionsAsync(Devices.SelectedOutputDevice?.Id);
 

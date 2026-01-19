@@ -26,7 +26,7 @@ namespace Gamix.UI.Services
 
         public async void SetTheme(string themeName)
         {
-            var uri = new Uri($"pack://application:,,,/Gamix.UI;component/Resources/Themes/{themeName}Theme.xaml", UriKind.Absolute);
+            var uri = new Uri($"pack://application:,,,/Gamix;component/Resources/Themes/{themeName}Theme.xaml", UriKind.Absolute);
             
             try
             {

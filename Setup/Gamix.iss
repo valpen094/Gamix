@@ -1,9 +1,9 @@
 ; Gamix Installer Script for Inno Setup
 
 #define MyAppName "Gamix"
-#define MyAppVersion "0.0.1"
+#define MyAppVersion "0.0.2"
 #define MyAppPublisher "Gamix Team"
-#define MyAppExeName "Gamix.UI.exe"
+#define MyAppExeName "Gamix.exe"
 #define MyAppId "{7B2F6E1C-6A5D-4E92-B7A1-4F9E82C3D04C}"
 
 [Setup]
@@ -307,7 +307,7 @@ begin
       begin
         if RegQueryStringValue(HKEY_CURRENT_USER, KeyPath + '\' + SubKeyNames[i], 'ExecutablePath', ExePath) then
         begin
-          if Pos('Gamix.UI.exe', ExePath) > 0 then
+          if Pos('Gamix.exe', ExePath) > 0 then
           begin
             RegDeleteKeyIncludingSubkeys(HKEY_CURRENT_USER, KeyPath + '\' + SubKeyNames[i]);
           end;

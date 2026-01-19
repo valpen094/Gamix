@@ -102,8 +102,8 @@ namespace Gamix.Core.Services
                 var target = currentSessions.FirstOrDefault(s => s.ProcessName == setting.ProcessName);
                 if (target != null)
                 {
-                    _audioService.SetVolume(target.Id, setting.Volume);
-                    _audioService.SetMute(target.Id, setting.IsMuted);
+                    _audioService.SetVolume(target.Id, setting.Volume, preset.DeviceId);
+                    _audioService.SetMute(target.Id, setting.IsMuted, preset.DeviceId);
                 }
             }
             await Task.CompletedTask;

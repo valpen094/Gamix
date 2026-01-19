@@ -33,6 +33,7 @@ namespace Gamix.UI
             services.AddSingleton<Gamix.Core.Audio.IAudioService, Gamix.Core.Audio.WasapiAudioService>();
             services.AddSingleton<Gamix.Core.Services.IPresetService, Gamix.Core.Services.PresetService>();
             services.AddSingleton<Gamix.Core.Services.ISettingsService, Gamix.Core.Services.SettingsService>();
+            services.AddSingleton<Gamix.Core.Services.IStartupService, Gamix.Core.Services.StartupService>();
             services.AddSingleton<ITrayIconService, TrayIconService>();
 
             // ViewModels
@@ -47,7 +48,7 @@ namespace Gamix.UI
             return services.BuildServiceProvider();
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
             
@@ -58,6 +59,10 @@ namespace Gamix.UI
             // テーマ画像のプリロード（初回表示時の遅延解消）
             var themes = new[] { Gamix.Core.Constants.Themes.Gaming, Gamix.Core.Constants.Themes.Pastel };
             _ = ViewModels.ThemeSelectionViewModel.PreloadImagesAsync(themes);
+
+            // ViewModel の初期化完了を待ってからウィンドウを表示
+            var mainViewModel = Services.GetRequiredService<MainViewModel>();
+            await mainViewModel.InitializeAsync();
 
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.Show();

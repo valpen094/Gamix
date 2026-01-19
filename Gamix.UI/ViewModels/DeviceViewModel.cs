@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using Gamix.UI.Converters;
 
 namespace Gamix.UI.ViewModels
 {
@@ -40,6 +42,8 @@ namespace Gamix.UI.ViewModels
 
         [ObservableProperty]
         private bool _isInputMuted;
+
+        public static ImageSource? MasterIcon => IconHelper.GetIconFromPath(null, isMaster: true);
 
         public DeviceViewModel(IAudioService audioService, ISettingsService settingsService)
         {
@@ -90,12 +94,13 @@ namespace Gamix.UI.ViewModels
             var savedOutputId = await _settingsService.GetSelectedOutputDeviceIdAsync();
             var savedInputId = await _settingsService.GetSelectedInputDeviceIdAsync();
 
-            var targetOutput = OutputDevices.FirstOrDefault(d => d.Id == savedOutputId) 
-                             ?? OutputDevices.FirstOrDefault(d => d.IsDefault)
+            // システムのデフォルト設定を最優先、次に保存された設定、最後にリストの先頭を使用
+            var targetOutput = OutputDevices.FirstOrDefault(d => d.IsDefault)
+                             ?? OutputDevices.FirstOrDefault(d => d.Id == savedOutputId)
                              ?? OutputDevices.FirstOrDefault();
             
-            var targetInput = InputDevices.FirstOrDefault(d => d.Id == savedInputId) 
-                            ?? InputDevices.FirstOrDefault(d => d.IsDefault)
+            var targetInput = InputDevices.FirstOrDefault(d => d.IsDefault)
+                            ?? InputDevices.FirstOrDefault(d => d.Id == savedInputId)
                             ?? InputDevices.FirstOrDefault();
 
             _shouldSaveSettings = false;
@@ -122,6 +127,8 @@ namespace Gamix.UI.ViewModels
         {
             if (value != null)
             {
+                OnPropertyChanged(nameof(MasterIcon));
+
                 if (_isInitialized)
                 {
                     DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
@@ -251,7 +258,7 @@ namespace Gamix.UI.ViewModels
 
         private void OnDeviceMasterVolumeChanged(string deviceId, float volume, bool isMuted)
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 if (SelectedOutputDevice?.Id == deviceId)
                 {
@@ -266,30 +273,14 @@ namespace Gamix.UI.ViewModels
 
         public void UpdateMasterVolume(float volume, bool isMuted)
         {
-            if (_masterVolume != volume)
-            {
-                _masterVolume = volume;
-                OnPropertyChanged(nameof(MasterVolume));
-            }
-            if (_isOutputMuted != isMuted)
-            {
-                _isOutputMuted = isMuted;
-                OnPropertyChanged(nameof(IsOutputMuted));
-            }
+            SetProperty(ref _masterVolume, volume, nameof(MasterVolume));
+            SetProperty(ref _isOutputMuted, isMuted, nameof(IsOutputMuted));
         }
 
         public void UpdateInputMasterVolume(float volume, bool isMuted)
         {
-            if (_inputMasterVolume != volume)
-            {
-                _inputMasterVolume = volume;
-                OnPropertyChanged(nameof(InputMasterVolume));
-            }
-            if (_isInputMuted != isMuted)
-            {
-                _isInputMuted = isMuted;
-                OnPropertyChanged(nameof(IsInputMuted));
-            }
+            SetProperty(ref _inputMasterVolume, volume, nameof(InputMasterVolume));
+            SetProperty(ref _isInputMuted, isMuted, nameof(IsInputMuted));
         }
 
         public void Dispose()

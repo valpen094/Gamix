@@ -290,48 +290,66 @@ namespace Gamix.Core.Audio
         }
 
         /// <inheritdoc/>
-        public void SetVolume(string sessionId, float volume)
+        public void SetVolume(string sessionId, float volume, string? deviceId = null)
         {
-            var device = _enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-
-            if (sessionId == "Master")
+            try
             {
-                device.AudioEndpointVolume.MasterVolumeLevelScalar = volume;
-                return;
-            }
+                var device = string.IsNullOrEmpty(deviceId)
+                    ? _enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia)
+                    : _enumerator.GetDevice(deviceId);
 
-            var sessionManager = device.AudioSessionManager;
-            for (int i = 0; i < sessionManager.Sessions.Count; i++)
-            {
-                var ctl = sessionManager.Sessions[i];
-                if (ctl.GetSessionIdentifier == sessionId)
+                if (sessionId == "Master")
                 {
-                    ctl.SimpleAudioVolume.Volume = volume;
-                    break;
+                    device.AudioEndpointVolume.MasterVolumeLevelScalar = volume;
+                    return;
                 }
+
+                var sessionManager = device.AudioSessionManager;
+                for (int i = 0; i < sessionManager.Sessions.Count; i++)
+                {
+                    var ctl = sessionManager.Sessions[i];
+                    if (ctl.GetSessionIdentifier == sessionId)
+                    {
+                        ctl.SimpleAudioVolume.Volume = volume;
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error setting volume: {ex.Message}");
             }
         }
 
         /// <inheritdoc/>
-        public void SetMute(string sessionId, bool isMuted)
+        public void SetMute(string sessionId, bool isMuted, string? deviceId = null)
         {
-            var device = _enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-
-            if (sessionId == "Master")
+            try
             {
-                device.AudioEndpointVolume.Mute = isMuted;
-                return;
-            }
+                var device = string.IsNullOrEmpty(deviceId)
+                    ? _enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia)
+                    : _enumerator.GetDevice(deviceId);
 
-            var sessionManager = device.AudioSessionManager;
-            for (int i = 0; i < sessionManager.Sessions.Count; i++)
-            {
-                var ctl = sessionManager.Sessions[i];
-                if (ctl.GetSessionIdentifier == sessionId)
+                if (sessionId == "Master")
                 {
-                    ctl.SimpleAudioVolume.Mute = isMuted;
-                    break;
+                    device.AudioEndpointVolume.Mute = isMuted;
+                    return;
                 }
+
+                var sessionManager = device.AudioSessionManager;
+                for (int i = 0; i < sessionManager.Sessions.Count; i++)
+                {
+                    var ctl = sessionManager.Sessions[i];
+                    if (ctl.GetSessionIdentifier == sessionId)
+                    {
+                        ctl.SimpleAudioVolume.Mute = isMuted;
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error setting mute: {ex.Message}");
             }
         }
 

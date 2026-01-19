@@ -11,6 +11,8 @@ using Gamix.UI.ViewModels;
 using Hardcodet.Wpf.TaskbarNotification;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
+using CommunityToolkit.Mvvm.Input;
+using Gamix.Core.Models;
 
 namespace Gamix.UI.Services
 {
@@ -87,10 +89,11 @@ namespace Gamix.UI.Services
             if (separatorStyle != null) separator1.Style = separatorStyle;
             contextMenu.Items.Add(separator1);
 
-            // プリセット (サブメニュー)
-            var presetsItem = new MenuItem { Header = "プリセット", Tag = Constants.TrayIcons.Preset };
-            if (menuItemStyle != null) presetsItem.Style = menuItemStyle;
-            contextMenu.Items.Add(presetsItem);
+            // 音量ミキサー (サブメニュー: 専用スタイル)
+            var volumeMixerItem = new MenuItem { Header = "音量ミキサー", Tag = "🎚️" };
+            var volumeMenuParentStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuParentStyle") as Style;
+            volumeMixerItem.Style = volumeMenuParentStyle ?? menuItemStyle;
+            contextMenu.Items.Add(volumeMixerItem);
 
             // 出力デバイス (サブメニュー)
             var outputDevicesItem = new MenuItem { Header = "出力デバイス", Tag = Constants.TrayIcons.OutputDevice };
@@ -102,13 +105,20 @@ namespace Gamix.UI.Services
             if (menuItemStyle != null) inputDevicesItem.Style = menuItemStyle;
             contextMenu.Items.Add(inputDevicesItem);
 
-            // メニューが開かれる直前に動的に一覧を生成
-            contextMenu.Opened += (s, e) =>
-            {
-                PopulatePresetsMenu(presetsItem, menuItemStyle);
-                PopulateOutputDevicesMenu(outputDevicesItem, menuItemStyle);
-                PopulateInputDevicesMenu(inputDevicesItem, menuItemStyle);
-            };
+            // セパレーター
+            var separator2 = new Separator();
+            if (separatorStyle != null) separator2.Style = separatorStyle;
+            contextMenu.Items.Add(separator2);
+
+            // プリセット (サブメニュー)
+            var presetsItem = new MenuItem { Header = "プリセット", Tag = Constants.TrayIcons.Preset };
+            if (menuItemStyle != null) presetsItem.Style = menuItemStyle;
+            contextMenu.Items.Add(presetsItem);
+
+            // 設定 (サブメニュー)
+            var settingsItem = new MenuItem { Header = "設定", Tag = "⚙" };
+            if (menuItemStyle != null) settingsItem.Style = menuItemStyle;
+            contextMenu.Items.Add(settingsItem);
 
             // セパレーター
             var separator = new Separator();
@@ -121,7 +131,41 @@ namespace Gamix.UI.Services
             exitItem.Click += (s, e) => ShutdownApp();
             contextMenu.Items.Add(exitItem);
 
+            // メニューが開かれる直前に動的に一覧を生成
+            contextMenu.Opened += (s, e) =>
+            {
+                PopulatePresetsMenu(presetsItem, menuItemStyle);
+                PopulateOutputDevicesMenu(outputDevicesItem, menuItemStyle);
+                PopulateInputDevicesMenu(inputDevicesItem, menuItemStyle);
+                PopulateSettingsMenu(settingsItem, menuItemStyle);
+
+                var volumeMenuParentStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuParentStyle") as Style;
+                PopulateVolumeMixerMenu(volumeMixerItem, volumeMenuParentStyle ?? menuItemStyle);
+            };
+
             return contextMenu;
+        }
+
+        private void PopulateSettingsMenu(MenuItem settingsItem, Style? menuItemStyle)
+        {
+            settingsItem.Items.Clear();
+            var viewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+
+            var startupItem = new MenuItem
+            {
+                Header = "Windows起動時に実行",
+                IsCheckable = false, // カスタムチェックマークを使うのでfalse
+                Tag = viewModel.IsStartupEnabled ? Constants.TrayIcons.Checkmark : "",
+                StaysOpenOnClick = true
+            };
+            if (menuItemStyle != null) startupItem.Style = menuItemStyle;
+
+            startupItem.Click += (s, e) =>
+            {
+                viewModel.IsStartupEnabled = !viewModel.IsStartupEnabled;
+                startupItem.Tag = viewModel.IsStartupEnabled ? Constants.TrayIcons.Checkmark : "";
+            };
+            settingsItem.Items.Add(startupItem);
         }
 
         private void PopulatePresetsMenu(MenuItem presetsItem, Style? menuItemStyle)
@@ -135,7 +179,7 @@ namespace Gamix.UI.Services
 
                 if (currentPresets.Count != 0)
                 {
-                    string currentPresetName = viewModel.NewPresetName ?? "";
+                    string currentPresetName = viewModel.CurrentPresetName ?? "";
 
                     foreach (var preset in currentPresets)
                     {
@@ -147,11 +191,19 @@ namespace Gamix.UI.Services
                         };
                         if (menuItemStyle != null) item.Style = menuItemStyle;
 
-                        item.Click += (sender, args) =>
+                        item.Click += async (sender, args) =>
                         {
-                            if (viewModel.ApplyPresetCommand.CanExecute(preset))
+                            var capturedPreset = preset;
+                            if (viewModel.ApplyPresetCommand.CanExecute(capturedPreset))
                             {
-                                viewModel.ApplyPresetCommand.Execute(preset);
+                                if (viewModel.ApplyPresetCommand is IAsyncRelayCommand<Preset> asyncCommand)
+                                {
+                                    await asyncCommand.ExecuteAsync(capturedPreset);
+                                }
+                                else
+                                {
+                                    viewModel.ApplyPresetCommand.Execute(capturedPreset);
+                                }
                             }
                         };
                         presetsItem.Items.Add(item);
@@ -186,13 +238,15 @@ namespace Gamix.UI.Services
                         var item = new MenuItem
                         {
                             Header = device.Name,
-                            Tag = device.Id == selectedDevice?.Id ? Constants.TrayIcons.Checkmark : ""
+                            Tag = device.Id == selectedDevice?.Id ? Constants.TrayIcons.Checkmark : "",
+                            StaysOpenOnClick = true
                         };
                         if (menuItemStyle != null) item.Style = menuItemStyle;
 
                         item.Click += (sender, args) =>
                         {
                             viewModel.Devices.SelectedOutputDevice = device;
+                            PopulateOutputDevicesMenu(devicesItem, menuItemStyle);
                         };
                         devicesItem.Items.Add(item);
                     }
@@ -226,13 +280,15 @@ namespace Gamix.UI.Services
                         var item = new MenuItem
                         {
                             Header = device.Name,
-                            Tag = device.Id == selectedDevice?.Id ? Constants.TrayIcons.Checkmark : ""
+                            Tag = device.Id == selectedDevice?.Id ? Constants.TrayIcons.Checkmark : "",
+                            StaysOpenOnClick = true
                         };
                         if (menuItemStyle != null) item.Style = menuItemStyle;
 
                         item.Click += (sender, args) =>
                         {
                             viewModel.Devices.SelectedInputDevice = device;
+                            PopulateInputDevicesMenu(devicesItem, menuItemStyle);
                         };
                         devicesItem.Items.Add(item);
                     }
@@ -246,6 +302,68 @@ namespace Gamix.UI.Services
             catch
             {
                 devicesItem.IsEnabled = false;
+            }
+        }
+
+        private void PopulateVolumeMixerMenu(MenuItem volumeMixerItem, Style? menuItemStyle)
+        {
+            try
+            {
+                volumeMixerItem.Items.Clear();
+
+                var viewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+                var visibleSessions = viewModel.Sessions.Sessions.ToList(); // コピーを作成
+
+                // Master Volume
+                var masterVolumeTemplate = System.Windows.Application.Current.TryFindResource("MasterVolumeItemTemplate") as DataTemplate;
+                var volumeMenuItemStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuItemStyle") as Style;
+                
+                var masterItem = new MenuItem
+                {
+                    Header = viewModel.Devices, // DeviceViewModel
+                    HeaderTemplate = masterVolumeTemplate,
+                    StaysOpenOnClick = true,
+                    IsCheckable = false
+                };
+                
+                if (volumeMenuItemStyle != null) masterItem.Style = volumeMenuItemStyle;
+                else if (menuItemStyle != null) masterItem.Style = menuItemStyle;
+                
+                volumeMixerItem.Items.Add(masterItem);
+
+                // App Sessions
+                if (visibleSessions.Count != 0)
+                {
+                    var volumeItemTemplate = System.Windows.Application.Current.TryFindResource("VolumeItemTemplate") as DataTemplate;
+                    // volumeMenuItemStyle already retrieved above
+
+                    foreach (var session in visibleSessions)
+                    {
+                        var item = new MenuItem
+                        {
+                            Header = session,
+                            HeaderTemplate = volumeItemTemplate,
+                            StaysOpenOnClick = true,
+                            IsCheckable = false
+                        };
+                        
+                        // Default to passed style, but override if specific style found
+                        if (menuItemStyle != null) item.Style = menuItemStyle;
+                        if (volumeMenuItemStyle != null) item.Style = volumeMenuItemStyle;
+                        
+                        volumeMixerItem.Items.Add(item);
+                    }
+                    volumeMixerItem.IsEnabled = true;
+                }
+                else
+                {
+                    // No sessions, but we have Master Volume so it should be enabled
+                    volumeMixerItem.IsEnabled = true; 
+                }
+            }
+            catch
+            {
+                volumeMixerItem.IsEnabled = false;
             }
         }
 

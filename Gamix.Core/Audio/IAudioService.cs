@@ -56,14 +56,16 @@ namespace Gamix.Core.Audio
         /// </summary>
         /// <param name="sessionId">セッションID。</param>
         /// <param name="volume">音量 (0.0 〜 1.0)。</param>
-        void SetVolume(string sessionId, float volume);
+        /// <param name="deviceId">デバイスID。null の場合はデフォルトデバイスを使用。</param>
+        void SetVolume(string sessionId, float volume, string? deviceId = null);
 
         /// <summary>
         /// 指定したセッションのミュート状態を設定します。
         /// </summary>
         /// <param name="sessionId">セッションID。</param>
         /// <param name="isMuted">ミュートするかどうか。</param>
-        void SetMute(string sessionId, bool isMuted);
+        /// <param name="deviceId">デバイスID。null の場合はデフォルトデバイスを使用。</param>
+        void SetMute(string sessionId, bool isMuted, string? deviceId = null);
 
         /// <summary>
         /// セッション構成が変更されたときに発火するイベント。
