@@ -87,6 +87,11 @@ namespace Gamix.UI.Services
             if (separatorStyle != null) separator1.Style = separatorStyle;
             contextMenu.Items.Add(separator1);
 
+            // 音量ミキサー (サブメニュー)
+            var volumeMixerItem = new MenuItem { Header = "音量ミキサー", Tag = "🎚️" };
+            if (menuItemStyle != null) volumeMixerItem.Style = menuItemStyle;
+            contextMenu.Items.Add(volumeMixerItem);
+
             // プリセット (サブメニュー)
             var presetsItem = new MenuItem { Header = "プリセット", Tag = Constants.TrayIcons.Preset };
             if (menuItemStyle != null) presetsItem.Style = menuItemStyle;
@@ -108,6 +113,7 @@ namespace Gamix.UI.Services
                 PopulatePresetsMenu(presetsItem, menuItemStyle);
                 PopulateOutputDevicesMenu(outputDevicesItem, menuItemStyle);
                 PopulateInputDevicesMenu(inputDevicesItem, menuItemStyle);
+                PopulateVolumeMixerMenu(volumeMixerItem, menuItemStyle);
             };
 
             // セパレーター
@@ -246,6 +252,46 @@ namespace Gamix.UI.Services
             catch
             {
                 devicesItem.IsEnabled = false;
+            }
+        }
+
+        private void PopulateVolumeMixerMenu(MenuItem volumeMixerItem, Style? menuItemStyle)
+        {
+            try
+            {
+                volumeMixerItem.Items.Clear();
+
+                var viewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+                var sessions = viewModel.Sessions.Sessions.ToList();
+
+                if (sessions.Count != 0)
+                {
+                    var volumeItemTemplate = System.Windows.Application.Current.TryFindResource("VolumeItemTemplate") as DataTemplate;
+
+                    foreach (var session in sessions)
+                    {
+                        var item = new MenuItem
+                        {
+                            Header = session,
+                            HeaderTemplate = volumeItemTemplate,
+                            StaysOpenOnClick = true,
+                            IsCheckable = false
+                        };
+                        
+                        if (menuItemStyle != null) item.Style = menuItemStyle;
+                        
+                        volumeMixerItem.Items.Add(item);
+                    }
+                    volumeMixerItem.IsEnabled = true;
+                }
+                else
+                {
+                   volumeMixerItem.IsEnabled = false;
+                }
+            }
+            catch
+            {
+                volumeMixerItem.IsEnabled = false;
             }
         }
 
