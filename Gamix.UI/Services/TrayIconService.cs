@@ -159,17 +159,15 @@ namespace Gamix.UI.Services
                         {
                             Header = preset.Name,
                             IsCheckable = false,
-                            Tag = preset.Name == currentPresetName ? Constants.TrayIcons.Checkmark : "",
-                            StaysOpenOnClick = true
+                            Tag = preset.Name == currentPresetName ? Constants.TrayIcons.Checkmark : ""
                         };
                         if (menuItemStyle != null) item.Style = menuItemStyle;
 
                         item.Click += async (sender, args) =>
                         {
-                            var capturedPreset = preset; // Explicit capture for safety
+                            var capturedPreset = preset;
                             if (viewModel.ApplyPresetCommand.CanExecute(capturedPreset))
                             {
-                                // Command is IAsyncRelayCommand<Preset> for async methods with parameter
                                 if (viewModel.ApplyPresetCommand is IAsyncRelayCommand<Preset> asyncCommand)
                                 {
                                     await asyncCommand.ExecuteAsync(capturedPreset);
@@ -178,7 +176,6 @@ namespace Gamix.UI.Services
                                 {
                                     viewModel.ApplyPresetCommand.Execute(capturedPreset);
                                 }
-                                PopulatePresetsMenu(presetsItem, menuItemStyle);
                             }
                         };
                         presetsItem.Items.Add(item);
