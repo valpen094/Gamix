@@ -87,9 +87,10 @@ namespace Gamix.UI.Services
             if (separatorStyle != null) separator1.Style = separatorStyle;
             contextMenu.Items.Add(separator1);
 
-            // 音量ミキサー (サブメニュー)
+            // 音量ミキサー (サブメニュー: 専用スタイル)
             var volumeMixerItem = new MenuItem { Header = "音量ミキサー", Tag = "🎚️" };
-            if (menuItemStyle != null) volumeMixerItem.Style = menuItemStyle;
+            var volumeMenuParentStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuParentStyle") as Style;
+            volumeMixerItem.Style = volumeMenuParentStyle ?? menuItemStyle;
             contextMenu.Items.Add(volumeMixerItem);
 
             // プリセット (サブメニュー)
@@ -113,7 +114,9 @@ namespace Gamix.UI.Services
                 PopulatePresetsMenu(presetsItem, menuItemStyle);
                 PopulateOutputDevicesMenu(outputDevicesItem, menuItemStyle);
                 PopulateInputDevicesMenu(inputDevicesItem, menuItemStyle);
-                PopulateVolumeMixerMenu(volumeMixerItem, menuItemStyle);
+                
+                var volumeMenuParentStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuParentStyle") as Style;
+                PopulateVolumeMixerMenu(volumeMixerItem, volumeMenuParentStyle ?? menuItemStyle);
             };
 
             // セパレーター
