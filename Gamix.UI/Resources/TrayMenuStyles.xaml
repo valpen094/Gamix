@@ -109,39 +109,61 @@
 
     <!-- Volume Item Template -->
     <DataTemplate x:Key="VolumeItemTemplate" DataType="{x:Type viewmodels:AudioSessionViewModel}">
-        <Grid Width="250" Margin="0,4">
+        <Grid Width="280" Margin="0,4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
+            
             <!-- Icon -->
-            <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" 
+            <Image Grid.Column="0" 
                    Source="{Binding Icon}" 
                    Width="24" Height="24" Margin="0,0,12,0"
-                   VerticalAlignment="Top" RenderOptions.BitmapScalingMode="HighQuality"/>
+                   VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
 
-            <!-- Name -->
-            <TextBlock Grid.Column="1" Grid.Row="0" 
-                       Text="{Binding DisplayName}" 
-                       Foreground="{DynamicResource Brush_Foreground}"
-                       FontSize="13"
-                       TextTrimming="CharacterEllipsis"
-                       VerticalAlignment="Center" Margin="0,0,0,4"/>
+            <!-- Content -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <!-- Name -->
+                <TextBlock Text="{Binding DisplayName}" 
+                           Foreground="{DynamicResource Brush_Foreground}"
+                           FontSize="13"
+                           TextTrimming="CharacterEllipsis"
+                           Margin="0,0,0,4"/>
+
+                <!-- Slider and Percent -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Slider Grid.Column="0"
+                            Value="{Binding Volume}" Minimum="0" Maximum="100"
+                            VerticalAlignment="Center"
+                            IsMoveToPointEnabled="True"
+                            Style="{DynamicResource PastelSlider}"/>
+                    
+                    <TextBlock Grid.Column="1" 
+                               Text="{Binding Volume, StringFormat={}{0:F0}%}" 
+                               FontSize="12" FontWeight="Bold"
+                               Foreground="{DynamicResource Brush_AccentPrimary}"
+                               Margin="8,0,4,0"
+                               VerticalAlignment="Center"
+                               MinWidth="30" TextAlignment="Right"/>
+                </Grid>
+            </StackPanel>
 
             <!-- Mute Toggle -->
-            <ToggleButton Grid.Column="2" Grid.Row="0"
+            <ToggleButton Grid.Column="2" 
                           IsChecked="{Binding IsMuted}"
                           Width="24" Height="24"
                           Background="Transparent" 
                           BorderThickness="0"
                           Padding="0"
-                          Cursor="Hand">
+                          Cursor="Hand"
+                          VerticalAlignment="Center"
+                          Margin="8,0,0,0">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton">
                         <Setter Property="Template">
@@ -153,12 +175,13 @@
                                                    HorizontalAlignment="Center" 
                                                    VerticalAlignment="Center"
                                                    FontSize="16"
-                                                   Foreground="{DynamicResource Brush_Foreground}"/>
+                                                   Foreground="{DynamicResource Brush_AccentPrimary}"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsChecked" Value="True">
                                             <Setter TargetName="IconText" Property="Text" Value="🔇"/>
-                                            <Setter TargetName="IconText" Property="Foreground" Value="{DynamicResource Brush_AccentPrimary}"/>
+                                            <Setter TargetName="IconText" Property="Foreground" Value="{DynamicResource Brush_Foreground}"/>
+                                            <Setter Property="Opacity" Value="0.6"/>
                                         </Trigger>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Opacity" Value="0.8"/>
@@ -170,13 +193,6 @@
                     </Style>
                 </ToggleButton.Style>
             </ToggleButton>
-
-            <!-- Volume Slider -->
-            <Slider Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"
-                    Value="{Binding Volume}" Minimum="0" Maximum="100"
-                    VerticalAlignment="Center"
-                    IsMoveToPointEnabled="True"
-                    Style="{DynamicResource PastelSlider}"/>
         </Grid>
     </DataTemplate>
     
