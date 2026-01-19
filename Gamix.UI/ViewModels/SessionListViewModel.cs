@@ -41,7 +41,7 @@ namespace Gamix.UI.ViewModels
                 {
                     if (s.IsMaster) continue;
 
-                    var viewModel = new AudioSessionViewModel(s, _audioService);
+                    var viewModel = new AudioSessionViewModel(s, _audioService, deviceId);
                     Sessions.Add(viewModel);
                     _sessionMap[s.Id] = viewModel;
                 }

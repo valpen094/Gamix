@@ -11,6 +11,8 @@ using Gamix.UI.ViewModels;
 using Hardcodet.Wpf.TaskbarNotification;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
+using CommunityToolkit.Mvvm.Input;
+using Gamix.Core.Models;
 
 namespace Gamix.UI.Services
 {
@@ -149,7 +151,7 @@ namespace Gamix.UI.Services
 
                 if (currentPresets.Count != 0)
                 {
-                    string currentPresetName = viewModel.NewPresetName ?? "";
+                    string currentPresetName = viewModel.CurrentPresetName ?? "";
 
                     foreach (var preset in currentPresets)
                     {
@@ -157,15 +159,26 @@ namespace Gamix.UI.Services
                         {
                             Header = preset.Name,
                             IsCheckable = false,
-                            Tag = preset.Name == currentPresetName ? Constants.TrayIcons.Checkmark : ""
+                            Tag = preset.Name == currentPresetName ? Constants.TrayIcons.Checkmark : "",
+                            StaysOpenOnClick = true
                         };
                         if (menuItemStyle != null) item.Style = menuItemStyle;
 
-                        item.Click += (sender, args) =>
+                        item.Click += async (sender, args) =>
                         {
-                            if (viewModel.ApplyPresetCommand.CanExecute(preset))
+                            var capturedPreset = preset; // Explicit capture for safety
+                            if (viewModel.ApplyPresetCommand.CanExecute(capturedPreset))
                             {
-                                viewModel.ApplyPresetCommand.Execute(preset);
+                                // Command is IAsyncRelayCommand<Preset> for async methods with parameter
+                                if (viewModel.ApplyPresetCommand is IAsyncRelayCommand<Preset> asyncCommand)
+                                {
+                                    await asyncCommand.ExecuteAsync(capturedPreset);
+                                }
+                                else
+                                {
+                                    viewModel.ApplyPresetCommand.Execute(capturedPreset);
+                                }
+                                PopulatePresetsMenu(presetsItem, menuItemStyle);
                             }
                         };
                         presetsItem.Items.Add(item);
@@ -200,13 +213,15 @@ namespace Gamix.UI.Services
                         var item = new MenuItem
                         {
                             Header = device.Name,
-                            Tag = device.Id == selectedDevice?.Id ? Constants.TrayIcons.Checkmark : ""
+                            Tag = device.Id == selectedDevice?.Id ? Constants.TrayIcons.Checkmark : "",
+                            StaysOpenOnClick = true
                         };
                         if (menuItemStyle != null) item.Style = menuItemStyle;
 
                         item.Click += (sender, args) =>
                         {
                             viewModel.Devices.SelectedOutputDevice = device;
+                            PopulateOutputDevicesMenu(devicesItem, menuItemStyle);
                         };
                         devicesItem.Items.Add(item);
                     }
@@ -240,13 +255,15 @@ namespace Gamix.UI.Services
                         var item = new MenuItem
                         {
                             Header = device.Name,
-                            Tag = device.Id == selectedDevice?.Id ? Constants.TrayIcons.Checkmark : ""
+                            Tag = device.Id == selectedDevice?.Id ? Constants.TrayIcons.Checkmark : "",
+                            StaysOpenOnClick = true
                         };
                         if (menuItemStyle != null) item.Style = menuItemStyle;
 
                         item.Click += (sender, args) =>
                         {
                             viewModel.Devices.SelectedInputDevice = device;
+                            PopulateInputDevicesMenu(devicesItem, menuItemStyle);
                         };
                         devicesItem.Items.Add(item);
                     }

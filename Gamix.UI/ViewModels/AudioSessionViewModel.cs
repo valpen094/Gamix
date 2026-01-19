@@ -15,16 +15,19 @@ namespace Gamix.UI.ViewModels
     {
         private readonly AudioSession _model;
         private readonly IAudioService _audioService;
+        private readonly string? _deviceId;
 
         /// <summary>
         /// AudioSessionViewModel のコンストラクタ。
         /// </summary>
         /// <param name="model">ラップする AudioSession モデル。</param>
         /// <param name="audioService">音量変更に使用する IAudioService。</param>
-        public AudioSessionViewModel(AudioSession model, IAudioService audioService)
+        /// <param name="deviceId">このセッションが属するデバイスID。</param>
+        public AudioSessionViewModel(AudioSession model, IAudioService audioService, string? deviceId)
         {
             _model = model;
             _audioService = audioService;
+            _deviceId = deviceId;
         }
 
         /// <summary>
@@ -52,7 +55,7 @@ namespace Gamix.UI.ViewModels
             {
                 if (SetProperty(_model.IsMuted, value, _model, (m, v) => m.IsMuted = v))
                 {
-                    _audioService.SetMute(_model.Id, value);
+                    _audioService.SetMute(_model.Id, value, _deviceId);
                 }
             }
         }
@@ -88,7 +91,7 @@ namespace Gamix.UI.ViewModels
                 {
                     _model.Volume = normalizedValue;
                     OnPropertyChanged(nameof(Volume));
-                    _audioService.SetVolume(_model.Id, normalizedValue);
+                    _audioService.SetVolume(_model.Id, normalizedValue, _deviceId);
                 }
             }
         }

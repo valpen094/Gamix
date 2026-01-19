@@ -40,6 +40,12 @@ namespace Gamix.UI.ViewModels
         [NotifyCanExecuteChangedFor(nameof(SavePresetCommand))]
         private string _newPresetName = string.Empty;
 
+        /// <summary>
+        /// 現在適用されているプリセット名。
+        /// </summary>
+        [ObservableProperty]
+        private string? _currentPresetName;
+
         public MainViewModel(
             Gamix.Core.Audio.IAudioService audioService, 
             IPresetService presetService,
@@ -88,6 +94,7 @@ namespace Gamix.UI.ViewModels
                 // プリセットリスト更新
                 LoadPresets();
                 NewPresetName = string.Empty;
+                CurrentPresetName = null; // デバイス変更時はリセット
             }
         }
 
@@ -141,7 +148,7 @@ namespace Gamix.UI.ViewModels
             { 
                 Id = s.Id, 
                 ProcessName = s.ProcessName, 
-                Volume = s.Volume, 
+                Volume = s.Volume / 100f,  // 0-100 から 0.0-1.0 に正規化
                 IsMuted = s.IsMuted 
             }).ToList();
             
@@ -153,6 +160,7 @@ namespace Gamix.UI.ViewModels
                 currentModels);
 
             LoadPresets();
+            CurrentPresetName = name; // 保存後にカレントに設定
         }
 
         /// <summary>
@@ -171,7 +179,8 @@ namespace Gamix.UI.ViewModels
                 Devices.MasterVolume = preset.MasterVolume.Value * 100f;
             }
             
-            NewPresetName = preset.Name;
+            CurrentPresetName = preset.Name;
+            NewPresetName = preset.Name; // テキストボックスにも反映
 
             await Sessions.LoadSessionsAsync(Devices.SelectedOutputDevice?.Id);
 
