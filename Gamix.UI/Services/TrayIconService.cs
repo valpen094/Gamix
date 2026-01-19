@@ -267,6 +267,7 @@ namespace Gamix.UI.Services
                 if (sessions.Count != 0)
                 {
                     var volumeItemTemplate = System.Windows.Application.Current.TryFindResource("VolumeItemTemplate") as DataTemplate;
+                    var volumeMenuItemStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuItemStyle") as Style;
 
                     foreach (var session in sessions)
                     {
@@ -278,7 +279,9 @@ namespace Gamix.UI.Services
                             IsCheckable = false
                         };
                         
+                        // Default to passed style, but override if specific style found
                         if (menuItemStyle != null) item.Style = menuItemStyle;
+                        if (volumeMenuItemStyle != null) item.Style = volumeMenuItemStyle;
                         
                         volumeMixerItem.Items.Add(item);
                     }
