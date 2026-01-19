@@ -265,14 +265,32 @@ namespace Gamix.UI.Services
                 volumeMixerItem.Items.Clear();
 
                 var viewModel = _serviceProvider.GetRequiredService<MainViewModel>();
-                var sessions = viewModel.Sessions.Sessions.ToList();
+                var visibleSessions = viewModel.Sessions.Sessions.ToList(); // コピーを作成
 
-                if (sessions.Count != 0)
+                // Master Volume
+                var masterVolumeTemplate = System.Windows.Application.Current.TryFindResource("MasterVolumeItemTemplate") as DataTemplate;
+                var volumeMenuItemStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuItemStyle") as Style;
+                
+                var masterItem = new MenuItem
+                {
+                    Header = viewModel.Devices, // DeviceViewModel
+                    HeaderTemplate = masterVolumeTemplate,
+                    StaysOpenOnClick = true,
+                    IsCheckable = false
+                };
+                
+                if (volumeMenuItemStyle != null) masterItem.Style = volumeMenuItemStyle;
+                else if (menuItemStyle != null) masterItem.Style = menuItemStyle;
+                
+                volumeMixerItem.Items.Add(masterItem);
+
+                // App Sessions
+                if (visibleSessions.Count != 0)
                 {
                     var volumeItemTemplate = System.Windows.Application.Current.TryFindResource("VolumeItemTemplate") as DataTemplate;
-                    var volumeMenuItemStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuItemStyle") as Style;
+                    // volumeMenuItemStyle already retrieved above
 
-                    foreach (var session in sessions)
+                    foreach (var session in visibleSessions)
                     {
                         var item = new MenuItem
                         {
@@ -292,7 +310,8 @@ namespace Gamix.UI.Services
                 }
                 else
                 {
-                   volumeMixerItem.IsEnabled = false;
+                    // No sessions, but we have Master Volume so it should be enabled
+                    volumeMixerItem.IsEnabled = true; 
                 }
             }
             catch

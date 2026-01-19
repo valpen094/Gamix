@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using Gamix.UI.Converters;
 
 namespace Gamix.UI.ViewModels
 {
@@ -40,6 +42,8 @@ namespace Gamix.UI.ViewModels
 
         [ObservableProperty]
         private bool _isInputMuted;
+
+        public ImageSource? MasterIcon => IconHelper.GetIconFromPath(null, isMaster: true);
 
         public DeviceViewModel(IAudioService audioService, ISettingsService settingsService)
         {
@@ -123,6 +127,8 @@ namespace Gamix.UI.ViewModels
         {
             if (value != null)
             {
+                OnPropertyChanged(nameof(MasterIcon));
+
                 if (_isInitialized)
                 {
                     DefaultAudioDeviceSwitcher.SetDefaultDevice(value.Id);
