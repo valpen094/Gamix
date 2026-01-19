@@ -93,11 +93,6 @@ namespace Gamix.UI.Services
             volumeMixerItem.Style = volumeMenuParentStyle ?? menuItemStyle;
             contextMenu.Items.Add(volumeMixerItem);
 
-            // プリセット (サブメニュー)
-            var presetsItem = new MenuItem { Header = "プリセット", Tag = Constants.TrayIcons.Preset };
-            if (menuItemStyle != null) presetsItem.Style = menuItemStyle;
-            contextMenu.Items.Add(presetsItem);
-
             // 出力デバイス (サブメニュー)
             var outputDevicesItem = new MenuItem { Header = "出力デバイス", Tag = Constants.TrayIcons.OutputDevice };
             if (menuItemStyle != null) outputDevicesItem.Style = menuItemStyle;
@@ -108,16 +103,15 @@ namespace Gamix.UI.Services
             if (menuItemStyle != null) inputDevicesItem.Style = menuItemStyle;
             contextMenu.Items.Add(inputDevicesItem);
 
-            // メニューが開かれる直前に動的に一覧を生成
-            contextMenu.Opened += (s, e) =>
-            {
-                PopulatePresetsMenu(presetsItem, menuItemStyle);
-                PopulateOutputDevicesMenu(outputDevicesItem, menuItemStyle);
-                PopulateInputDevicesMenu(inputDevicesItem, menuItemStyle);
-                
-                var volumeMenuParentStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuParentStyle") as Style;
-                PopulateVolumeMixerMenu(volumeMixerItem, volumeMenuParentStyle ?? menuItemStyle);
-            };
+            // セパレーター
+            var separator2 = new Separator();
+            if (separatorStyle != null) separator2.Style = separatorStyle;
+            contextMenu.Items.Add(separator2);
+
+            // プリセット (サブメニュー)
+            var presetsItem = new MenuItem { Header = "プリセット", Tag = Constants.TrayIcons.Preset };
+            if (menuItemStyle != null) presetsItem.Style = menuItemStyle;
+            contextMenu.Items.Add(presetsItem);
 
             // セパレーター
             var separator = new Separator();
@@ -129,6 +123,17 @@ namespace Gamix.UI.Services
             if (menuItemStyle != null) exitItem.Style = menuItemStyle;
             exitItem.Click += (s, e) => ShutdownApp();
             contextMenu.Items.Add(exitItem);
+
+            // メニューが開かれる直前に動的に一覧を生成
+            contextMenu.Opened += (s, e) =>
+            {
+                PopulatePresetsMenu(presetsItem, menuItemStyle);
+                PopulateOutputDevicesMenu(outputDevicesItem, menuItemStyle);
+                PopulateInputDevicesMenu(inputDevicesItem, menuItemStyle);
+                
+                var volumeMenuParentStyle = System.Windows.Application.Current.TryFindResource("VolumeMenuParentStyle") as Style;
+                PopulateVolumeMixerMenu(volumeMixerItem, volumeMenuParentStyle ?? menuItemStyle);
+            };
 
             return contextMenu;
         }
