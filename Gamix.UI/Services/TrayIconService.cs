@@ -447,6 +447,12 @@ namespace Gamix.UI.Services
                     if (subKey?.GetValue("ExecutablePath") is string exePath &&
                         exePath.EndsWith(exeName, StringComparison.OrdinalIgnoreCase))
                     {
+                        // IsPromotedが1なら何もしない
+                        var currentVal = subKey.GetValue("IsPromoted");
+                        if (currentVal is int val && val == 1)
+                        {
+                            continue;
+                        }
                         subKey.SetValue("IsPromoted", 1, RegistryValueKind.DWord);
                     }
                 }
