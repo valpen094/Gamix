@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Gamix.Core.Models;
+using Gamix.Core.Services;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 
@@ -88,8 +89,13 @@ namespace Gamix.Core.Audio
                                     path = proc.MainModule?.FileName ?? ""; 
                                     session.IconPath = path;
                                 } 
-                                catch 
+                                catch (System.ComponentModel.Win32Exception)
                                 { 
+                                    // アクセス拒否（保護されたプロセス）
+                                    session.IconPath = "";
+                                }
+                                catch
+                                {
                                     session.IconPath = "";
                                 }
 
@@ -100,8 +106,22 @@ namespace Gamix.Core.Audio
 
                                 try { session.MainWindowHandle = proc.MainWindowHandle; } catch { }
                             }
-                            catch 
+                            catch (System.ComponentModel.Win32Exception ex)
                             {
+                                // プロセス情報へのアクセス拒否
+                                Logger.Debug($"WasapiAudioService: Access denied to process {pid}: {ex.Message}");
+                                session.ProcessName = $"PID: {pid}";
+                                session.DisplayName = session.ProcessName;
+                            }
+                            catch (ArgumentException)
+                            {
+                                // プロセスが既に終了している
+                                session.ProcessName = $"PID: {pid} (Terminated)";
+                                session.DisplayName = session.ProcessName;
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Warning($"WasapiAudioService: Failed to get process info for PID {pid}", ex);
                                 session.ProcessName = $"PID: {pid}";
                                 session.DisplayName = session.ProcessName;
                             }
@@ -128,7 +148,7 @@ namespace Gamix.Core.Audio
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error enumerating sessions: {ex.Message}");
+                    Logger.Error("WasapiAudioService: Error enumerating audio sessions", ex);
                 }
 
                 return sessions;
@@ -250,7 +270,7 @@ namespace Gamix.Core.Audio
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error enumerating devices: {ex.Message}");
+                    Logger.Error("WasapiAudioService: Error enumerating audio devices", ex);
                 }
 
                 return devices;
@@ -269,7 +289,7 @@ namespace Gamix.Core.Audio
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error getting master volume: {ex.Message}");
+                    Logger.Error("WasapiAudioService: Error getting master volume", ex);
                     return (0f, false);
                 }
             });
@@ -317,7 +337,7 @@ namespace Gamix.Core.Audio
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error setting volume: {ex.Message}");
+                Logger.Error("WasapiAudioService: Error setting volume", ex);
             }
         }
 
@@ -349,7 +369,7 @@ namespace Gamix.Core.Audio
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error setting mute: {ex.Message}");
+                Logger.Error("WasapiAudioService: Error setting mute", ex);
             }
         }
 

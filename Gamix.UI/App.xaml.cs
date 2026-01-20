@@ -53,10 +53,15 @@ namespace Gamix.UI
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+            // グローバル例外ハンドラーの登録
+            SetupExceptionHandlers();
+
+            Gamix.Core.Services.Logger.Info("========== Application Startup ==========");
+
             _mutex = new Mutex(true, MutexName, out bool createdNew);
             if (!createdNew)
             {
-                // すでに起動している場合は終了
+                Gamix.Core.Services.Logger.Info("Application already running. Shutting down this instance.");
                 System.Windows.Application.Current.Shutdown();
                 return;
             }
@@ -94,10 +99,46 @@ namespace Gamix.UI
 
         protected override void OnExit(ExitEventArgs e)
         {
+            Gamix.Core.Services.Logger.Info("========== Application Exit ==========");
             _trayIconService?.Dispose();
             _mutex?.ReleaseMutex();
             _mutex?.Dispose();
             base.OnExit(e);
+        }
+
+        private void SetupExceptionHandlers()
+        {
+            // UIスレッドの未処理例外
+            DispatcherUnhandledException += (s, e) =>
+            {
+                Gamix.Core.Services.Logger.Fatal("UI thread unhandled exception", e.Exception);
+                System.Windows.MessageBox.Show(
+                    $"予期しないエラーが発生しました。ログファイルを確認してください。\n\n{e.Exception.Message}",
+                    "エラー",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                e.Handled = true;
+            };
+
+            // バックグラウンドタスクの未処理例外
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                Gamix.Core.Services.Logger.Fatal("Background task unhandled exception", e.Exception);
+                e.SetObserved();
+            };
+
+            // その他の未処理例外
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                if (e.ExceptionObject is Exception ex)
+                {
+                    Gamix.Core.Services.Logger.Fatal("AppDomain unhandled exception", ex);
+                }
+                else
+                {
+                    Gamix.Core.Services.Logger.Error($"AppDomain unhandled non-exception: {e.ExceptionObject}");
+                }
+            };
         }
     }
 }
