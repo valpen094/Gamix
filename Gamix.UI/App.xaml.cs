@@ -10,6 +10,7 @@ using Gamix.UI.Services;
 using Gamix.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Hardcodet.Wpf.TaskbarNotification;
+using System.Threading;
 
 namespace Gamix.UI
 {
@@ -18,6 +19,8 @@ namespace Gamix.UI
         public new static App Current => (App)System.Windows.Application.Current;
         public ServiceProvider Services { get; }
         private ITrayIconService? _trayIconService;
+        private static Mutex? _mutex;
+        private const string MutexName = "Global\\Gamix_Unique_Mutex_ID";
 
         public App()
         {
@@ -50,6 +53,14 @@ namespace Gamix.UI
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+            _mutex = new Mutex(true, MutexName, out bool createdNew);
+            if (!createdNew)
+            {
+                // すでに起動している場合は終了
+                System.Windows.Application.Current.Shutdown();
+                return;
+            }
+
             base.OnStartup(e);
 
             bool startMinimized = false;
@@ -84,6 +95,8 @@ namespace Gamix.UI
         protected override void OnExit(ExitEventArgs e)
         {
             _trayIconService?.Dispose();
+            _mutex?.ReleaseMutex();
+            _mutex?.Dispose();
             base.OnExit(e);
         }
     }
