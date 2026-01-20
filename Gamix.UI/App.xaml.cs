@@ -51,6 +51,16 @@ namespace Gamix.UI
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            bool startMinimized = false;
+            foreach (var arg in e.Args)
+            {
+                if (arg.Equals("--minimized", StringComparison.OrdinalIgnoreCase))
+                {
+                    startMinimized = true;
+                    break;
+                }
+            }
             
             // トレイアイコンの初期化
             _trayIconService = Services.GetRequiredService<ITrayIconService>();
@@ -65,7 +75,10 @@ namespace Gamix.UI
             await mainViewModel.InitializeAsync();
 
             var mainWindow = Services.GetRequiredService<MainWindow>();
-            mainWindow.Show();
+            if (!startMinimized)
+            {
+                mainWindow.Show();
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)
