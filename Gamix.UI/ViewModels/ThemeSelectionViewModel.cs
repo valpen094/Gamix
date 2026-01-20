@@ -75,6 +75,7 @@ namespace Gamix.UI.ViewModels
         {
             _onApplyTheme = onApplyTheme;
             InitializeThemeOptions(availableThemes, currentTheme);
+            NavigateToSelectedTheme();
             RefreshPagination();
         }
 
@@ -92,6 +93,18 @@ namespace Gamix.UI.ViewModels
                     ImagePath = GetThemeImagePath(theme),
                     IsSelected = theme == currentTheme
                 });
+            }
+        }
+
+        /// <summary>
+        /// 選択中のテーマが含まれるページに移動します。
+        /// </summary>
+        private void NavigateToSelectedTheme()
+        {
+            var selectedIndex = ThemeOptions.ToList().FindIndex(t => t.IsSelected);
+            if (selectedIndex >= 0)
+            {
+                CurrentPage = (selectedIndex / ItemsPerPage) + 1;
             }
         }
 

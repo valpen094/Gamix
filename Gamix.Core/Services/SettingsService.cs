@@ -73,27 +73,67 @@ namespace Gamix.Core.Services
         {
             if (!File.Exists(_filePath))
             {
+                Logger.Info("SettingsService: No settings file found, using defaults");
                 return new AppSettings();
             }
 
             try
             {
                 var json = File.ReadAllText(_filePath);
-                return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+                var settings = JsonSerializer.Deserialize<AppSettings>(json);
+                
+                if (settings == null)
+                {
+                    Logger.Warning("SettingsService: Deserialization returned null, using defaults");
+                    return new AppSettings();
+                }
+                
+                Logger.Info("SettingsService: Successfully loaded settings");
+                return settings;
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Error("SettingsService: Failed to load settings, attempting recovery", ex);
+                
+                // 破損したファイルをバックアップ
+                try
+                {
+                    var corruptFile = Path.Combine(Path.GetDirectoryName(_filePath) ?? "", "settings.corrupt.json");
+                    File.Copy(_filePath, corruptFile, true);
+                    Logger.Info($"SettingsService: Backed up corrupt settings to {corruptFile}");
+                }
+                catch (Exception backupEx)
+                {
+                    Logger.Warning("SettingsService: Failed to backup corrupt settings", backupEx);
+                }
+                
                 return new AppSettings();
             }
         }
 
         /// <summary>
-        /// 設定をファイルに保存します。
+        /// 設定をファイルに保存します（アトミック操作）。
         /// </summary>
         private async Task SaveSettingsAsync()
         {
-            var json = JsonSerializer.Serialize(_settings, _jsonOptions);
-            await File.WriteAllTextAsync(_filePath, json);
+            try
+            {
+                var json = JsonSerializer.Serialize(_settings, _jsonOptions);
+                
+                // 一時ファイルに書き込む
+                var tempFile = _filePath + ".tmp";
+                await File.WriteAllTextAsync(tempFile, json);
+                
+                // アトミックに置き換え
+                File.Move(tempFile, _filePath, true);
+                
+                Logger.Debug("SettingsService: Settings saved successfully");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("SettingsService: Failed to save settings", ex);
+                throw; // 呼び出し元にエラーを伝播
+            }
         }
 
         /// <summary>

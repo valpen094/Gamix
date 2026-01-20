@@ -1,6 +1,7 @@
 .vs/
 bin/
 obj/
+publish/
 *.user
 *.suo
 *.json
@@ -8,3 +9,7 @@ obj/
 *.png
 *.exe
 *.dll
+*.txt
+*.log
+*.zip
+*.md

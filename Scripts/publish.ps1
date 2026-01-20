@@ -16,7 +16,7 @@ if (Test-Path $outputPath) {
 # --self-contained false: .NETランタイムを含めない（ランタイムはパッケージ側で配布するか、ユーザーにインストールしてもらう前提）
 # -p:PublishReadyToRun=true: 起動速度向上のための最適化
 # -p:DebugType=None -p:DebugSymbols=false: PDBファイルの生成を抑制
-dotnet publish $projectPath -c Release -r win-x64 --self-contained false -o $outputPath -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false
+dotnet publish $projectPath -c Release -r win-x64 --self-contained true -o $outputPath -p:PublishReadyToRun=true -p:DebugType=None -p:DebugSymbols=false
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Publish failed!"
